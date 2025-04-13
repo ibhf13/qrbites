@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
 
 // Import and use route files
 app.use('/api/auth', require('./routes/authRoutes'));
-// app.use('/api/menus', require('./routes/menuRoutes'));
+app.use('/api/menus', require('./routes/menuRoutes'));
 // app.use('/api/uploads', require('./routes/uploadRoutes'));
 // app.use('/api/qr-codes', require('./routes/qrCodeRoutes'));
 // app.use('/api/public', require('./routes/publicRoutes'));

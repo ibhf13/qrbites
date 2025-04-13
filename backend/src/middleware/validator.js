@@ -68,8 +68,79 @@ const loginSchema = Joi.object({
     })
 });
 
+/**
+ * Menu validation schema
+ */
+const menuSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required()
+    .messages({
+      'string.min': 'Menu name must be at least 2 characters',
+      'string.max': 'Menu name cannot exceed 100 characters',
+      'any.required': 'Menu name is required'
+    }),
+  description: Joi.string().max(500).allow('', null)
+    .messages({
+      'string.max': 'Description cannot exceed 500 characters'
+    }),
+  isPublished: Joi.boolean()
+});
+
+/**
+ * Section validation schema
+ */
+const sectionSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required()
+    .messages({
+      'string.min': 'Section name must be at least 2 characters',
+      'string.max': 'Section name cannot exceed 100 characters',
+      'any.required': 'Section name is required'
+    }),
+  description: Joi.string().max(300).allow('', null)
+    .messages({
+      'string.max': 'Section description cannot exceed 300 characters'
+    }),
+  order: Joi.number().min(0).allow(null)
+});
+
+/**
+ * MenuItem validation schema
+ */
+const menuItemSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required()
+    .messages({
+      'string.min': 'Item name must be at least 2 characters',
+      'string.max': 'Item name cannot exceed 100 characters',
+      'any.required': 'Item name is required'
+    }),
+  description: Joi.string().max(500).allow('', null)
+    .messages({
+      'string.max': 'Description cannot exceed 500 characters'
+    }),
+  price: Joi.number().min(0).required()
+    .messages({
+      'number.min': 'Price cannot be negative',
+      'any.required': 'Price is required'
+    }),
+  currency: Joi.string().valid('USD', 'EUR', 'GBP', 'CAD', 'AUD').default('USD'),
+  isAvailable: Joi.boolean().default(true),
+  section: Joi.string().required()
+    .messages({
+      'any.required': 'Section is required'
+    }),
+  order: Joi.number().min(0).default(0),
+  tags: Joi.array().items(Joi.string().trim()),
+  nutritionalInfo: Joi.object({
+    calories: Joi.number().allow(null),
+    allergens: Joi.array().items(Joi.string()),
+    dietary: Joi.array().items(Joi.string())
+  }).allow(null)
+});
+
 module.exports = {
   validate,
   registrationSchema,
-  loginSchema
+  loginSchema,
+  menuSchema,
+  sectionSchema,
+  menuItemSchema
 }; 

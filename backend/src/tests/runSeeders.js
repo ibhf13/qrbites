@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { seedUsers } = require('./seed/users');
+const { seedMenus } = require('./seed/menus');
 const logger = require('../utils/logger');
 
 /**
@@ -14,6 +15,7 @@ const runSeeders = async () => {
     
     // Run seeders
     await seedUsers();
+    await seedMenus();
     
     // Disconnect
     await mongoose.disconnect();
