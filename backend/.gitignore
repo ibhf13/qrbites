@@ -38,4 +38,8 @@ pids
 .idea
 .vscode
 *.swp
-*.swo 
+*.swo
+
+# Uploads folder
+uploads/*
+!uploads/.gitkeep 
