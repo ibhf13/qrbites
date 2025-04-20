@@ -98,4 +98,34 @@ MenuSchema.statics.incrementScanCount = async function(menuId) {
   return menu;
 };
 
+// Static method to find menus by restaurant ID
+MenuSchema.statics.findByRestaurantId = async function(restaurantId) {
+  return await this.find({ restaurant: restaurantId });
+};
+
+// Instance method to add a section
+MenuSchema.methods.addSection = async function(section) {
+  // Check if section with same name already exists
+  const existingSection = this.sections.find(s => s.name === section.name);
+  if (existingSection) {
+    throw new Error('Section with this name already exists');
+  }
+
+  this.sections.push(section);
+  await this.save();
+  return this;
+};
+
+// Instance method to remove a section
+MenuSchema.methods.removeSection = async function(section) {
+  const sectionIndex = this.sections.findIndex(s => s.name === section.name);
+  if (sectionIndex === -1) {
+    throw new Error('Section not found');
+  }
+
+  this.sections.splice(sectionIndex, 1);
+  await this.save();
+  return this;
+};
+
 module.exports = mongoose.model('Menu', MenuSchema); 
