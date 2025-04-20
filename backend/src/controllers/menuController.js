@@ -153,7 +153,7 @@ exports.deleteMenu = async (req, res, next) => {
     await MenuItem.deleteMany({ menu: req.params.id });
 
     // Then delete the menu
-    await menu.remove();
+    await menu.deleteOne();
 
     res.status(200).json({
       success: true,

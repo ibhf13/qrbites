@@ -282,7 +282,7 @@ exports.deleteMenuItem = async (req, res, next) => {
       });
     }
 
-    await item.remove();
+    await item.deleteOne();
 
     res.status(200).json({
       success: true,
