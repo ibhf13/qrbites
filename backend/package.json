@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest --watchAll --verbose",
-    "test:u": "jest --watchAll --verbose src/tests/unit",
-    "test:int": "jest --watchAll --verbose src/tests/integration",
-    "test:ci": "jest --ci --coverage",
+    "test": "jest --watchAll --verbose --detectOpenHandles",
+    "test:u": "jest --watchAll --verbose --detectOpenHandles src/tests/unit",
+    "test:int": "jest --watchAll --verbose --detectOpenHandles src/tests/integration",
+    "test:ci": "jest --ci --coverage --detectOpenHandles",
     "seed": "node src/tests/runSeeders.js"
   },
   "keywords": [
