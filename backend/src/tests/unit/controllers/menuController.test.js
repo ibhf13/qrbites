@@ -60,6 +60,29 @@ describe('Menu Controller', () => {
       // Assert
       expect(next).toHaveBeenCalledWith(error);
     });
+
+    it('should return empty array when user has no menus', async () => {
+      // Setup
+      const userId = new mongoose.Types.ObjectId().toString();
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId }
+      });
+
+      // Mock Menu.find to return empty array
+      Menu.find.mockResolvedValue([]);
+
+      // Execute
+      await getMenus(req, res, next);
+
+      // Assert
+      expect(Menu.find).toHaveBeenCalledWith({ restaurant: userId });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        count: 0,
+        data: []
+      });
+    });
   });
 
   describe('getMenu', () => {
@@ -237,6 +260,31 @@ describe('Menu Controller', () => {
       expect(Menu.create).toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(error);
     });
+
+    it('should handle validation errors with specific error message', async () => {
+      // Setup
+      const validationError = new Error('Name is required');
+      validationError.name = 'ValidationError';
+      
+      const userId = new mongoose.Types.ObjectId().toString();
+      const invalidPayload = { ...mockMenuPayload };
+      delete invalidPayload.name; // Make payload invalid
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        body: invalidPayload
+      });
+
+      // Mock Menu.create to throw a validation error
+      Menu.create.mockRejectedValue(validationError);
+
+      // Execute
+      await createMenu(req, res, next);
+
+      // Assert
+      expect(Menu.create).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(validationError);
+    });
   });
 
   describe('updateMenu', () => {
@@ -392,6 +440,66 @@ describe('Menu Controller', () => {
         error: 'Menu not found'
       });
     });
+
+    it('should return 403 if user does not own the menu', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const ownerId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: ownerId
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId, role: 'user' },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return a menu owned by someone else
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await deleteMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not authorized to delete this menu'
+      });
+    });
+
+    it('should handle database errors during deletion', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const error = new Error('Database connection error');
+      const mockMenu = {
+        ...mockMenus[0], 
+        restaurant: userId,
+        deleteOne: jest.fn().mockRejectedValue(error)
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return a menu
+      Menu.findById.mockResolvedValue(mockMenu);
+      // Mock MenuItem.deleteMany 
+      MenuItem.deleteMany.mockResolvedValue({ deletedCount: 5 });
+
+      // Execute
+      await deleteMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(mockMenu.deleteOne).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('addSection', () => {
@@ -429,6 +537,97 @@ describe('Menu Controller', () => {
         success: true,
         data: mockMenu
       });
+    });
+
+    it('should return 404 if menu not found', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const sectionData = { name: 'New Section', description: 'New section description' };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId },
+        body: sectionData
+      });
+
+      // Mock Menu.findById to return null
+      Menu.findById.mockResolvedValue(null);
+
+      // Execute
+      await addSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Menu not found'
+      });
+    });
+    
+    it('should return 403 if user does not own the menu', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const ownerId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const sectionData = { name: 'New Section', description: 'New section description' };
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: ownerId
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId, role: 'user' },
+        params: { id: menuId },
+        body: sectionData
+      });
+
+      // Mock Menu.findById to return a menu owned by someone else
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await addSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not authorized to update this menu'
+      });
+    });
+    
+    it('should handle error on save', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const sectionData = { name: 'New Section', description: 'New section description' };
+      const error = new Error('Save error');
+      const mockMenu = {
+        ...mockMenus[0], 
+        restaurant: userId,
+        sections: [...mockMenus[0].sections],
+        save: jest.fn().mockRejectedValue(error)
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId },
+        body: sectionData
+      });
+
+      // Mock Menu.findById to return a menu
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await addSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(mockMenu.sections.length).toBe(mockMenus[0].sections.length + 1);
+      expect(mockMenu.save).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 
@@ -535,6 +734,95 @@ describe('Menu Controller', () => {
         error: 'Cannot publish menu with no items'
       });
     });
+
+    it('should return 404 if menu not found', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return null
+      Menu.findById.mockResolvedValue(null);
+
+      // Execute
+      await publishMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Menu not found'
+      });
+    });
+
+    it('should return 403 if user is not authorized', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const ownerId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: ownerId,
+        isPublished: false
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId, role: 'user' },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return a menu owned by someone else
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await publishMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not authorized to publish this menu'
+      });
+    });
+
+    it('should handle save errors', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const error = new Error('Save error');
+      
+      const mockMenu = {
+        ...mockMenus[0], 
+        restaurant: userId,
+        isPublished: false,
+        save: jest.fn().mockRejectedValue(error)
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return a menu
+      Menu.findById.mockResolvedValue(mockMenu);
+      // Mock MenuItem.find to return items
+      MenuItem.find.mockResolvedValue([{ name: 'Item 1' }]);
+
+      // Execute
+      await publishMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(MenuItem.find).toHaveBeenCalledWith({ menu: menuId });
+      expect(mockMenu.save).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('unpublishMenu', () => {
@@ -572,6 +860,92 @@ describe('Menu Controller', () => {
         success: true,
         data: mockMenu
       });
+    });
+
+    it('should return 404 if menu not found', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return null
+      Menu.findById.mockResolvedValue(null);
+
+      // Execute
+      await unpublishMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Menu not found'
+      });
+    });
+
+    it('should return 403 if user is not authorized', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const ownerId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: ownerId,
+        isPublished: true
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId, role: 'user' },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return a menu owned by someone else
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await unpublishMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not authorized to unpublish this menu'
+      });
+    });
+
+    it('should handle save errors', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const error = new Error('Save error');
+      
+      const mockMenu = {
+        ...mockMenus[0], 
+        restaurant: userId,
+        isPublished: true,
+        save: jest.fn().mockRejectedValue(error)
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId }
+      });
+
+      // Mock Menu.findById to return a menu
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await unpublishMenu(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(mockMenu.save).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 
@@ -647,6 +1021,42 @@ describe('Menu Controller', () => {
         success: false,
         error: 'Section not found'
       });
+    });
+
+    it('should handle save errors when updating a section', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const sectionId = mockMenus[0].sections[0]._id.toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const updateData = { name: 'Updated Section Name' };
+      const error = new Error('Save error');
+      
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: userId,
+        sections: mockMenus[0].sections.map(section => ({
+          ...section,
+          toObject: jest.fn().mockReturnValue(section)
+        })),
+        save: jest.fn().mockRejectedValue(error)
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId, sectionId },
+        body: updateData
+      });
+
+      // Mock Menu.findById to return a menu
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await updateSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(mockMenu.save).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 
@@ -728,6 +1138,102 @@ describe('Menu Controller', () => {
         success: false,
         error: 'Cannot delete section that contains items'
       });
+    });
+
+    it('should return 404 if menu not found', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const sectionId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId, sectionId }
+      });
+
+      // Mock Menu.findById to return null
+      Menu.findById.mockResolvedValue(null);
+
+      // Execute
+      await deleteSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Menu not found'
+      });
+    });
+    
+    it('should return 403 if user does not own the menu', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const sectionId = new mongoose.Types.ObjectId().toString();
+      const ownerId = new mongoose.Types.ObjectId().toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: ownerId,
+        sections: [...mockMenus[0].sections]
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId, role: 'user' },
+        params: { id: menuId, sectionId }
+      });
+
+      // Mock Menu.findById to return a menu owned by someone else
+      Menu.findById.mockResolvedValue(mockMenu);
+
+      // Execute
+      await deleteSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Not authorized to update this menu'
+      });
+    });
+    
+    it('should handle save errors during section deletion', async () => {
+      // Setup
+      const menuId = new mongoose.Types.ObjectId().toString();
+      const sectionId = mockMenus[0].sections[0]._id.toString();
+      const userId = new mongoose.Types.ObjectId().toString();
+      const error = new Error('Save error');
+      
+      const mockMenu = {
+        ...mockMenus[0],
+        restaurant: userId,
+        sections: [...mockMenus[0].sections],
+        save: jest.fn().mockRejectedValue(error)
+      };
+      
+      const { req, res, next } = mockRequestResponse({
+        user: { id: userId },
+        params: { id: menuId, sectionId }
+      });
+
+      // Mock Menu.findById to return a menu
+      Menu.findById.mockResolvedValue(mockMenu);
+      // Mock MenuItem.find to return empty array (no items in section)
+      MenuItem.find.mockResolvedValue([]);
+
+      // Execute
+      await deleteSection(req, res, next);
+
+      // Assert
+      expect(Menu.findById).toHaveBeenCalledWith(menuId);
+      expect(MenuItem.find).toHaveBeenCalledWith({
+        menu: menuId,
+        section: sectionId
+      });
+      expect(mockMenu.save).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 });

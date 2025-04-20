@@ -1,5 +1,6 @@
 const User = require('../../../models/User');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 describe('User model', () => {
   describe('User schema', () => {
@@ -79,6 +80,91 @@ describe('User model', () => {
       expect(error).toBeDefined();
       expect(error.code).toBe(11000); // Duplicate key error code
     });
+
+    it('should validate email format', async () => {
+      const invalidUser = new User({
+        name: 'Invalid Email',
+        email: 'invalid-email',
+        password: 'password123',
+        restaurantName: 'Test Restaurant'
+      });
+
+      let error;
+      try {
+        await invalidUser.save();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeDefined();
+      expect(error.errors.email).toBeDefined();
+      expect(error.errors.email.message).toBe('Please add a valid email');
+    });
+
+    it('should validate name and restaurantName maxlength', async () => {
+      const longName = 'a'.repeat(51);
+      const longRestaurantName = 'b'.repeat(101);
+
+      const invalidUser = new User({
+        name: longName,
+        email: 'test@example.com',
+        password: 'password123',
+        restaurantName: longRestaurantName
+      });
+
+      let error;
+      try {
+        await invalidUser.save();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeDefined();
+      expect(error.errors.name).toBeDefined();
+      expect(error.errors.restaurantName).toBeDefined();
+      expect(error.errors.name.message).toBe('Name cannot be more than 50 characters');
+      expect(error.errors.restaurantName.message).toBe('Restaurant name cannot be more than 100 characters');
+    });
+
+    it('should validate role enum', async () => {
+      const invalidUser = new User({
+        name: 'Invalid Role',
+        email: 'role@example.com',
+        password: 'password123',
+        restaurantName: 'Test Restaurant',
+        role: 'invalid_role'
+      });
+
+      let error;
+      try {
+        await invalidUser.save();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeDefined();
+      expect(error.errors.role).toBeDefined();
+    });
+
+    it('should validate password minlength', async () => {
+      const invalidUser = new User({
+        name: 'Short Password',
+        email: 'short@example.com',
+        password: '12345',
+        restaurantName: 'Test Restaurant'
+      });
+
+      let error;
+      try {
+        await invalidUser.save();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeDefined();
+      expect(error.errors.password).toBeDefined();
+      expect(error.errors.password.message).toBe('Password must be at least 6 characters');
+    });
   });
   
   describe('User methods', () => {
@@ -114,6 +200,57 @@ describe('User model', () => {
       
       expect(isMatch).toBe(true);
       expect(isWrongMatch).toBe(false);
+    });
+
+    it('should not hash password when not modified', async () => {
+      const user = await User.create({
+        name: 'No Hash',
+        email: 'nohash@example.com',
+        password: 'password123',
+        restaurantName: 'Test Restaurant'
+      });
+
+      const originalPassword = user.password;
+      user.name = 'Updated Name';
+      await user.save();
+
+      expect(user.password).toBe(originalPassword);
+    });
+
+    it('should generate reset password token', async () => {
+      const user = await User.create({
+        name: 'Reset Token',
+        email: 'reset@example.com',
+        password: 'password123',
+        restaurantName: 'Test Restaurant'
+      });
+
+      const resetToken = user.getResetPasswordToken();
+
+      expect(resetToken).toBeDefined();
+      expect(typeof resetToken).toBe('string');
+      expect(user.resetPasswordToken).toBeDefined();
+      expect(user.resetPasswordExpire).toBeDefined();
+      expect(user.resetPasswordExpire.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('should generate JWT token with expiration', async () => {
+      process.env.JWT_SECRET = 'testsecret';
+      process.env.JWT_EXPIRES_IN = '1h';
+
+      const user = await User.create({
+        name: 'JWT Expire',
+        email: 'jwt@example.com',
+        password: 'password123',
+        restaurantName: 'Test Restaurant'
+      });
+
+      const token = user.getSignedJwtToken();
+      const decoded = jwt.verify(token, 'testsecret');
+
+      expect(decoded).toHaveProperty('id');
+      expect(decoded).toHaveProperty('exp');
+      expect(decoded.id).toBe(user._id.toString());
     });
   });
 }); 
