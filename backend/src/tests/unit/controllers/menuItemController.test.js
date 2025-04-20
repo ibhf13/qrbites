@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Menu = require('../../../models/Menu');
 const MenuItem = require('../../../models/MenuItem');
 const menuItemController = require('../../../controllers/menuItemController');
+const { mockRequestResponse } = require('../../utils/testHelpers');
 
 // Mock the models
 jest.mock('../../../models/Menu');
@@ -190,6 +191,72 @@ describe('Menu Item Controller', () => {
         error: 'Menu item not found'
       });
     });
+
+    it('should return 400 if item does not belong to menu in getMenuItem', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' }
+      });
+
+      // Mock finding an item that belongs to a different menu
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'differentMenu123'
+      });
+
+      // Execute
+      return menuItemController.getMenuItem(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Menu item does not belong to this menu'
+            })
+          );
+        });
+    });
+
+    it('should return 403 if user not authorized in getMenuItem', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' }
+      });
+
+      // Mock finding an item
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'menu123'
+      });
+
+      // Mock finding a menu owned by a different user
+      Menu.findById = jest.fn().mockResolvedValue({
+        _id: 'menu123',
+        restaurant: 'differentUser123'
+      });
+
+      // Execute
+      return menuItemController.getMenuItem(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(403);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Not authorized to access this menu'
+            })
+          );
+        });
+    });
   });
 
   describe('createMenuItem', () => {
@@ -308,6 +375,82 @@ describe('Menu Item Controller', () => {
         error: 'Menu item not found'
       });
     });
+
+    it('should return 400 if item does not belong to menu in updateMenuItem', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' },
+        body: { name: 'Updated Item' }
+      });
+
+      // Mock finding an item that belongs to a different menu
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'differentMenu123'
+      });
+
+      // Execute
+      return menuItemController.updateMenuItem(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Menu item does not belong to this menu'
+            })
+          );
+        });
+    });
+
+    it('should return 404 if section not found when changing section', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' },
+        body: { 
+          name: 'Updated Item',
+          section: 'newSection123' 
+        }
+      });
+
+      // Mock finding an item
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'menu123',
+        section: 'oldSection123'
+      });
+
+      // Mock finding a menu with sections that don't include the requested one
+      Menu.findById = jest.fn().mockResolvedValue({
+        _id: 'menu123',
+        restaurant: 'user123',
+        sections: [
+          { _id: 'oldSection123', name: 'Appetizers' },
+          { _id: 'otherSection123', name: 'Desserts' }
+        ]
+      });
+
+      // Execute
+      return menuItemController.updateMenuItem(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(404);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Section not found'
+            })
+          );
+        });
+    });
   });
 
   describe('deleteMenuItem', () => {
@@ -350,6 +493,37 @@ describe('Menu Item Controller', () => {
         success: false,
         error: 'Menu item not found'
       });
+    });
+
+    it('should return 400 if item does not belong to menu in deleteMenuItem', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' }
+      });
+
+      // Mock finding an item that belongs to a different menu
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'differentMenu123',
+        deleteOne: jest.fn().mockResolvedValue({})
+      });
+
+      // Execute
+      return menuItemController.deleteMenuItem(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Menu item does not belong to this menu'
+            })
+          );
+        });
     });
   });
 
@@ -398,6 +572,78 @@ describe('Menu Item Controller', () => {
         success: false,
         error: 'Menu item not found'
       });
+    });
+
+    it('should return 400 if item does not belong to menu in updateAvailability', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' },
+        body: { isAvailable: false }
+      });
+
+      // Mock finding an item that belongs to a different menu
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'differentMenu123',
+        isAvailable: true,
+        save: jest.fn().mockResolvedValue({})
+      });
+
+      // Execute
+      return menuItemController.updateAvailability(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Menu item does not belong to this menu'
+            })
+          );
+        });
+    });
+
+    it('should return 403 if user not authorized in updateAvailability', () => {
+      // Setup
+      const { req, res, next } = mockRequestResponse({
+        params: {
+          menuId: 'menu123',
+          id: 'item123'
+        },
+        user: { id: 'user123', role: 'owner' },
+        body: { isAvailable: false }
+      });
+
+      // Mock finding an item
+      MenuItem.findById = jest.fn().mockResolvedValue({
+        _id: 'item123',
+        menu: 'menu123',
+        isAvailable: true,
+        save: jest.fn().mockResolvedValue({})
+      });
+
+      // Mock finding a menu owned by a different user
+      Menu.findById = jest.fn().mockResolvedValue({
+        _id: 'menu123',
+        restaurant: 'differentUser123'
+      });
+
+      // Execute
+      return menuItemController.updateAvailability(req, res, next)
+        .then(() => {
+          // Assert
+          expect(res.status).toHaveBeenCalledWith(403);
+          expect(res.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+              success: false,
+              error: 'Not authorized to update this menu'
+            })
+          );
+        });
     });
   });
 

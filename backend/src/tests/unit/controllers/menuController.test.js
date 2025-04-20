@@ -6,6 +6,7 @@ const {
 } = require('../../../controllers/menuController');
 const Menu = require('../../../models/Menu');
 const MenuItem = require('../../../models/MenuItem');
+const menuController = require('../../../controllers/menuController');
 const { mockRequestResponse } = require('../../utils/testHelpers');
 const { mockMenus, mockMenuPayload } = require('../../mocks/menuMocks');
 
@@ -823,6 +824,42 @@ describe('Menu Controller', () => {
       expect(mockMenu.save).toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(error);
     });
+
+    it('should return 400 if menu has no items when publishing', async () => {
+      // Setup
+      const req = {
+        params: { id: 'menu123' },
+        user: { id: 'user123', role: 'owner' }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+      const next = jest.fn();
+
+      // Mock finding a menu with sections but no items
+      Menu.findById = jest.fn().mockResolvedValue({
+        _id: 'menu123',
+        restaurant: 'user123',
+        sections: [{ _id: 'section123', name: 'Appetizers' }],
+        save: jest.fn().mockResolvedValue({})
+      });
+
+      // Mock no items found - using find instead of countDocuments
+      MenuItem.find = jest.fn().mockResolvedValue([]);
+
+      // Execute
+      await menuController.publishMenu(req, res, next);
+
+      // Assert
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          error: 'Cannot publish menu with no items'
+        })
+      );
+    });
   });
 
   describe('unpublishMenu', () => {
@@ -1235,5 +1272,154 @@ describe('Menu Controller', () => {
       expect(mockMenu.save).toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(error);
     });
+  });
+});
+
+describe('Additional edge cases', () => {
+  it('should handle database errors during menu update', async () => {
+    // Setup
+    const { req, res, next } = mockRequestResponse({
+      params: { id: 'menu123' },
+      user: { id: 'user123', role: 'owner' },
+      body: { name: 'Updated Menu' }
+    });
+
+    // Mock finding a menu
+    Menu.findById = jest.fn().mockResolvedValue({
+      _id: 'menu123',
+      restaurant: 'user123'
+    });
+
+    // Mock database error during update
+    Menu.findByIdAndUpdate = jest.fn().mockRejectedValue(new Error('Database error'));
+
+    // Execute
+    await menuController.updateMenu(req, res, next);
+
+    // Assert
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it('should handle authorization when admin updates a menu', async () => {
+    // Setup
+    const { req, res, next } = mockRequestResponse({
+      params: { id: 'menu123' },
+      user: { id: 'admin123', role: 'admin' },
+      body: { name: 'Admin Updated Menu' }
+    });
+
+    // Mock finding a menu owned by another user
+    Menu.findById = jest.fn().mockResolvedValue({
+      _id: 'menu123',
+      restaurant: 'user123'
+    });
+
+    // Mock successful update
+    Menu.findByIdAndUpdate = jest.fn().mockResolvedValue({
+      _id: 'menu123',
+      name: 'Admin Updated Menu'
+    });
+
+    // Execute
+    await menuController.updateMenu(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        data: expect.any(Object)
+      })
+    );
+  });
+
+  it('should validate menu has items before publishing', async () => {
+    // Setup
+    const { req, res, next } = mockRequestResponse({
+      params: { id: 'menu123' },
+      user: { id: 'user123', role: 'owner' }
+    });
+
+    // Mock finding a menu with sections but no items
+    Menu.findById = jest.fn().mockResolvedValue({
+      _id: 'menu123',
+      restaurant: 'user123',
+      sections: [{ _id: 'section123', name: 'Appetizers' }],
+      save: jest.fn().mockResolvedValue({})
+    });
+
+    // Mock no items found - using find instead of countDocuments
+    MenuItem.find = jest.fn().mockResolvedValue([]);
+
+    // Execute
+    await menuController.publishMenu(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        error: 'Cannot publish menu with no items'
+      })
+    );
+  });
+
+  it('should handle errors during unpublishMenu save operation', async () => {
+    // Setup
+    const { req, res, next } = mockRequestResponse({
+      params: { id: 'menu123' },
+      user: { id: 'user123', role: 'owner' }
+    });
+
+    // Mock finding a menu with save error
+    const saveMock = jest.fn().mockRejectedValue(new Error('Save failed'));
+    Menu.findById = jest.fn().mockResolvedValue({
+      _id: 'menu123',
+      restaurant: 'user123',
+      isPublished: true,
+      save: saveMock
+    });
+
+    // Execute
+    await menuController.unpublishMenu(req, res, next);
+
+    // Assert
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+  
+  it('should allow admin to delete any menu', async () => {
+    // Setup
+    const req = {
+      params: { id: 'menu123' },
+      user: { id: 'admin123', role: 'admin' }
+    };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const next = jest.fn();
+
+    // Mock finding a menu owned by another user with deleteOne method
+    Menu.findById = jest.fn().mockResolvedValue({
+      _id: 'menu123',
+      restaurant: 'user123',
+      deleteOne: jest.fn().mockResolvedValue({}) // Add the deleteOne method
+    });
+    
+    // Mock deletion of related items
+    MenuItem.deleteMany = jest.fn().mockResolvedValue({});
+
+    // Execute
+    await menuController.deleteMenu(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        data: {}
+      })
+    );
+    expect(MenuItem.deleteMany).toHaveBeenCalledWith({ menu: 'menu123' });
   });
 });

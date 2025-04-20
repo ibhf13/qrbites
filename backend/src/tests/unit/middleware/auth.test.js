@@ -151,6 +151,55 @@ describe('Auth Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(401);
       expect(next).not.toHaveBeenCalled();
     });
+
+    describe('Error handling in protect', () => {
+      it('should handle jwt verification errors properly', async () => {
+        // Setup
+        const { req, res, next } = mockRequestResponse({
+          headers: {
+            authorization: 'Bearer invalidtoken'
+          }
+        });
+        
+        // Mock JWT verification to throw a specific error
+        jwt.verify.mockImplementation(() => {
+          throw new Error('jwt malformed');
+        });
+
+        // Execute
+        await protect(req, res, next);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: 'Not authorized to access this route'
+          })
+        );
+      });
+
+      it('should handle malformed Bearer token properly', async () => {
+        // Setup
+        const { req, res, next } = mockRequestResponse({
+          headers: {
+            authorization: 'Bearer'  // Missing the actual token
+          }
+        });
+
+        // Execute
+        await protect(req, res, next);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            error: 'Not authorized to access this route'
+          })
+        );
+      });
+    });
   });
 
   describe('authorize', () => {
