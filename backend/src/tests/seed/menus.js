@@ -1,202 +1,103 @@
 const Menu = require('../../models/Menu');
 const MenuItem = require('../../models/MenuItem');
-const User = require('../../models/User');
-const { getUserByEmail } = require('./users');
 const logger = require('../../utils/logger');
-const mongoose = require('mongoose');
+const { getUserByEmail } = require('./userSeeds');
+const { mockMenus } = require('../mock/menuMocks');
+const { mockMenuItems } = require('../mock/menuItemMocks');
 
 /**
- * Seed menus for testing
+ * Seed menus and menu items to database
+ * @param {Boolean} clearExisting - Whether to clear existing menus
+ * @returns {Promise<Object>} Object containing created menus and items
  */
-const seedMenus = async () => {
+const seedMenus = async (clearExisting = true) => {
   try {
     // Get a user to own the menus
     const owner = await getUserByEmail('john@example.com');
     
     if (!owner) {
-      logger.error('User not found for seeding menus');
-      return;
+      logger.error('User not found for seeding menus. Make sure to run seedUsers first.');
+      throw new Error('User not found for seeding menus');
     }
     
-    // Clear existing menus and menu items
-    await Menu.deleteMany({});
-    await MenuItem.deleteMany({});
+    // Clear existing menus and menu items if requested
+    if (clearExisting) {
+      logger.info('Clearing existing menus and menu items');
+      await Menu.deleteMany({});
+      await MenuItem.deleteMany({});
+    }
     
-    // Create sample menus
-    const lunchMenu = await Menu.create({
-      name: 'Lunch Menu',
-      description: 'Our delicious lunch options',
-      restaurant: owner._id,
-      isPublished: true,
-      sections: [
-        {
-          name: 'Appetizers',
-          description: 'Start with something light',
-          order: 1
-        },
-        {
-          name: 'Main Courses',
-          description: 'Hearty lunch entrees',
-          order: 2
-        },
-        {
-          name: 'Desserts',
-          description: 'Sweet treats',
-          order: 3
-        }
-      ]
-    });
+    // Create menus with owner ID
+    const menusToCreate = mockMenus.map(menu => ({
+      ...menu,
+      restaurant: owner._id
+    }));
     
-    const dinnerMenu = await Menu.create({
-      name: 'Dinner Menu',
-      description: 'Evening dining options',
-      restaurant: owner._id,
-      isPublished: false,
-      sections: [
-        {
-          name: 'Starters',
-          description: 'Begin your evening meal',
-          order: 1
-        },
-        {
-          name: 'Entrees',
-          description: 'Main dinner selections',
-          order: 2
-        },
-        {
-          name: 'Sides',
-          description: 'Accompaniments',
-          order: 3
-        },
-        {
-          name: 'Desserts',
-          description: 'Finish with something sweet',
-          order: 4
-        }
-      ]
-    });
+    // Insert menus
+    const createdMenus = await Menu.insertMany(menusToCreate);
+    logger.success(`${createdMenus.length} menus seeded successfully`);
     
-    // Add items to lunch menu
-    await MenuItem.create([
-      {
-        name: 'Caesar Salad',
-        description: 'Romaine lettuce with Caesar dressing and croutons',
-        price: 8.99,
-        section: lunchMenu.sections[0]._id,
-        menu: lunchMenu._id,
-        isAvailable: true,
-        order: 1
-      },
-      {
-        name: 'Tomato Soup',
-        description: 'Creamy tomato soup with basil',
-        price: 6.99,
-        section: lunchMenu.sections[0]._id,
-        menu: lunchMenu._id,
-        isAvailable: true,
-        order: 2
-      },
-      {
-        name: 'Grilled Chicken Sandwich',
-        description: 'Grilled chicken with lettuce, tomato, and mayo on ciabatta',
-        price: 12.99,
-        section: lunchMenu.sections[1]._id,
-        menu: lunchMenu._id,
-        isAvailable: true,
-        order: 1
-      },
-      {
-        name: 'Pasta Primavera',
-        description: 'Penne pasta with seasonal vegetables',
-        price: 13.99,
-        section: lunchMenu.sections[1]._id,
-        menu: lunchMenu._id,
-        isAvailable: true,
-        order: 2
-      },
-      {
-        name: 'Chocolate Brownie',
-        description: 'Warm chocolate brownie with vanilla ice cream',
-        price: 6.99,
-        section: lunchMenu.sections[2]._id,
-        menu: lunchMenu._id,
-        isAvailable: false,
-        order: 1
-      }
-    ]);
+    // Create menu items, associating them with the created menus
+    const itemsToCreate = [];
     
-    // Add items to dinner menu
-    await MenuItem.create([
-      {
-        name: 'Shrimp Cocktail',
-        description: 'Chilled shrimp with cocktail sauce',
-        price: 14.99,
-        section: dinnerMenu.sections[0]._id,
-        menu: dinnerMenu._id,
-        isAvailable: true,
-        order: 1
-      },
-      {
-        name: 'Bruschetta',
-        description: 'Toasted bread with tomatoes, garlic, and basil',
-        price: 9.99,
-        section: dinnerMenu.sections[0]._id,
-        menu: dinnerMenu._id,
-        isAvailable: true,
-        order: 2
-      },
-      {
-        name: 'Filet Mignon',
-        description: '8oz filet with red wine reduction',
-        price: 34.99,
-        section: dinnerMenu.sections[1]._id,
-        menu: dinnerMenu._id,
-        isAvailable: true,
-        order: 1
-      },
-      {
-        name: 'Salmon',
-        description: 'Grilled salmon with lemon butter sauce',
-        price: 28.99,
-        section: dinnerMenu.sections[1]._id,
-        menu: dinnerMenu._id,
-        isAvailable: true,
-        order: 2
-      },
-      {
-        name: 'Roasted Potatoes',
-        description: 'Herb-roasted baby potatoes',
-        price: 5.99,
-        section: dinnerMenu.sections[2]._id,
-        menu: dinnerMenu._id,
-        isAvailable: true,
-        order: 1
-      },
-      {
-        name: 'Cheesecake',
-        description: 'New York style cheesecake with berry compote',
-        price: 8.99,
-        section: dinnerMenu.sections[3]._id,
-        menu: dinnerMenu._id,
-        isAvailable: true,
-        order: 1
-      }
-    ]);
+    // Process items for each menu
+    for (const menu of createdMenus) {
+      const itemsForThisMenu = mockMenuItems.filter(item => {
+        // Find the mock menu this item belongs to
+        const mockMenu = mockMenus.find(m => m.name === menu.name);
+        return mockMenu && item.menu === mockMenu._id;
+      });
+      
+      // Map items to use the real menu and section IDs
+      const mappedItems = itemsForThisMenu.map(item => {
+        // Find the matching section in the real menu
+        const mockMenu = mockMenus.find(m => m.name === menu.name);
+        const mockSection = mockMenu.sections.find(s => s._id === item.section);
+        
+        // Find the corresponding section in the real menu
+        const realSection = menu.sections.find(s => s.name === mockSection.name);
+        
+        return {
+          ...item,
+          menu: menu._id,
+          section: realSection._id
+        };
+      });
+      
+      itemsToCreate.push(...mappedItems);
+    }
     
-    logger.success('Menus and menu items seeded successfully');
+    // Insert menu items
+    const createdItems = await MenuItem.insertMany(itemsToCreate);
+    logger.success(`${createdItems.length} menu items seeded successfully`);
+    
+    return { menus: createdMenus, items: createdItems };
   } catch (error) {
     logger.error('Error seeding menus:', error);
+    throw error;
   }
 };
 
 /**
  * Get menu by name
+ * @param {String} name - Menu name to search for
+ * @returns {Promise<Object>} Menu document
  */
 const getMenuByName = async (name) => {
   return await Menu.findOne({ name });
 };
 
+/**
+ * Get menu by ID
+ * @param {String} id - Menu ID to search for
+ * @returns {Promise<Object>} Menu document
+ */
+const getMenuById = async (id) => {
+  return await Menu.findById(id);
+};
+
 module.exports = {
   seedMenus,
-  getMenuByName
-}; 
+  getMenuByName,
+  getMenuById
+};

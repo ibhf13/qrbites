@@ -7,7 +7,7 @@ const Joi = require('joi');
  */
 const validate = (schema) => {
   return (req, res, next) => {
-    const { error } = schema.validate(req.body, {
+    const { error, value } = schema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true
     });
@@ -20,6 +20,8 @@ const validate = (schema) => {
       });
     }
 
+    // Update req.body with the validated and stripped data
+    req.body = value;
     next();
   };
 };
@@ -100,6 +102,9 @@ const sectionSchema = Joi.object({
       'string.max': 'Section description cannot exceed 300 characters'
     }),
   order: Joi.number().min(0).allow(null)
+    .messages({
+      'number.min': 'Order must be at least 0'
+    })
 });
 
 /**

@@ -7,8 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --watchAll --verbose",
-    "test:unit": "jest --watchAll --verbose src/tests/unit",
-    "test:integration": "jest --watchAll --verbose src/tests/integration",
+    "test:u": "jest --watchAll --verbose src/tests/unit",
+    "test:int": "jest --watchAll --verbose src/tests/integration",
     "test:ci": "jest --ci --coverage",
     "seed": "node src/tests/runSeeders.js"
   },
