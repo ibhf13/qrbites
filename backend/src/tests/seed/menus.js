@@ -1,9 +1,9 @@
-const Menu = require('../../models/Menu');
-const MenuItem = require('../../models/MenuItem');
-const logger = require('../../utils/logger');
+const Menu = require('@models/Menu');
+const MenuItem = require('@models/MenuItem');
+const logger = require('@utils/logger');
 const { getUserByEmail } = require('./userSeeds');
-const { mockMenus } = require('../mock/menuMocks');
-const { mockMenuItems } = require('../mock/menuItemMocks');
+const { mockMenus } = require('@tests/mocks/menuMocks');
+const { mockMenuItems } = require('@tests/mocks/menuItemMocks');
 
 /**
  * Seed menus and menu items to database

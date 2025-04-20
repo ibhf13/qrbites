@@ -3,17 +3,17 @@ const {
   getMenus, getMenu, createMenu, updateMenu, deleteMenu,
   addSection, updateSection, deleteSection,
   publishMenu, unpublishMenu
-} = require('../../../controllers/menuController');
-const Menu = require('../../../models/Menu');
-const MenuItem = require('../../../models/MenuItem');
-const menuController = require('../../../controllers/menuController');
-const { mockRequestResponse } = require('../../utils/testHelpers');
-const { mockMenus, mockMenuPayload } = require('../../mocks/menuMocks');
+} = require('@controllers/menuController');
+const Menu = require('@models/Menu');
+const MenuItem = require('@models/MenuItem');
+const menuController = require('@controllers/menuController');
+const { mockRequestResponse } = require('@tests/utils/testHelpers');
+const { mockMenus, mockMenuPayload } = require('@tests/mocks/menuMocks');
 
 // Mock the models
-jest.mock('../../../models/Menu');
-jest.mock('../../../models/MenuItem');
-jest.mock('../../../utils/logger');
+jest.mock('@models/Menu');
+jest.mock('@models/MenuItem');
+jest.mock('@utils/logger');
 
 describe('Menu Controller', () => {
   beforeEach(() => {

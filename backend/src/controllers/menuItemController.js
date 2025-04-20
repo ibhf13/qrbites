@@ -1,6 +1,6 @@
-const Menu = require('../models/Menu');
-const MenuItem = require('../models/MenuItem');
-const logger = require('../utils/logger');
+const Menu = require('@models/Menu');
+const MenuItem = require('@models/MenuItem');
+const logger = require('@utils/logger');
 
 /**
  * @desc    Get all items for a menu

@@ -1,11 +1,11 @@
-const { register, login, getMe, logout } = require('../../../controllers/authController');
-const User = require('../../../models/User');
-const { mockRequestResponse } = require('../../utils/testHelpers');
-const { mockUsers, mockUserWithMethods } = require('../../mocks/userMocks');
+const { register, login, getMe, logout } = require('@controllers/authController');
+const User = require('@models/User');
+const { mockRequestResponse } = require('@tests/utils/testHelpers');
+const { mockUsers, mockUserWithMethods } = require('@tests/mocks/userMocks');
 
 // Mock User model and logger
-jest.mock('../../../models/User');
-jest.mock('../../../utils/logger');
+jest.mock('@models/User');
+jest.mock('@utils/logger');
 
 describe('Auth Controller', () => {
   beforeEach(() => {

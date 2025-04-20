@@ -1,9 +1,9 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const User = require('../../models/User');
-const { mockUsers } = require('../mocks/userMocks');
-const { authenticatedRequest } = require('../utils/apiTestUtils');
+const app = require('@root/app');
+const User = require('@models/User');
+const { mockUsers } = require('@tests/mocks/userMocks');
+const { authenticatedRequest } = require('@tests/utils/apiTestUtils');
 
 describe('Auth Routes Integration Tests', () => {
   beforeEach(async () => {

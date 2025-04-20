@@ -1,8 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const Upload = require('../models/Upload');
-const logger = require('../utils/logger');
+const Upload = require('@models/Upload');
+const logger = require('@utils/logger');
 const createError = require('http-errors');
 
 // Setup multer storage

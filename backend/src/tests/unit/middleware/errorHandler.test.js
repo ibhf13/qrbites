@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const errorHandler = require('../../../middleware/errorHandler');
-const { mockRequestResponse } = require('../../utils/testHelpers');
-const logger = require('../../../utils/logger');
+const errorHandler = require('@middleware/errorHandler');
+const { mockRequestResponse } = require('@tests/utils/testHelpers');
+const logger = require('@utils/logger');
 
 // Mock logger
-jest.mock('../../../utils/logger');
+jest.mock('@utils/logger');
 
 describe('Error Handler Middleware', () => {
   beforeEach(() => {

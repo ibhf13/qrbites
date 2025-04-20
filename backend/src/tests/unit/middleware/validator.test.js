@@ -1,6 +1,6 @@
 const Joi = require('joi');
-const { validate, registrationSchema, loginSchema, menuSchema, sectionSchema, menuItemSchema } = require('../../../middleware/validator');
-const { mockRequestResponse } = require('../../utils/testHelpers');
+const { validate, registrationSchema, loginSchema, menuSchema, sectionSchema, menuItemSchema } = require('@middleware/validator');
+const { mockRequestResponse } = require('@tests/utils/testHelpers');
 
 describe('Validator Middleware', () => {
   beforeEach(() => {

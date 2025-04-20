@@ -1,9 +1,9 @@
 const path = require('path');
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const User = require('../../models/User');
-const Upload = require('../../models/Upload');
+const app = require('@root/app');
+const User = require('@models/User');
+const Upload = require('@models/Upload');
 const fs = require('fs');
 
 // Mock the entire jwt module

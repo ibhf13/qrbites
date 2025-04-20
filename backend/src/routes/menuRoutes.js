@@ -10,7 +10,7 @@ const {
   deleteSection,
   publishMenu,
   unpublishMenu
-} = require('../controllers/menuController');
+} = require('@controllers/menuController');
 
 const {
   getMenuItems,
@@ -20,10 +20,10 @@ const {
   updateMenuItem,
   deleteMenuItem,
   updateAvailability
-} = require('../controllers/menuItemController');
+} = require('@controllers/menuItemController');
 
-const { protect } = require('../middleware/auth');
-const { validate, menuSchema, sectionSchema, menuItemSchema } = require('../middleware/validator');
+const { protect } = require('@middleware/auth');
+const { validate, menuSchema, sectionSchema, menuItemSchema } = require('@middleware/validator');
 
 const router = express.Router();
 

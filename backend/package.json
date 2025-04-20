@@ -5,12 +5,25 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "dev": "nodemon src/server.js",
     "test": "jest --watchAll --verbose --detectOpenHandles",
     "test:u": "jest --watchAll --verbose --detectOpenHandles src/tests/unit",
     "test:int": "jest --watchAll --verbose --detectOpenHandles src/tests/integration",
     "test:ci": "jest --ci --coverage --detectOpenHandles",
     "seed": "node src/tests/runSeeders.js"
+  },
+  "_moduleAliases": {
+    "@root": "./src",
+    "@controllers": "./src/controllers",
+    "@models": "./src/models",
+    "@middleware": "./src/middleware",
+    "@routes": "./src/routes",
+    "@utils": "./src/utils",
+    "@config": "./src/config",
+    "@services": "./src/services",
+    "@tests": "./src/tests"
   },
   "keywords": [
     "restaurant",
@@ -30,12 +43,15 @@
     "http-errors": "^2.0.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.0",
+    "module-alias": "^2.2.3",
     "mongoose": "^7.1.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "tesseract.js": "^4.0.3"
   },
   "devDependencies": {
+    "eslint": "^9.25.0",
+    "eslint-import-resolver-alias": "^1.1.2",
     "jest": "^29.7.0",
     "mongodb-memory-server": "^8.12.2",
     "node-mocks-http": "^1.16.2",

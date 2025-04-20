@@ -84,4 +84,40 @@ src/
 
 ### Public Access
 - `GET /api/public/menus/:id` - Public menu access
-- `GET /api/public/menus/:id/search` - Search items in a menu 
+- `GET /api/public/menus/:id/search` - Search items in a menu
+
+## Import Aliases
+
+This project uses module aliases to improve import readability and maintainability. Instead of using relative paths like `../../../utils/logger`, you can use aliases like `@utils/logger`.
+
+### Available Aliases
+
+- `@root` - Points to the `src` directory
+- `@controllers` - Points to `src/controllers`
+- `@models` - Points to `src/models`
+- `@middleware` - Points to `src/middleware`
+- `@routes` - Points to `src/routes`
+- `@utils` - Points to `src/utils`
+- `@config` - Points to `src/config`
+- `@services` - Points to `src/services`
+- `@tests` - Points to `src/tests`
+
+### Example Usage
+
+```javascript
+// Before
+const User = require('../../../models/User');
+const logger = require('../../../utils/logger');
+
+// After
+const User = require('@models/User');
+const logger = require('@utils/logger');
+```
+
+### Configuration Files
+
+The aliases are configured in:
+- `jsconfig.json` - For editor support (VS Code, etc.)
+- `package.json` - In the `_moduleAliases` section
+- `src/aliases.js` - Runtime alias setup
+- `jest.config.js` - For test support 

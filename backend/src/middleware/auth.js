@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('@models/User');
 
 /**
  * Protect routes - Verify JWT token and attach user to request

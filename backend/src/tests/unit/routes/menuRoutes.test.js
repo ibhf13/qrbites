@@ -1,23 +1,23 @@
 const express = require('express');
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { protect } = require('../../../middleware/auth');
-const menuRoutes = require('../../../routes/menuRoutes');
+const { protect } = require('@middleware/auth');
+const menuRoutes = require('@routes/menuRoutes');
 const {
   getMenus, getMenu, createMenu, updateMenu, deleteMenu,
   addSection, updateSection, deleteSection,
   publishMenu, unpublishMenu
-} = require('../../../controllers/menuController');
+} = require('@controllers/menuController');
 const {
   getMenuItems, getSectionItems, getMenuItem,
   createMenuItem, updateMenuItem, deleteMenuItem,
   updateAvailability
-} = require('../../../controllers/menuItemController');
+} = require('@controllers/menuItemController');
 
 // Mock middleware and controllers
-jest.mock('../../../middleware/auth');
-jest.mock('../../../controllers/menuController');
-jest.mock('../../../controllers/menuItemController');
+jest.mock('@middleware/auth');
+jest.mock('@controllers/menuController');
+jest.mock('@controllers/menuItemController');
 
 describe('Menu Routes', () => {
   let app;

@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-const User = require('../../models/User');
-const logger = require('../../utils/logger');
-const { mockUsers } = require('../mock/userMocks');
+const User = require('@models/User');
+const logger = require('@utils/logger');
+const { mockUsers } = require('@tests/mocks/userMocks');
 
 /**
  * Seed users to database

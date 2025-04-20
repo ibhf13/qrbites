@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const MenuItem = require('../../../models/MenuItem');
-const Menu = require('../../../models/Menu');
-const { setupTestEnv } = require('../../setup');
+const MenuItem = require('@models/MenuItem');
+const Menu = require('@models/Menu');
+const { setupTestEnv } = require('@tests/setup');
 
 describe('MenuItem Model', () => {
   beforeAll(async () => {

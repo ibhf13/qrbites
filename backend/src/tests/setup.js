@@ -1,6 +1,9 @@
+// Setup module aliases
+require('@root/aliases');
+
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const logger = require('@utils/logger');
 
 let mongoServer;
 

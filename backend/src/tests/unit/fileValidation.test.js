@@ -1,4 +1,4 @@
-const { validateFileUpload } = require('../../middleware/fileValidation');
+const { validateFileUpload } = require('@middleware/fileValidation');
 const createError = require('http-errors');
 
 describe('File Validation Middleware', () => {

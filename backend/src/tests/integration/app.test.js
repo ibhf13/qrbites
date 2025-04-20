@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../app');
+const app = require('@root/app');
 
 describe('App Routes Integration Tests', () => {
   describe('GET /api/health', () => {

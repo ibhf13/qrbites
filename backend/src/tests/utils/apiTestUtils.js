@@ -1,6 +1,6 @@
 const request = require('supertest');
-const User = require('../../models/User');
-const { generateMockToken } = require('./testHelpers');
+const User = require('@models/User');
+const { generateMockToken } = require('@tests/utils/testHelpers');
 
 /**
  * Create a test user in the database and return auth token

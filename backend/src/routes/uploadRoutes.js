@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
-const { validateFileUpload } = require('../middleware/fileValidation');
-const uploadController = require('../controllers/uploadController');
+const { protect } = require('@middleware/auth');
+const { validateFileUpload } = require('@middleware/fileValidation');
+const uploadController = require('@controllers/uploadController');
 
 // Routes that require authentication
 router.use(protect);

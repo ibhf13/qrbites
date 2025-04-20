@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const { protect, authorize } = require('../../../middleware/auth');
-const User = require('../../../models/User');
-const { mockRequestResponse } = require('../../utils/testHelpers');
+const { protect, authorize } = require('@middleware/auth');
+const User = require('@models/User');
+const { mockRequestResponse } = require('@tests/utils/testHelpers');
 
 // Mock dependencies
 jest.mock('jsonwebtoken');
-jest.mock('../../../models/User');
+jest.mock('@models/User');
 
 describe('Auth Middleware', () => {
   beforeEach(() => {

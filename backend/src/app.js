@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 // Import middleware
-const errorHandler = require('./middleware/errorHandler');
+const errorHandler = require('@middleware/errorHandler');
 
 // Create Express app
 const app = express();

@@ -1,13 +1,13 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const Menu = require('../../models/Menu');
-const MenuItem = require('../../models/MenuItem');
-const User = require('../../models/User');
-const { mockMenus, mockMenuPayload } = require('../mocks/menuMocks');
-const { mockMenuItems } = require('../mocks/menuItemMocks');
-const { mockUsers } = require('../mocks/userMocks');
-const { authenticatedRequest } = require('../utils/apiTestUtils');
+const app = require('@root/app');
+const Menu = require('@models/Menu');
+const MenuItem = require('@models/MenuItem');
+const User = require('@models/User');
+const { mockMenus, mockMenuPayload } = require('@tests/mocks/menuMocks');
+const { mockMenuItems } = require('@tests/mocks/menuItemMocks');
+const { mockUsers } = require('@tests/mocks/userMocks');
+const { authenticatedRequest } = require('@tests/utils/apiTestUtils');
 
 describe('Menu Routes Integration Tests', () => {
   let user;

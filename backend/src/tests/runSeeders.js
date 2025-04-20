@@ -2,7 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const { seedUsers } = require('./seed/users');
 const { seedMenus } = require('./seed/menus');
-const logger = require('../utils/logger');
+const logger = require('@utils/logger');
 
 /**
  * Connect to MongoDB and seed data

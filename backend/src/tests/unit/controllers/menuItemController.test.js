@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
-const Menu = require('../../../models/Menu');
-const MenuItem = require('../../../models/MenuItem');
-const menuItemController = require('../../../controllers/menuItemController');
-const { mockRequestResponse } = require('../../utils/testHelpers');
+
+const Menu = require('@models/Menu');
+const MenuItem = require('@models/MenuItem');
+const menuItemController = require('@controllers/menuItemController');
+const { mockRequestResponse } = require('@tests/utils/testHelpers');
 
 // Mock the models
-jest.mock('../../../models/Menu');
-jest.mock('../../../models/MenuItem');
-jest.mock('../../../utils/logger');
+jest.mock('@models/Menu');
+jest.mock('@models/MenuItem');
+jest.mock('@utils/logger');
 
 describe('Menu Item Controller', () => {
   let mockReq, mockRes, mockNext;

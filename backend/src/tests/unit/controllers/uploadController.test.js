@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 const httpMocks = require('node-mocks-http');
-const uploadController = require('../../../controllers/uploadController');
-const Upload = require('../../../models/Upload');
-const User = require('../../../models/User');
+const uploadController = require('@controllers/uploadController');
+const Upload = require('@models/Upload');
+const User = require('@models/User');
 
 // Mock dependencies
-jest.mock('../../../models/Upload');
-jest.mock('../../../models/User');
-jest.mock('../../../utils/logger');
+jest.mock('@models/Upload');
+jest.mock('@models/User');
+jest.mock('@utils/logger');
 
 describe('Upload Controller', () => {
   let req, res, next;
