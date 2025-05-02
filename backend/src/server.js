@@ -1,26 +1,32 @@
-// Setup module aliases for import paths
-require('./aliases');
+// Register module aliases
+require('module-alias/register')
+require('dotenv').config()
+const mongoose = require('mongoose')
+const app = require('./app')
 
-require('dotenv').config();
-const app = require('./app');
-const connectDB = require('@config/db');
-const logger = require('@utils/logger');
-
-const PORT = process.env.PORT || 5000;
-
-// Connect to MongoDB
-connectDB();
+// MongoDB connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI)
+    console.log('MongoDB connected successfully')
+  } catch (error) {
+    console.error('MongoDB connection error:', error)
+    process.exit(1)
+  }
+}
 
 // Start server
-const server = app.listen(PORT, () => {
-  logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000
+const startServer = async () => {
+  try {
+    await connectDB()
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`)
+    })
+  } catch (error) {
+    console.error('Server startup error:', error)
+    process.exit(1)
+  }
+}
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  logger.error('Unhandled Rejection:', err);
-  // Close server & exit process
-  server.close(() => process.exit(1));
-});
-
-module.exports = server; 
+startServer() 

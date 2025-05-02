@@ -2,20 +2,27 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@root/*": ["./src/*"],
-      "@controllers/*": ["./src/controllers/*"],
-      "@models/*": ["./src/models/*"],
-      "@middleware/*": ["./src/middleware/*"],
-      "@routes/*": ["./src/routes/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@config/*": ["./src/config/*"],
-      "@services/*": ["./src/services/*"],
-      "@tests/*": ["./src/tests/*"]
+      "@src/*": ["src/*"],
+      "@models/*": ["src/models/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@routes/*": ["src/routes/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@utils/*": ["src/utils/*"],
+      "@config/*": ["src/config/*"],
+      "@validations/*": ["src/validations/*"],
+      "@tests/*": ["tests/*"],
+      "@seeders/*": ["tests/seeders/*"],
+      "@mocks/*": ["tests/fixtures/mocks/*"],
+      "@services/*": ["src/services/*"]
     },
     "module": "CommonJS",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "checkJs": false
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "coverage"]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 } 

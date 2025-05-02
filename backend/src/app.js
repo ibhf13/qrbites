@@ -1,53 +1,75 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
+const express = require('express')
+const cors = require('cors')
+const helmet = require('helmet')
+const morgan = require('morgan')
+const path = require('path')
+const logger = require('@utils/logger')
+const loggerMiddleware = require('@middlewares/loggerMiddleware')
+const { notFoundMiddleware, errorHandlerMiddleware } = require('@middlewares/errorMiddleware')
+const { apiLimiter } = require('@middlewares/rateLimitMiddleware')
+const { multerErrorHandler } = require('@services/fileUploadService')
+const { cacheMiddleware } = require('@middlewares/cacheMiddleware')
 
-// Import middleware
-const errorHandler = require('@middleware/errorHandler');
+// Import routes
+const authRoutes = require('@routes/authRoutes')
+const userRoutes = require('@routes/userRoutes')
+const restaurantRoutes = require('@routes/restaurantRoutes')
+const menuRoutes = require('@routes/menuRoutes')
+const menuItemRoutes = require('@routes/menuItemRoutes')
+const publicRoutes = require('@routes/publicRoutes')
+const redirectRoutes = require('@routes/redirectRoutes')
 
 // Create Express app
-const app = express();
+const app = express()
 
-// Apply middleware
-app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Parse JSON request body
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan('dev')); // HTTP request logger
+// Basic middleware
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-// Apply rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
+// Serve static files from public directory
+// app.use(express.static(path.join(process.cwd(), 'public')))
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
-});
+// Security middleware
+app.use(helmet())
+app.use(cors())
 
-// Root route
+// Logging middleware
+app.use(morgan('dev'))
+app.use(loggerMiddleware)
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
+
+// Welcome route
 app.get('/', (req, res) => {
-  res.status(200).json({ 
-    message: 'QrBites API',
-    version: '1.0.0',
-    documentation: '/api/docs' 
-  });
-});
+  res.json({
+    success: true,
+    message: 'Welcome to QrBites API',
+    version: '1.0.0'
+  })
+})
 
-// Import and use route files
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/menus', require('./routes/menuRoutes'));
-app.use('/api/uploads', require('./routes/uploadRoutes'));
-// app.use('/api/qr-codes', require('./routes/qrCodeRoutes'));
-// app.use('/api/public', require('./routes/publicRoutes'));
+// Public routes (no rate limiting)
+app.use('/r', redirectRoutes)
+app.use('/api/public', cacheMiddleware(1800), publicRoutes)
 
-// Error handling middleware (should be last)
-app.use(errorHandler);
+// Apply rate limiting to protected API routes
+app.use('/api', apiLimiter)
 
-module.exports = app; 
+// Protected routes
+app.use('/api/auth', authRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/restaurants', restaurantRoutes)
+app.use('/api/menus', menuRoutes)
+app.use('/api/menu-items', menuItemRoutes)
+
+// Multer error handler middleware
+app.use(multerErrorHandler)
+
+// 404 handler - must be after all routes
+app.use(notFoundMiddleware)
+
+// Error handler - must be the last middleware
+app.use(errorHandlerMiddleware)
+
+module.exports = app 

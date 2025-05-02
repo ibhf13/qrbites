@@ -1,83 +1,85 @@
+const chalk = require('chalk')
+
 /**
- * Simple logger utility with different log levels
+ * Logger utility with colored output for better debugging
  */
 const logger = {
-  /**
-   * Format a log message with timestamp and level
-   * @param {string} level - Log level
-   * @param {string} message - Message to log
-   * @returns {string} Formatted message
-   */
-  formatMessage: (level, message) => {
-    return `[${level}] ${new Date().toISOString()}: ${message}`;
-  },
+    /**
+     * Log info message
+     * @param {string} message - The message to log
+     * @param {Object} data - Optional data to log
+     */
+    info: (message, data = null) => {
+        console.log(chalk.blue('ℹ INFO:'), chalk.blue(message))
+        if (data) console.log(chalk.blue('  Data:'), data)
+    },
 
-  /**
-   * Log informational message
-   * @param {string} message - Message to log
-   * @param {Object} [metadata] - Optional metadata
-   */
-  info: (message, metadata) => {
-    const formattedMessage = logger.formatMessage('INFO', message);
-    if (metadata) {
-      console.info(formattedMessage, metadata);
-    } else {
-      console.info(formattedMessage);
-    }
-  },
-  
-  /**
-   * Log success message
-   * @param {string} message - Message to log 
-   */
-  success: (message) => {
-    console.log('\x1b[32m%s\x1b[0m', logger.formatMessage('SUCCESS', message));
-  },
-  
-  /**
-   * Log warning message
-   * @param {string} message - Message to log
-   * @param {Object} [metadata] - Optional metadata
-   */
-  warn: (message, metadata) => {
-    const formattedMessage = logger.formatMessage('WARN', message);
-    if (metadata) {
-      console.warn(formattedMessage, metadata);
-    } else {
-      console.warn(formattedMessage);
-    }
-  },
-  
-  /**
-   * Log error message
-   * @param {string|Error} message - Message or Error object to log
-   * @param {Object} [metadata] - Optional metadata
-   */
-  error: (message, metadata) => {
-    const formattedMessage = logger.formatMessage('ERROR', 
-      message instanceof Error ? message.message : message
-    );
-    
-    if (metadata) {
-      console.error(formattedMessage, metadata);
-    } else {
-      console.error(formattedMessage);
-    }
-    
-    if (message instanceof Error && message.stack) {
-      console.error(message.stack);
-    }
-  },
-  
-  /**
-   * Log debug message (only in development environment)
-   * @param {string} message - Message to log
-   */
-  debug: (message) => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('\x1b[35m%s\x1b[0m', logger.formatMessage('DEBUG', message));
-    }
-  }
-};
+    /**
+     * Log success message
+     * @param {string} message - The message to log
+     * @param {Object} data - Optional data to log
+     */
+    success: (message, data = null) => {
+        console.log(chalk.green('✓ SUCCESS:'), chalk.green(message))
+        if (data) console.log(chalk.green('  Data:'), data)
+    },
 
-module.exports = logger; 
+    /**
+     * Log warning message
+     * @param {string} message - The message to log
+     * @param {Object} data - Optional data to log
+     */
+    warn: (message, data = null) => {
+        console.log(chalk.yellow('⚠ WARNING:'), chalk.yellow(message))
+        if (data) console.log(chalk.yellow('  Data:'), data)
+    },
+
+    /**
+     * Log error message
+     * @param {string} message - The message to log
+     * @param {Error|Object} error - The error object or data
+     */
+    error: (message, error = null) => {
+        console.log(chalk.red('✖ ERROR:'), chalk.red(message))
+        if (error) {
+            if (error instanceof Error) {
+                console.log(chalk.red('  Message:'), error.message)
+                console.log(chalk.red('  Stack:'), error.stack)
+            } else {
+                console.log(chalk.red('  Data:'), error)
+            }
+        }
+    },
+
+    /**
+     * Log debug message (only in development environment)
+     * @param {string} message - The message to log
+     * @param {Object} data - Optional data to log
+     */
+    debug: (message, data = null) => {
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(chalk.magenta('🔍 DEBUG:'), chalk.magenta(message))
+            if (data) console.log(chalk.magenta('  Data:'), data)
+        }
+    },
+
+    /**
+     * Log HTTP request
+     * @param {Object} req - Express request object
+     * @param {string} status - HTTP status code
+     */
+    http: (req, status) => {
+        const statusCode = parseInt(status, 10)
+        let color = chalk.green
+
+        if (statusCode >= 400 && statusCode < 500) color = chalk.yellow
+        if (statusCode >= 500) color = chalk.red
+
+        console.log(
+            color(`${req.method} ${req.url} ${status}`),
+            chalk.gray(`- ${new Date().toISOString()}`)
+        )
+    }
+}
+
+module.exports = logger 

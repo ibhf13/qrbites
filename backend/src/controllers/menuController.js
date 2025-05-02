@@ -1,414 +1,362 @@
-const Menu = require('@models/Menu');
-const MenuItem = require('@models/MenuItem');
-const logger = require('@utils/logger');
+const Menu = require('@models/menuModel')
+const Restaurant = require('@models/restaurantModel')
+const {
+    asyncHandler,
+    notFound,
+    badRequest,
+    forbidden
+} = require('@utils/errorUtils')
+const logger = require('@utils/logger')
+const { logDatabaseError } = require('@services/errorLogService')
+const { getFileUrl } = require('@services/fileUploadService')
+const { generateMenuQRCode } = require('@services/qrCodeService')
 
 /**
- * @desc    Get all menus for the logged-in user
- * @route   GET /api/menus
- * @access  Private
+ * Get all menus with optional filtering
+ * @route GET /api/menus
+ * @access Public
  */
-exports.getMenus = async (req, res, next) => {
-  try {
-    const menus = await Menu.find({ restaurant: req.user.id });
+const getMenus = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, name, restaurantId, sortBy = 'createdAt', order = 'desc' } = req.query
 
-    res.status(200).json({
-      success: true,
-      count: menus.length,
-      data: menus
-    });
-  } catch (error) {
-    logger.error('Error fetching menus:', error);
-    next(error);
-  }
-};
+    // Build query
+    const query = {}
+
+    // Add name filter if provided
+    if (name) {
+        query.name = { $regex: name, $options: 'i' }
+    }
+
+    // Add restaurant filter if provided
+    if (restaurantId) {
+        query.restaurantId = restaurantId
+    }
+
+    // Build sort object
+    const sort = {}
+    sort[sortBy] = order === 'desc' ? -1 : 1
+
+    try {
+        // Calculate pagination
+        const skip = (page - 1) * limit
+
+        // Execute query
+        const menus = await Menu.find(query)
+            .select('-__v')
+            .sort(sort)
+            .skip(skip)
+            .limit(parseInt(limit))
+            .populate({
+                path: 'restaurantId',
+                select: 'name'
+            })
+
+        // Get total count
+        const total = await Menu.countDocuments(query)
+
+        res.json({
+            success: true,
+            data: menus,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Math.ceil(total / limit)
+            }
+        })
+    } catch (error) {
+        logDatabaseError(error, 'FIND', { collection: 'menus', query })
+        throw error
+    }
+})
 
 /**
- * @desc    Get a single menu by ID
- * @route   GET /api/menus/:id
- * @access  Private
+ * Get menu by ID
+ * @route GET /api/menus/:id
+ * @access Public
  */
-exports.getMenu = async (req, res, next) => {
-  try {
-    const menu = await Menu.findById(req.params.id);
+const getMenuById = asyncHandler(async (req, res) => {
+    const { id } = req.params
 
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
+    try {
+        const menu = await Menu.findById(id)
+            .select('-__v')
+            .populate({
+                path: 'restaurantId',
+                select: 'name'
+            })
+            .populate({
+                path: 'menuItems',
+                select: '-__v'
+            })
+
+        if (!menu) {
+            throw notFound(`Menu with id ${id} not found`)
+        }
+
+        res.json({
+            success: true,
+            data: menu
+        })
+    } catch (error) {
+        if (error.name === 'CastError') {
+            throw badRequest('Invalid menu ID format')
+        }
+        throw error
     }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to access this menu'
-      });
-    }
-
-    // Get menu items
-    const items = await MenuItem.findByMenuId(menu._id);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        ...menu.toObject(),
-        items
-      }
-    });
-  } catch (error) {
-    logger.error('Error fetching menu:', error);
-    next(error);
-  }
-};
+})
 
 /**
- * @desc    Create a new menu
- * @route   POST /api/menus
- * @access  Private
+ * Create menu
+ * @route POST /api/menus
+ * @access Private
  */
-exports.createMenu = async (req, res, next) => {
-  try {
-    // Add user to request body
-    req.body.restaurant = req.user.id;
+const createMenu = asyncHandler(async (req, res) => {
+    const { restaurantId } = req.body
 
-    // Create menu
-    const menu = await Menu.create(req.body);
+    try {
+        // Check if restaurant exists and user owns it
+        const restaurant = await Restaurant.findById(restaurantId)
 
-    res.status(201).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error creating menu:', error);
-    next(error);
-  }
-};
+        if (!restaurant) {
+            throw notFound(`Restaurant with id ${restaurantId} not found`)
+        }
+
+        // Check restaurant ownership
+        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
+            throw forbidden('Not authorized to create menu for this restaurant')
+        }
+
+        // Add image URL if file was uploaded
+        if (req.file) {
+            req.body.imageUrl = getFileUrl(req.file.filename, 'menu')
+        }
+
+        // Create menu
+        const menu = await Menu.create(req.body)
+
+        // Generate QR code for the menu
+        const qrCodeUrl = await generateMenuQRCode(menu._id, restaurantId)
+
+        // Update menu with QR code URL
+        menu.qrCodeUrl = qrCodeUrl
+        await menu.save()
+
+        logger.success(`Menu created: ${menu.name} for restaurant ${restaurantId} by user ${req.user._id}`)
+
+        res.status(201).json({
+            success: true,
+            data: menu
+        })
+    } catch (error) {
+        logDatabaseError(error, 'CREATE', { collection: 'menus', document: req.body })
+        throw error
+    }
+})
 
 /**
- * @desc    Update a menu
- * @route   PUT /api/menus/:id
- * @access  Private
+ * Update menu
+ * @route PUT /api/menus/:id
+ * @access Private
  */
-exports.updateMenu = async (req, res, next) => {
-  try {
-    let menu = await Menu.findById(req.params.id);
+const updateMenu = asyncHandler(async (req, res) => {
+    const { id } = req.params
 
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
+    try {
+        // Find menu
+        const menu = await Menu.findById(id)
+
+        if (!menu) {
+            throw notFound(`Menu with id ${id} not found`)
+        }
+
+        // Find restaurant to check ownership
+        const restaurant = await Restaurant.findById(menu.restaurantId)
+
+        // Check ownership
+        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
+            throw forbidden('Not authorized to update this menu')
+        }
+
+        // Add image URL if file was uploaded
+        if (req.file) {
+            req.body.imageUrl = getFileUrl(req.file.filename, 'menu')
+        }
+
+        // Update menu
+        const updatedMenu = await Menu.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true, runValidators: true }
+        )
+
+        logger.info(`Menu updated: ${menu.name} by user ${req.user._id}`)
+
+        res.json({
+            success: true,
+            data: updatedMenu
+        })
+    } catch (error) {
+        if (error.name === 'CastError') {
+            throw badRequest('Invalid menu ID format')
+        }
+        logDatabaseError(error, 'UPDATE', { collection: 'menus', id, document: req.body })
+        throw error
     }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to update this menu'
-      });
-    }
-
-    // Update menu
-    menu = await Menu.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
-
-    res.status(200).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error updating menu:', error);
-    next(error);
-  }
-};
+})
 
 /**
- * @desc    Delete a menu
- * @route   DELETE /api/menus/:id
- * @access  Private
+ * Delete menu
+ * @route DELETE /api/menus/:id
+ * @access Private
  */
-exports.deleteMenu = async (req, res, next) => {
-  try {
-    const menu = await Menu.findById(req.params.id);
+const deleteMenu = asyncHandler(async (req, res) => {
+    const { id } = req.params
 
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
+    try {
+        // Find menu
+        const menu = await Menu.findById(id)
+
+        if (!menu) {
+            throw notFound(`Menu with id ${id} not found`)
+        }
+
+        // Find restaurant to check ownership
+        const restaurant = await Restaurant.findById(menu.restaurantId)
+
+        // Check ownership
+        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
+            throw forbidden('Not authorized to delete this menu')
+        }
+
+        // Delete menu
+        await menu.deleteOne()
+
+        logger.warn(`Menu deleted: ${menu.name} by user ${req.user._id}`)
+
+        res.status(204).send()
+    } catch (error) {
+        if (error.name === 'CastError') {
+            throw badRequest('Invalid menu ID format')
+        }
+        logDatabaseError(error, 'DELETE', { collection: 'menus', id })
+        throw error
     }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to delete this menu'
-      });
-    }
-
-    // Delete all menu items first
-    await MenuItem.deleteMany({ menu: req.params.id });
-
-    // Then delete the menu
-    await menu.deleteOne();
-
-    res.status(200).json({
-      success: true,
-      data: {}
-    });
-  } catch (error) {
-    logger.error('Error deleting menu:', error);
-    next(error);
-  }
-};
+})
 
 /**
- * @desc    Add a section to a menu
- * @route   POST /api/menus/:id/sections
- * @access  Private
+ * Upload menu image
+ * @route POST /api/menus/:id/image
+ * @access Private
  */
-exports.addSection = async (req, res, next) => {
-  try {
-    const menu = await Menu.findById(req.params.id);
+const uploadImage = asyncHandler(async (req, res) => {
+    const { id } = req.params
 
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
+    try {
+        // Find menu
+        const menu = await Menu.findById(id)
+
+        if (!menu) {
+            throw notFound(`Menu with id ${id} not found`)
+        }
+
+        // Find restaurant to check ownership
+        const restaurant = await Restaurant.findById(menu.restaurantId)
+
+        // Check ownership
+        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
+            throw forbidden('Not authorized to update this menu')
+        }
+
+        // Check if file was uploaded
+        if (!req.file) {
+            throw badRequest('Please upload an image')
+        }
+
+        // Update menu with new image URL
+        const imageUrl = getFileUrl(req.file.filename, 'menu')
+        const updatedMenu = await Menu.findByIdAndUpdate(
+            id,
+            { imageUrl },
+            { new: true, runValidators: true }
+        )
+
+        logger.info(`Menu image updated: ${menu.name} by user ${req.user._id}`)
+
+        res.json({
+            success: true,
+            data: {
+                imageUrl: updatedMenu.imageUrl
+            }
+        })
+    } catch (error) {
+        if (error.name === 'CastError') {
+            throw badRequest('Invalid menu ID format')
+        }
+        logDatabaseError(error, 'UPDATE', { collection: 'menus', id, field: 'imageUrl' })
+        throw error
     }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to update this menu'
-      });
-    }
-
-    // Add section to menu
-    menu.sections.push(req.body);
-    await menu.save();
-
-    res.status(200).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error adding section:', error);
-    next(error);
-  }
-};
+})
 
 /**
- * @desc    Update a section in a menu
- * @route   PUT /api/menus/:id/sections/:sectionId
- * @access  Private
+ * Generate QR code for a menu
+ * @route POST /api/menus/:id/qrcode
+ * @access Private
  */
-exports.updateSection = async (req, res, next) => {
-  try {
-    const menu = await Menu.findById(req.params.id);
+const generateQRCode = asyncHandler(async (req, res) => {
+    const { id } = req.params
 
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
+    try {
+        // Find menu
+        const menu = await Menu.findById(id)
+
+        if (!menu) {
+            throw notFound(`Menu with id ${id} not found`)
+        }
+
+        // Find restaurant to check ownership
+        const restaurant = await Restaurant.findById(menu.restaurantId)
+
+        if (!restaurant) {
+            throw notFound(`Restaurant with id ${menu.restaurantId} not found for menu ${id}`)
+        }
+
+        if (!restaurant.userId) {
+            throw badRequest(`Restaurant with id ${menu.restaurantId} has no associated user`)
+        }
+
+        // Check ownership
+        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
+            throw forbidden('Not authorized to generate QR code for this menu')
+        }
+
+        // Generate new QR code
+        const qrCodeUrl = await generateMenuQRCode(menu._id, menu.restaurantId)
+
+        // Update menu with QR code URL
+        menu.qrCodeUrl = qrCodeUrl
+        await menu.save()
+
+        logger.info(`QR code generated for menu: ${menu.name} by user ${req.user._id}`)
+
+        res.json({
+            success: true,
+            data: {
+                qrCodeUrl
+            }
+        })
+    } catch (error) {
+        logger.error(`Error generating QR code for menu ${id}:`, error)
+        throw error
     }
+})
 
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to update this menu'
-      });
-    }
-
-    // Find section index
-    const sectionIndex = menu.sections.findIndex(
-      section => section._id.toString() === req.params.sectionId
-    );
-
-    if (sectionIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Section not found'
-      });
-    }
-
-    // Update section
-    menu.sections[sectionIndex] = {
-      ...menu.sections[sectionIndex].toObject(),
-      ...req.body
-    };
-
-    await menu.save();
-
-    res.status(200).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error updating section:', error);
-    next(error);
-  }
-};
-
-/**
- * @desc    Delete a section from a menu
- * @route   DELETE /api/menus/:id/sections/:sectionId
- * @access  Private
- */
-exports.deleteSection = async (req, res, next) => {
-  try {
-    const menu = await Menu.findById(req.params.id);
-
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
-    }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to update this menu'
-      });
-    }
-
-    // Find section index
-    const sectionIndex = menu.sections.findIndex(
-      section => section._id.toString() === req.params.sectionId
-    );
-
-    if (sectionIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Section not found'
-      });
-    }
-
-    // Check if there are menu items in this section
-    const items = await MenuItem.find({
-      menu: req.params.id,
-      section: req.params.sectionId
-    });
-
-    if (items.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cannot delete section that contains items'
-      });
-    }
-
-    // Remove section
-    menu.sections.splice(sectionIndex, 1);
-    await menu.save();
-
-    res.status(200).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error deleting section:', error);
-    next(error);
-  }
-};
-
-/**
- * @desc    Publish a menu
- * @route   PUT /api/menus/:id/publish
- * @access  Private
- */
-exports.publishMenu = async (req, res, next) => {
-  try {
-    let menu = await Menu.findById(req.params.id);
-
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
-    }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to publish this menu'
-      });
-    }
-
-    // Check if menu has sections
-    if (menu.sections.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cannot publish menu with no sections'
-      });
-    }
-
-    // Check if menu has items
-    const items = await MenuItem.find({ menu: req.params.id });
-    if (items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cannot publish menu with no items'
-      });
-    }
-
-    // Update menu to published status
-    menu.isPublished = true;
-    await menu.save();
-
-    res.status(200).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error publishing menu:', error);
-    next(error);
-  }
-};
-
-/**
- * @desc    Unpublish a menu
- * @route   PUT /api/menus/:id/unpublish
- * @access  Private
- */
-exports.unpublishMenu = async (req, res, next) => {
-  try {
-    let menu = await Menu.findById(req.params.id);
-
-    if (!menu) {
-      return res.status(404).json({
-        success: false,
-        error: 'Menu not found'
-      });
-    }
-
-    // Check if user owns the menu
-    if (menu.restaurant.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Not authorized to unpublish this menu'
-      });
-    }
-
-    // Update menu to unpublished status
-    menu.isPublished = false;
-    await menu.save();
-
-    res.status(200).json({
-      success: true,
-      data: menu
-    });
-  } catch (error) {
-    logger.error('Error unpublishing menu:', error);
-    next(error);
-  }
-}; 
+module.exports = {
+    getMenus,
+    getMenuById,
+    createMenu,
+    updateMenu,
+    deleteMenu,
+    uploadImage,
+    generateQRCode
+} 

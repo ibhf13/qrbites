@@ -1,123 +1,123 @@
-# QrBites Backend
+# QrBites
 
-The backend REST API for QrBites - a platform that converts photos of restaurant menus into digital versions with QR codes.
+QrBites is a web-based platform that enables restaurant owners to convert physical menu photos into digital versions accessible via QR codes.
 
-## Technology Stack
+## Features
 
-- **Core**: Node.js with Express
-- **Database**: MongoDB with Mongoose
-- **Authentication**: JWT, bcrypt
-- **File Upload**: Multer
-- **OCR Service**: Tesseract.js
-- **QR Generation**: qrcode
+- **User Management:** Register, login, and manage restaurant owner accounts
+- **Restaurant Management:** Create and manage multiple restaurants
+- **Menu Digitization:** Create digital menus with items and categories
+- **QR Code Generation:** Generate QR codes for menus that customers can scan
+- **File Upload:** Upload and store menu and item images
+- **Public Access:** Mobile-optimized public menu viewing
+- **Real-time Updates:** Update menu items instantly across all access points
 
-## Project Structure
+## Tech Stack
 
-The project follows the MVC architecture pattern:
+- **Backend:** Node.js, Express, MongoDB with Mongoose
+- **Authentication:** JWT, bcrypt
+- **Data Handling:** Joi (validation), Multer (file upload)
+- **Features:** Tesseract.js (OCR), qrcode (QR generation)
+- **Quality Tools:** Jest/Supertest (testing), Winston/Morgan (logging)
+- **Security:** Helmet, Rate limiting, Input validation
 
+## Documentation
+
+- [Getting Started](./docs/getting-started/README.md) - Installation and basic setup
+- [Architecture](./docs/architecture/README.md) - System design and components
+- [API Documentation](./docs/api/README.md) - Endpoints and usage
+- [Development Guide](./docs/development/README.md) - Coding standards and practices
+- [Deployment Guide](./docs/deployment/README.md) - Production setup and configuration
+- [Contributing Guide](./docs/contributing/README.md) - How to contribute to the project
+- [Testing Guide](./docs/development/testing.md) - Testing strategy and examples
+- [Middleware Documentation](./docs/architecture/middlewares.md) - Middleware explanations
+- [Services Documentation](./docs/architecture/services.md) - Core services documentation
+- [API Response Examples](./docs/api/response-examples.md) - Sample API responses
+- [Troubleshooting](./docs/troubleshooting.md) - Common issues and solutions
+- [FAQ](./docs/faq.md) - Frequently asked questions
+
+## Quick Start
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/qrbites.git
+cd qrbites
 ```
-src/
-├── config/               # Configuration files
-├── controllers/          # Route controllers (MVC)
-├── middleware/           # Custom middleware
-├── models/               # Database models (MVC)
-├── routes/               # API routes
-├── services/             # Business logic
-├── utils/                # Utility functions
-└── tests/                # Tests (unit & integration)
+
+2. Install dependencies:
+```bash
+npm install
 ```
 
-## Setup Instructions
+3. Configure environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-1. **Install dependencies**:
-   ```
-   npm install
-   ```
+4. Start the development server:
+```bash
+npm run dev
+```
 
-2. **Configure environment variables**:
-   Create a `.env` file in the root directory with the following variables:
-   ```
-   PORT=5000
-   NODE_ENV=development
-   MONGODB_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   JWT_EXPIRES_IN=7d
-   JWT_COOKIE_EXPIRES_IN=7
-   MAX_FILE_SIZE=10485760
-   ALLOWED_FILE_TYPES=image/jpeg,image/png,application/pdf
-   ```
-
-3. **Run development server**:
-   ```
-   npm run dev
-   ```
-
-4. **Run tests**:
-   ```
-   npm test
-   ```
+5. Visit `http://localhost:3000` to access the API
 
 ## API Endpoints
 
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login and get token
-- `POST /api/auth/forgotpassword` - Password reset request
-- `PUT /api/auth/resetpassword/:resettoken` - Reset password
+- **Authentication:**
+  - `POST /api/auth/register` - Register a new user
+  - `POST /api/auth/login` - Login and get token
 
-### Menu Management
-- `GET /api/menus` - Get all menus for a user
-- `POST /api/menus` - Create a new menu
-- `GET /api/menus/:id` - Get a specific menu
-- `PUT /api/menus/:id` - Update a menu
-- `DELETE /api/menus/:id` - Delete a menu
+- **Restaurants:**
+  - `GET /api/restaurants` - Get all restaurants (for user)
+  - `POST /api/restaurants` - Create a new restaurant
+  - `GET /api/restaurants/:id` - Get a specific restaurant
+  - `PUT /api/restaurants/:id` - Update a restaurant
+  - `DELETE /api/restaurants/:id` - Delete a restaurant
 
-### File Upload & OCR
-- `POST /api/uploads` - Upload menu photos
-- `GET /api/ocr/:id` - Get OCR results
-- `PUT /api/ocr/:id` - Update OCR results
+- **Menus:**
+  - `GET /api/restaurants/:id/menus` - Get all menus for a restaurant
+  - `POST /api/restaurants/:id/menus` - Create a new menu
+  - `GET /api/menus/:id` - Get a specific menu
+  - `PUT /api/menus/:id` - Update a menu
+  - `DELETE /api/menus/:id` - Delete a menu
+  - `POST /api/menus/:id/qr` - Generate QR code for a menu
 
-### QR Code
-- `GET /api/qr-codes` - Get all QR codes for a user
-- `POST /api/qr-codes` - Generate a new QR code
-- `GET /api/qr-codes/:id` - Get a specific QR code
+For a complete list of endpoints, see the [API Documentation](./docs/api/README.md).
 
-### Public Access
-- `GET /api/public/menus/:id` - Public menu access
-- `GET /api/public/menus/:id/search` - Search items in a menu
+## Development
 
-## Import Aliases
+### Available Scripts
 
-This project uses module aliases to improve import readability and maintainability. Instead of using relative paths like `../../../utils/logger`, you can use aliases like `@utils/logger`.
+- `npm start` - Start the production server
+- `npm run dev` - Start the development server with hot reload
+- `npm test` - Run tests
+- `npm run test:coverage` - Run tests with coverage
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
 
-### Available Aliases
+### Testing
 
-- `@root` - Points to the `src` directory
-- `@controllers` - Points to `src/controllers`
-- `@models` - Points to `src/models`
-- `@middleware` - Points to `src/middleware`
-- `@routes` - Points to `src/routes`
-- `@utils` - Points to `src/utils`
-- `@config` - Points to `src/config`
-- `@services` - Points to `src/services`
-- `@tests` - Points to `src/tests`
+The project uses Jest for testing. To run the test suite:
 
-### Example Usage
-
-```javascript
-// Before
-const User = require('../../../models/User');
-const logger = require('../../../utils/logger');
-
-// After
-const User = require('@models/User');
-const logger = require('@utils/logger');
+```bash
+npm test
 ```
 
-### Configuration Files
+For more information, see the [Testing Guide](./docs/development/testing.md).
 
-The aliases are configured in:
-- `jsconfig.json` - For editor support (VS Code, etc.)
-- `package.json` - In the `_moduleAliases` section
-- `src/aliases.js` - Runtime alias setup
-- `jest.config.js` - For test support 
+## Deployment
+
+For deployment instructions, see the [Deployment Guide](./docs/deployment/README.md).
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](./docs/contributing/README.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please create an issue in the repository or contact the development team. 

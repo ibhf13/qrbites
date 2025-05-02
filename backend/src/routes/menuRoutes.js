@@ -1,76 +1,33 @@
-const express = require('express');
+const express = require('express')
 const {
-  getMenus,
-  getMenu,
-  createMenu,
-  updateMenu,
-  deleteMenu,
-  addSection,
-  updateSection,
-  deleteSection,
-  publishMenu,
-  unpublishMenu
-} = require('@controllers/menuController');
+    getMenus,
+    getMenuById,
+    createMenu,
+    updateMenu,
+    deleteMenu,
+    uploadImage,
+    generateQRCode
+} = require('@controllers/menuController')
+const { protect } = require('@middlewares/authMiddleware')
+const { validateRequest } = require('@middlewares/validationMiddleware')
+const { menuSchema, menuUpdateSchema } = require('@validations/menuValidation')
+const { upload } = require('@services/fileUploadService')
 
-const {
-  getMenuItems,
-  getSectionItems,
-  getMenuItem,
-  createMenuItem,
-  updateMenuItem,
-  deleteMenuItem,
-  updateAvailability
-} = require('@controllers/menuItemController');
+const router = express.Router()
 
-const { protect } = require('@middleware/auth');
-const { validate, menuSchema, sectionSchema, menuItemSchema } = require('@middleware/validator');
+// Public routes
+router.get('/', getMenus)
+router.get('/:id', getMenuById)
 
-const router = express.Router();
+// Protected routes
+router.post('/', protect, upload.single('image'), validateRequest(menuSchema), createMenu)
+router.put('/:id', protect, upload.single('image'), validateRequest(menuUpdateSchema), updateMenu)
+router.delete('/:id', protect, deleteMenu)
 
-// Protect all routes
-router.use(protect);
+// Image upload route
+router.post('/:id/image', protect, upload.single('image'), uploadImage)
 
-// Menu routes
-router.route('/')
-  .get(getMenus)
-  .post(validate(menuSchema), createMenu);
+// QR code generation route
+router.post('/:id/qrcode', protect, generateQRCode)
 
-router.route('/:id')
-  .get(getMenu)
-  .put(validate(menuSchema), updateMenu)
-  .delete(deleteMenu);
-
-// Section routes
-router.route('/:id/sections')
-  .post(validate(sectionSchema), addSection);
-
-router.route('/:id/sections/:sectionId')
-  .put(validate(sectionSchema), updateSection)
-  .delete(deleteSection);
-
-// Menu item routes
-router.route('/:menuId/items')
-  .get(getMenuItems)
-  .post(validate(menuItemSchema), createMenuItem);
-
-router.route('/:menuId/items/:id')
-  .get(getMenuItem)
-  .put(validate(menuItemSchema), updateMenuItem)
-  .delete(deleteMenuItem);
-
-// Section items route
-router.route('/:menuId/sections/:sectionId/items')
-  .get(getSectionItems);
-
-// Menu item availability route
-router.route('/:menuId/items/:id/availability')
-  .put(updateAvailability);
-
-// Menu publish/unpublish routes
-router.route('/:id/publish')
-  .put(publishMenu);
-
-router.route('/:id/unpublish')
-  .put(unpublishMenu);
-
-module.exports = router; 
+module.exports = router 

@@ -1,122 +1,155 @@
-const User = require('@models/User');
-const logger = require('@utils/logger');
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+const User = require('@models/userModel')
+const {
+  asyncHandler,
+  badRequest,
+  unauthorized,
+  notFound
+} = require('@utils/errorUtils')
+const logger = require('@utils/logger')
 
 /**
- * @desc    Register a new user
- * @route   POST /api/auth/register
- * @access  Public
+ * Generate JWT token
+ * @param {String} id - User ID
+ * @returns {String} JWT token
  */
-exports.register = async (req, res, next) => {
-  try {
-    const { name, email, password, restaurantName } = req.body;
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN
+  })
+}
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email already in use'
-      });
-    }
+/**
+ * Register a new user
+ * @route POST /api/auth/register
+ * @access Public
+ */
+const register = asyncHandler(async (req, res) => {
+  const { email, password } = req.body
 
-    // Create new user
-    const user = await User.create({
-      name,
-      email,
-      password,
-      restaurantName
-    });
+  // Check if user already exists
+  const userExists = await User.findOne({ email })
 
-    // Generate JWT token
-    sendTokenResponse(user, 201, res);
-  } catch (error) {
-    logger.error('Error in user registration:', error);
-    next(error);
+  if (userExists) {
+    throw badRequest('User already exists')
   }
-};
 
-/**
- * @desc    Login user
- * @route   POST /api/auth/login
- * @access  Public
- */
-exports.login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+  // Create user
+  const user = await User.create({
+    email,
+    password
+  })
 
-    // Find user
-    const user = await User.findOne({ email }).select('+password');
+  // Generate token
+  const token = generateToken(user._id)
 
-    // Check if user exists
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: 'Invalid credentials'
-      });
-    }
+  logger.info(`New user registered: ${email}`)
 
-    // Check if password matches
-    const isMatch = await user.matchPassword(password);
-
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        error: 'Invalid credentials'
-      });
-    }
-
-    // Generate JWT token
-    sendTokenResponse(user, 200, res);
-  } catch (error) {
-    logger.error('Error in user login:', error);
-    next(error);
-  }
-};
-
-/**
- * @desc    Get current logged in user
- * @route   GET /api/auth/me
- * @access  Private
- */
-exports.getMe = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      data: user
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @desc    Log user out / clear cookie
- * @route   GET /api/auth/logout
- * @access  Private
- */
-exports.logout = (req, res, next) => {
-  res.status(200).json({
+  res.status(201).json({
     success: true,
-    message: 'Logged out successfully'
-  });
-};
+    data: {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      token
+    }
+  })
+})
 
 /**
- * Get token from model, create cookie and send response
+ * Login user
+ * @route POST /api/auth/login
+ * @access Public
  */
-const sendTokenResponse = (user, statusCode, res) => {
-  // Create token
-  const token = user.getSignedJwtToken();
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body
 
-  // Remove password from output
-  user.password = undefined;
+  // Check if user exists
+  const user = await User.findOne({ email })
 
-  res.status(statusCode).json({
+  if (!user) {
+    throw unauthorized('Invalid credentials')
+  }
+
+  // Check if password matches
+  const isMatch = await user.comparePassword(password)
+
+  if (!isMatch) {
+    throw unauthorized('Invalid credentials')
+  }
+
+  // Check if user is active
+  if (!user.isActive) {
+    throw unauthorized('Account is disabled')
+  }
+
+  // Generate token
+  const token = generateToken(user._id)
+
+  logger.info(`User logged in: ${email}`)
+
+  res.json({
     success: true,
-    token,
-    data: user
-  });
-}; 
+    data: {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      token
+    }
+  })
+})
+
+/**
+ * Get current user profile
+ * @route GET /api/auth/me
+ * @access Private
+ */
+const getMe = asyncHandler(async (req, res) => {
+  // req.user is already set by auth middleware
+  res.json({
+    success: true,
+    data: req.user
+  })
+})
+
+/**
+ * Change password
+ * @route PUT /api/auth/password
+ * @access Private
+ */
+const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body
+
+  // Get user with password
+  const user = await User.findById(req.user._id)
+
+  if (!user) {
+    throw notFound('User not found')
+  }
+
+  // Check current password
+  const isMatch = await user.comparePassword(currentPassword)
+
+  if (!isMatch) {
+    throw badRequest('Current password is incorrect')
+  }
+
+  // Update password
+  user.password = newPassword
+  await user.save()
+
+  logger.info(`Password changed for user: ${user.email}`)
+
+  res.json({
+    success: true,
+    message: 'Password updated successfully'
+  })
+})
+
+module.exports = {
+  register,
+  login,
+  getMe,
+  changePassword
+} 

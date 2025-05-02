@@ -1,20 +1,27 @@
-const express = require('express');
-const { register, login, getMe, logout } = require('@controllers/authController');
-const { validate, registrationSchema, loginSchema } = require('@middleware/validator');
-const { protect } = require('@middleware/auth');
+const express = require('express')
+const {
+    register,
+    login,
+    getMe,
+    changePassword
+} = require('@controllers/authController')
+const {
+    registerSchema,
+    loginSchema,
+    changePasswordSchema
+} = require('../validations/authValidation')
+const { validateRequest } = require('@middlewares/validationMiddleware')
+const { protect } = require('@middlewares/authMiddleware')
+const { authLimiter, createUserLimiter } = require('@middlewares/rateLimitMiddleware')
 
-const router = express.Router();
+const router = express.Router()
 
-// Register route
-router.post('/register', validate(registrationSchema), register);
+// Public routes with rate limiting
+router.post('/register', createUserLimiter, validateRequest(registerSchema), register)
+router.post('/login', authLimiter, validateRequest(loginSchema), login)
 
-// Login route
-router.post('/login', validate(loginSchema), login);
+// Protected routes
+router.get('/me', protect, getMe)
+router.put('/password', protect, validateRequest(changePasswordSchema), changePassword)
 
-// Get current user route
-router.get('/me', protect, getMe);
-
-// Logout route
-router.get('/logout', protect, logout);
-
-module.exports = router; 
+module.exports = router 
