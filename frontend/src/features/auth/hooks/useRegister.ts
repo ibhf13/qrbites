@@ -1,4 +1,4 @@
-import { useNotification } from '@/hooks/useNotification'
+import { useNotificationContext } from '@/contexts/NotificationContext'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { RegisterRequest } from '../types/auth.types'
@@ -6,7 +6,7 @@ import { RegisterRequest } from '../types/auth.types'
 export const useRegister = () => {
     const [isLoading, setIsLoading] = useState(false)
     const { register, error, clearError } = useAuth()
-    const { showError } = useNotification()
+    const { showError } = useNotificationContext()
 
     const handleRegister = async (userData: RegisterRequest) => {
         setIsLoading(true)

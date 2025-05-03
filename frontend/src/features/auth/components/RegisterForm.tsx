@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
 import { Button, Card, ErrorDisplay, FormInput } from '@/components/common'
-import { useNotification } from '@/hooks/useNotification'
+import { useNotificationContext } from '@/contexts/NotificationContext'
 import { useRegister } from '../hooks/useRegister'
 import { RegisterFormData } from '../types/auth.types'
 import { registerSchema } from '../validations/register.validation'
@@ -12,7 +12,7 @@ import { registerSchema } from '../validations/register.validation'
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate()
     const [serverError, setServerError] = useState<string | null>(null)
-    const { showSuccess, showError } = useNotification()
+    const { showSuccess, showError } = useNotificationContext()
     const { register: registerUser, isLoading, error, clearError } = useRegister()
 
     // Clear server error when auth context error changes
@@ -45,6 +45,7 @@ const RegisterForm: React.FC = () => {
                 reset()
             }
         } catch (error) {
+            showError('Registration failed. Please try again.')
             // Error is already handled by the useRegister hook and displayed via serverError
             // No need for additional handling here
         }

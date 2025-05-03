@@ -1,4 +1,4 @@
-import { useNotification } from '@/hooks/useNotification'
+import { useNotificationContext } from '@/contexts/NotificationContext'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { LoginRequest } from '../types/auth.types'
@@ -6,7 +6,7 @@ import { LoginRequest } from '../types/auth.types'
 export const useLogin = () => {
     const [isLoading, setIsLoading] = useState(false)
     const { login, error, clearError } = useAuth()
-    const { showError } = useNotification()
+    const { showError } = useNotificationContext()
 
     const handleLogin = async (userData: LoginRequest) => {
         setIsLoading(true)

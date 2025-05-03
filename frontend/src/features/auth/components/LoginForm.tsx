@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { Button, Card, ErrorDisplay, FormInput } from '@/components/common'
 import env from '@/config/env'
-import { useNotification } from '@/hooks/useNotification'
+import { useNotificationContext } from '@/contexts/NotificationContext'
 import { useLogin } from '../hooks/useLogin'
 import { LoginFormData } from '../types/auth.types'
 import { loginSchema } from '../validations/login.validation'
@@ -13,7 +13,7 @@ import { loginSchema } from '../validations/login.validation'
 const LoginForm: React.FC = () => {
     const navigate = useNavigate()
     const [serverError, setServerError] = useState<string | null>(null)
-    const { showSuccess, showError } = useNotification()
+    const { showSuccess, showError } = useNotificationContext()
     const { login, isLoading, error, clearError } = useLogin()
 
     // Clear server error when auth context error changes

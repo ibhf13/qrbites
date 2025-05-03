@@ -2,8 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SnackbarProvider } from 'notistack'
 import React, { Suspense } from 'react'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { LoadingSpinner, NotificationSnackbar } from './components/common'
+import { ErrorBoundary, LoadingSpinner, NotificationSnackbar } from './components/common'
 import routes from './config/routes'
+import { NotificationProvider } from './contexts/NotificationContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AuthProvider } from './features/auth'
 
@@ -30,34 +31,38 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
     return (
-        <QueryClientProvider client={queryClient}>
-            <ThemeProvider>
-                <AuthProvider>
-                    <SnackbarProvider
-                        maxSnack={3}
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right'
-                        }}
-                        autoHideDuration={5000}
-                        preventDuplicate
-                        Components={{
-                            success: NotificationSnackbar,
-                            error: NotificationSnackbar,
-                            warning: NotificationSnackbar,
-                            info: NotificationSnackbar,
-                            default: NotificationSnackbar,
-                        }}
-                    >
-                        <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
-                            <Suspense fallback={<PageLoader />}>
-                                <RouterProvider router={router} />
-                            </Suspense>
-                        </div>
-                    </SnackbarProvider>
-                </AuthProvider>
-            </ThemeProvider>
-        </QueryClientProvider>
+        <ErrorBoundary>
+            <QueryClientProvider client={queryClient}>
+                <ThemeProvider>
+                    <AuthProvider>
+                        <SnackbarProvider
+                            maxSnack={3}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right'
+                            }}
+                            autoHideDuration={5000}
+                            preventDuplicate
+                            Components={{
+                                success: NotificationSnackbar,
+                                error: NotificationSnackbar,
+                                warning: NotificationSnackbar,
+                                info: NotificationSnackbar,
+                                default: NotificationSnackbar,
+                            }}
+                        >
+                            <NotificationProvider>
+                                <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+                                    <Suspense fallback={<PageLoader />}>
+                                        <RouterProvider router={router} />
+                                    </Suspense>
+                                </div>
+                            </NotificationProvider>
+                        </SnackbarProvider>
+                    </AuthProvider>
+                </ThemeProvider>
+            </QueryClientProvider>
+        </ErrorBoundary>
     )
 }
 

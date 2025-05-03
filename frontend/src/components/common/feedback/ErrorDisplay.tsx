@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import Button from '../buttons/Button'
 
 interface ErrorDisplayProps {
     title?: string
-    message: string
+    message: ReactNode
     onRetry?: () => void
     icon?: React.ReactNode
     className?: string
@@ -47,7 +47,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                             {displayIcon}
                         </div>
                         <h2 className="text-lg font-medium text-gray-900 mb-2">{title}</h2>
-                        <p className="text-gray-500 mb-6">{message}</p>
+                        <div className="text-gray-500 mb-6">{message}</div>
                         {onRetry && (
                             <Button variant="primary" onClick={onRetry}>
                                 Try Again
@@ -66,7 +66,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                         </div>
                         <div className="ml-3">
                             <h3 className="text-sm font-medium text-red-800">{title}</h3>
-                            <p className="text-sm text-red-700 mt-1">{message}</p>
+                            <div className="text-sm text-red-700 mt-1">{message}</div>
                             {onRetry && (
                                 <div className="mt-3">
                                     <Button size="sm" variant="outline" onClick={onRetry}>
@@ -88,7 +88,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                     </div>
                     <div>
                         <p className="font-medium">{title}</p>
-                        <p className="text-sm">{message}</p>
+                        <div className="text-sm">{message}</div>
                         {onRetry && (
                             <button
                                 onClick={onRetry}
