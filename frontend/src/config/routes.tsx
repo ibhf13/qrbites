@@ -8,6 +8,8 @@ const RegisterPage = lazy(() => import('../Pages/RegisterPage'))
 const NotFoundPage = lazy(() => import('../Pages/NotFoundPage'))
 const ProfilePage = lazy(() => import('../Pages/ProfilePage'))
 const RestaurantDashboardPage = lazy(() => import('../Pages/RestaurantDashboardPage'))
+const DesignSystem = lazy(() => import('../Pages/DesignSystem'))
+const DesignSystemDemo = lazy(() => import('../Pages/DesignSystemDemo'))
 
 // Home page as a placeholder for now
 const HomePage = () => (
@@ -65,6 +67,14 @@ export const routes: RouteObject[] = [
     {
         path: '/register',
         element: <RegisterPage />,
+    },
+    {
+        path: '/design-system',
+        element: <DesignSystem />,
+    },
+    {
+        path: '/design-system-demo',
+        element: <DesignSystemDemo />,
     },
 
     // Auth routes - require authentication

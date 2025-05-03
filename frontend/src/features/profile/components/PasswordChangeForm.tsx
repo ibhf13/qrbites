@@ -1,3 +1,4 @@
+import { Button, ErrorDisplay, FormInput } from '@/components/common'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -40,60 +41,46 @@ const PasswordChangeForm: React.FC = () => {
         })
     }
 
+    // Format error message for display
+    const getErrorMessage = () => {
+        if (typeof passwordChangeError === 'object' && passwordChangeError !== null && 'error' in passwordChangeError &&
+            typeof passwordChangeError.error === 'object' && passwordChangeError.error !== null && 'message' in passwordChangeError.error) {
+            return String(passwordChangeError.error.message)
+        }
+        return 'Failed to change password. Please try again.'
+    }
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
-                    Current Password
-                </label>
-                <input
-                    id="currentPassword"
-                    type="password"
-                    {...register('currentPassword')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-                {errors.currentPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.currentPassword.message}</p>
-                )}
-            </div>
+            <FormInput
+                label="Current Password"
+                id="currentPassword"
+                type="password"
+                error={errors.currentPassword?.message}
+                {...register('currentPassword')}
+            />
 
-            <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-                    New Password
-                </label>
-                <input
-                    id="newPassword"
-                    type="password"
-                    {...register('newPassword')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-                {errors.newPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.newPassword.message}</p>
-                )}
-            </div>
+            <FormInput
+                label="New Password"
+                id="newPassword"
+                type="password"
+                error={errors.newPassword?.message}
+                {...register('newPassword')}
+            />
 
-            <div>
-                <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700">
-                    Confirm New Password
-                </label>
-                <input
-                    id="confirmNewPassword"
-                    type="password"
-                    {...register('confirmNewPassword')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-                {errors.confirmNewPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.confirmNewPassword.message}</p>
-                )}
-            </div>
+            <FormInput
+                label="Confirm New Password"
+                id="confirmNewPassword"
+                type="password"
+                error={errors.confirmNewPassword?.message}
+                {...register('confirmNewPassword')}
+            />
 
             {passwordChangeError && (
-                <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
-                    {typeof passwordChangeError === 'object' && passwordChangeError !== null && 'error' in passwordChangeError &&
-                        typeof passwordChangeError.error === 'object' && passwordChangeError.error !== null && 'message' in passwordChangeError.error
-                        ? String(passwordChangeError.error.message)
-                        : 'Failed to change password. Please try again.'}
-                </div>
+                <ErrorDisplay
+                    variant="banner"
+                    message={getErrorMessage()}
+                />
             )}
 
             {successMessage && (
@@ -103,13 +90,13 @@ const PasswordChangeForm: React.FC = () => {
             )}
 
             <div className="flex justify-end">
-                <button
+                <Button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    isLoading={isChangingPassword}
                 >
-                    {isChangingPassword ? 'Changing Password...' : 'Change Password'}
-                </button>
+                    Change Password
+                </Button>
             </div>
         </form>
     )

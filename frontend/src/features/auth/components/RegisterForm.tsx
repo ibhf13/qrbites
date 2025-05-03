@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
+import { Button, Card, ErrorDisplay, FormInput } from '@/components/common'
 import { useNotification } from '@/hooks/useNotification'
 import { useRegister } from '../hooks/useRegister'
 import { RegisterFormData } from '../types/auth.types'
@@ -50,78 +51,59 @@ const RegisterForm: React.FC = () => {
     }
 
     return (
-        <div className="max-w-md w-full mx-auto bg-white p-8 rounded-lg shadow-md">
+        <Card className="max-w-md w-full mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Create an Account</h2>
 
             {serverError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-md">
-                    <span className="font-medium">Error: </span>{serverError}
-                </div>
+                <ErrorDisplay
+                    message={serverError}
+                    variant="banner"
+                    className="mb-4"
+                />
             )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email Address
-                    </label>
-                    <input
-                        id="email"
-                        type="email"
-                        {...register('email')}
-                        className="input-field mt-1"
-                        placeholder="you@example.com"
-                        disabled={isSubmitting || isLoading}
-                    />
-                    {errors.email && (
-                        <p className="error-text">{errors.email.message}</p>
-                    )}
-                </div>
+                <FormInput
+                    label="Email Address"
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    disabled={isSubmitting || isLoading}
+                    error={errors.email?.message}
+                    {...register('email')}
+                />
+
+                <FormInput
+                    label="Password"
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    disabled={isSubmitting || isLoading}
+                    error={errors.password?.message}
+                    {...register('password')}
+                />
 
                 <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Password
-                    </label>
-                    <input
-                        id="password"
-                        type="password"
-                        {...register('password')}
-                        className="input-field mt-1"
-                        placeholder="••••••••"
-                        disabled={isSubmitting || isLoading}
-                    />
-                    {errors.password && (
-                        <p className="error-text">{errors.password.message}</p>
-                    )}
-                </div>
-
-                <div>
-                    <button
+                    <Button
                         type="submit"
-                        className="btn-primary w-full flex justify-center"
+                        isFullWidth
+                        isLoading={isSubmitting || isLoading}
                         disabled={isSubmitting || isLoading}
                     >
-                        {(isSubmitting || isLoading) ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Creating Account...
-                            </>
-                        ) : 'Register'}
-                    </button>
+                        Register
+                    </Button>
                 </div>
             </form>
 
             <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                     Already have an account?{' '}
-                    <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+                    <a href="/login" className="font-medium text-primary-600 hover:text-primary-500">
                         Log in
                     </a>
                 </p>
             </div>
-        </div>
+        </Card>
     )
 }
 

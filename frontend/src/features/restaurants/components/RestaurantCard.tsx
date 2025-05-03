@@ -1,3 +1,4 @@
+import { Button, Card } from '@/components/common'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Restaurant } from '../types'
@@ -16,7 +17,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
     const formattedDate = new Date(created).toLocaleDateString()
 
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <Card className="hover:shadow-lg transition-shadow duration-300" noPadding>
             <div className="p-5">
                 <div className="flex items-center mb-4">
                     {logoUrl ? (
@@ -46,15 +47,17 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) =>
                     <span>Created: {formattedDate}</span>
                 </div>
 
-                <div className="mt-4 flex space-x-2">
+                <div className="mt-4">
                     <Link
                         to={`/restaurants/${_id}`}
-                        className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded transition-colors w-full text-center"
+                        className="w-full"
                     >
-                        Manage
+                        <Button isFullWidth>
+                            Manage
+                        </Button>
                     </Link>
                 </div>
             </div>
-        </div>
+        </Card>
     )
 } 

@@ -1,3 +1,4 @@
+import { Button, ErrorDisplay } from '@/components/common'
 import React, { useCallback, useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useProfileData } from '../hooks/useProfileData'
@@ -144,15 +145,22 @@ const AvatarUpload: React.FC = () => {
                     />
                     <label
                         htmlFor="avatar-upload"
-                        className="cursor-pointer px-4 py-2 bg-primary-600 text-white rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        className="cursor-pointer"
                     >
-                        {isUploadingAvatar ? 'Uploading...' : 'Select Image'}
+                        <Button
+                            isLoading={isUploadingAvatar}
+                            className="cursor-pointer"
+                        >
+                            Select Image
+                        </Button>
                     </label>
 
                     {avatarUploadError && (
-                        <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200 mt-4">
-                            Failed to upload avatar. Please try again.
-                        </div>
+                        <ErrorDisplay
+                            variant="banner"
+                            message="Failed to upload avatar. Please try again."
+                            className="mt-4"
+                        />
                     )}
                 </div>
             ) : (
@@ -185,21 +193,21 @@ const AvatarUpload: React.FC = () => {
                     </div>
 
                     <div className="flex space-x-4 mt-4">
-                        <button
+                        <Button
                             type="button"
+                            variant="outline"
                             onClick={cancelCrop}
-                            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="button"
                             onClick={uploadCroppedImage}
                             disabled={isUploadingAvatar}
-                            className="px-4 py-2 bg-primary-600 text-white rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            isLoading={isUploadingAvatar}
                         >
-                            {isUploadingAvatar ? 'Uploading...' : 'Upload Avatar'}
-                        </button>
+                            Upload Avatar
+                        </Button>
                     </div>
                 </div>
             )}

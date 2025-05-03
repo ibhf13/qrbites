@@ -1,3 +1,4 @@
+import { Button, ErrorDisplay, FormInput } from '@/components/common'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -45,69 +46,56 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
         updateProfile(data)
     }
 
+    // Format error message for display
+    const getErrorMessage = () => {
+        if (typeof updateError === 'object' && updateError !== null && 'error' in updateError &&
+            typeof updateError.error === 'object' && updateError.error !== null && 'message' in updateError.error) {
+            return String(updateError.error.message)
+        }
+        return 'Failed to update profile. Please try again.'
+    }
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                    First Name
-                </label>
-                <input
-                    id="firstName"
-                    type="text"
-                    {...register('firstName')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-                {errors.firstName && (
-                    <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
-                )}
-            </div>
+            <FormInput
+                label="First Name"
+                id="firstName"
+                type="text"
+                error={errors.firstName?.message}
+                {...register('firstName')}
+            />
 
-            <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                    Last Name
-                </label>
-                <input
-                    id="lastName"
-                    type="text"
-                    {...register('lastName')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-                {errors.lastName && (
-                    <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
-                )}
-            </div>
+            <FormInput
+                label="Last Name"
+                id="lastName"
+                type="text"
+                error={errors.lastName?.message}
+                {...register('lastName')}
+            />
 
-            <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
-                    Phone Number
-                </label>
-                <input
-                    id="phoneNumber"
-                    type="tel"
-                    {...register('phoneNumber')}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                />
-                {errors.phoneNumber && (
-                    <p className="mt-1 text-sm text-red-600">{errors.phoneNumber.message}</p>
-                )}
-            </div>
+            <FormInput
+                label="Phone Number"
+                id="phoneNumber"
+                type="tel"
+                error={errors.phoneNumber?.message}
+                {...register('phoneNumber')}
+            />
 
             {updateError && (
-                <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
-                    {typeof updateError === 'object' && updateError !== null && 'error' in updateError && typeof updateError.error === 'object' && updateError.error !== null && 'message' in updateError.error
-                        ? String(updateError.error.message)
-                        : 'Failed to update profile. Please try again.'}
-                </div>
+                <ErrorDisplay
+                    variant="banner"
+                    message={getErrorMessage()}
+                />
             )}
 
             <div className="flex justify-end">
-                <button
+                <Button
                     type="submit"
                     disabled={!isDirty || isUpdating}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    isLoading={isUpdating}
                 >
-                    {isUpdating ? 'Saving...' : 'Save Changes'}
-                </button>
+                    Save Changes
+                </Button>
             </div>
         </form>
     )

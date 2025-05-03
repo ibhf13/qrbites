@@ -1,3 +1,4 @@
+import { Button, FormInput } from '@/components/common'
 import React, { useState } from 'react'
 import { RestaurantListRequest } from '../types'
 
@@ -20,39 +21,39 @@ export const RestaurantSearch: React.FC<RestaurantSearchProps> = ({
         onSearch({ name: searchTerm })
     }
 
+    const searchIcon = (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+        </svg>
+    )
+
     return (
         <form onSubmit={handleSubmit} className="w-full">
-            <div className="relative">
-                <input
-                    type="text"
-                    placeholder="Search restaurants..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-3 pl-10 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    aria-label="Search restaurants"
-                />
-                <div className="absolute left-3 top-3.5 text-neutral-400">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
+            <div className="flex">
+                <div className="flex-grow mr-2">
+                    <FormInput
+                        placeholder="Search restaurants..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        leftIcon={searchIcon}
+                        aria-label="Search restaurants"
+                        containerClassName="mb-0"
+                    />
                 </div>
-                <button
-                    type="submit"
-                    className="absolute right-2 top-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-1 rounded-md transition-colors"
-                >
+                <Button type="submit" variant="primary">
                     Search
-                </button>
+                </Button>
             </div>
         </form>
     )
