@@ -25,12 +25,12 @@
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
+      "@features/*": ["src/features/*"],
       "@pages/*": ["src/pages/*"],
       "@api/*": ["src/api/*"],
       "@hooks/*": ["src/hooks/*"],
       "@utils/*": ["src/utils/*"],
-      "@store/*": ["src/store/*"],
-      "@types/*": ["src/types/*"]
+      "@types/*": ["src/types/*"],
     }
   },
   "include": ["src"],
