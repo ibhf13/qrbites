@@ -7,6 +7,7 @@ const LoginPage = lazy(() => import('../Pages/LoginPage'))
 const RegisterPage = lazy(() => import('../Pages/RegisterPage'))
 const NotFoundPage = lazy(() => import('../Pages/NotFoundPage'))
 const ProfilePage = lazy(() => import('../Pages/ProfilePage'))
+const RestaurantDashboardPage = lazy(() => import('../Pages/RestaurantDashboardPage'))
 
 // Home page as a placeholder for now
 const HomePage = () => (
@@ -33,7 +34,14 @@ const HomePage = () => (
             </Link>
         </div>
 
-
+        <div className="mt-8">
+            <Link
+                to="/restaurants"
+                className="text-primary-600 hover:text-primary-700 font-medium"
+            >
+                Manage Your Restaurants →
+            </Link>
+        </div>
     </div>
 )
 
@@ -63,6 +71,10 @@ export const routes: RouteObject[] = [
     {
         path: '/profile',
         element: <ProtectedRoute><ProfilePage /></ProtectedRoute>,
+    },
+    {
+        path: '/restaurants',
+        element: <ProtectedRoute><RestaurantDashboardPage /></ProtectedRoute>,
     },
 
     // 404 route - always keep this last
