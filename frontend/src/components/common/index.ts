@@ -24,8 +24,12 @@ export { default as Card } from './layout/Card'
 export type { CardProps } from './layout/Card'
 export { Col, Container, Row } from './layout/Grid'
 export type { ColProps, ContainerProps, RowProps } from './layout/Grid'
+export { default as Header } from './layout/Header'
+export { default as MainLayout } from './layout/MainLayout'
+export { default as Sidebar } from './layout/Sidebar'
 export { default as Typography } from './layout/Typography'
 export type { TypographyProps } from './layout/Typography'
+export { default as UserMenu } from './layout/UserMenu'
 
 // Feedback component exports
 export { default as Badge } from './feedback/Badge'
@@ -36,4 +40,10 @@ export { default as NetworkStatusIndicator } from './feedback/NetworkStatusIndic
 export { default as NotificationHistory } from './feedback/NotificationHistory'
 export { default as Skeleton } from './feedback/Skeleton'
 export type { SkeletonProps, SkeletonVariant } from './feedback/Skeleton'
+
+export * from './feedback'
+export * from './layout'
+export * from './navigation'
+
+// Add other common component exports here
 

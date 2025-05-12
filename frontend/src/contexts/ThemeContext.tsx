@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 type Theme = 'light' | 'dark'
 
@@ -9,20 +9,20 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // Check if user has previously set a theme preference
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [theme, setTheme] = useState<Theme>(() => {
-        // Check for saved theme in localStorage
+        // Check if theme is saved in localStorage
         const savedTheme = localStorage.getItem('theme')
-        if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-            return savedTheme
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+            return savedTheme as Theme
         }
 
-        // Check system preference
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        // Check if user prefers dark mode
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        return prefersDark ? 'dark' : 'light'
     })
 
-    // Update the DOM when theme changes
+    // Update the HTML element class when theme changes
     useEffect(() => {
         const root = window.document.documentElement
 
@@ -32,12 +32,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             root.classList.remove('dark')
         }
 
-        // Save preference to localStorage
+        // Save to localStorage
         localStorage.setItem('theme', theme)
     }, [theme])
 
     const toggleTheme = () => {
-        setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
+        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'))
     }
 
     return (
@@ -47,10 +47,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     )
 }
 
+// Hook for consuming the theme context
 export const useTheme = (): ThemeContextType => {
     const context = useContext(ThemeContext)
+
     if (context === undefined) {
         throw new Error('useTheme must be used within a ThemeProvider')
     }
+
     return context
-} 
+}
+
+export default useTheme 

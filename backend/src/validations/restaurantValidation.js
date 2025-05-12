@@ -29,10 +29,10 @@ const restaurantSchema = Joi.object({
             'array.base': 'Cuisine type must be an array'
         }),
 
-    address: Joi.object({
-        street: Joi.string().required().messages({
-            'string.base': 'Street must be a text',
-            'any.required': 'Street is required'
+    location: Joi.object({
+        address: Joi.string().required().messages({
+            'string.base': 'Address must be a text',
+            'any.required': 'Address is required'
         }),
         city: Joi.string().required().messages({
             'string.base': 'City must be a text',
@@ -50,7 +50,10 @@ const restaurantSchema = Joi.object({
             'string.base': 'Country must be a text',
             'any.required': 'Country is required'
         })
-    }).optional(),
+    }).required().messages({
+        'object.base': 'Location information is required',
+        'any.required': 'Location information is required'
+    }),
 
     contact: Joi.object({
         phone: Joi.string().required().messages({
@@ -65,18 +68,35 @@ const restaurantSchema = Joi.object({
             'string.base': 'Website must be a text',
             'string.uri': 'Please provide a valid URL'
         })
-    }).optional(),
+    }).required().messages({
+        'object.base': 'Contact information is required',
+        'any.required': 'Contact information is required'
+    }),
 
-    operatingHours: Joi.array()
+    hours: Joi.array()
         .items(
             Joi.object({
-                day: Joi.string().required(),
-                open: Joi.string().required(),
-                close: Joi.string().required(),
-                isClosed: Joi.boolean().default(false)
+                day: Joi.number().min(0).max(6).required(),
+                closed: Joi.boolean().required(),
+                open: Joi.string().when('closed', {
+                    is: false,
+                    then: Joi.required(),
+                    otherwise: Joi.optional()
+                }),
+                close: Joi.string().when('closed', {
+                    is: false,
+                    then: Joi.required(),
+                    otherwise: Joi.optional()
+                })
             })
         )
-        .optional(),
+        .length(7)
+        .required()
+        .messages({
+            'array.base': 'Business hours must be an array',
+            'array.length': 'Business hours must include all 7 days',
+            'any.required': 'Business hours are required'
+        }),
 
     isActive: Joi.boolean()
         .optional()
@@ -113,8 +133,8 @@ const restaurantUpdateSchema = Joi.object({
             'array.base': 'Cuisine type must be an array'
         }),
 
-    address: Joi.object({
-        street: Joi.string().optional(),
+    location: Joi.object({
+        address: Joi.string().optional(),
         city: Joi.string().optional(),
         state: Joi.string().optional(),
         zipCode: Joi.string().optional(),
@@ -131,15 +151,24 @@ const restaurantUpdateSchema = Joi.object({
         })
     }).optional(),
 
-    operatingHours: Joi.array()
+    hours: Joi.array()
         .items(
             Joi.object({
-                day: Joi.string().required(),
-                open: Joi.string().required(),
-                close: Joi.string().required(),
-                isClosed: Joi.boolean().default(false)
+                day: Joi.number().min(0).max(6).required(),
+                closed: Joi.boolean().required(),
+                open: Joi.string().when('closed', {
+                    is: false,
+                    then: Joi.required(),
+                    otherwise: Joi.optional()
+                }),
+                close: Joi.string().when('closed', {
+                    is: false,
+                    then: Joi.required(),
+                    otherwise: Joi.optional()
+                })
             })
         )
+        .length(7)
         .optional(),
 
     isActive: Joi.boolean()

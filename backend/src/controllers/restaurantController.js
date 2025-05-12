@@ -96,16 +96,31 @@ const getRestaurantById = asyncHandler(async (req, res) => {
  */
 const createRestaurant = asyncHandler(async (req, res) => {
   try {
+    // Parse the restaurant data from formData
+    let restaurantData
+
+    // Check if data was sent as JSON string
+    if (req.body.data) {
+      try {
+        restaurantData = JSON.parse(req.body.data)
+      } catch (err) {
+        throw badRequest('Invalid restaurant data format')
+      }
+    } else {
+      // Fallback to regular request body (for backwards compatibility)
+      restaurantData = req.body
+    }
+
     // Add user ID from authenticated user
-    req.body.userId = req.user._id
+    restaurantData.userId = req.user._id
 
     // Add logo URL if file was uploaded
     if (req.file) {
-      req.body.logoUrl = getFileUrl(req.file.filename, 'restaurant')
+      restaurantData.logoUrl = getFileUrl(req.file.filename, 'restaurant')
     }
 
     // Create restaurant
-    const restaurant = await Restaurant.create(req.body)
+    const restaurant = await Restaurant.create(restaurantData)
 
     logger.success(`Restaurant created: ${restaurant.name} by user ${req.user._id}`)
 
@@ -128,6 +143,21 @@ const updateRestaurant = asyncHandler(async (req, res) => {
   const { id } = req.params
 
   try {
+    // Parse the restaurant data from formData
+    let restaurantData
+
+    // Check if data was sent as JSON string
+    if (req.body.data) {
+      try {
+        restaurantData = JSON.parse(req.body.data)
+      } catch (err) {
+        throw badRequest('Invalid restaurant data format')
+      }
+    } else {
+      // Fallback to regular request body (for backwards compatibility)
+      restaurantData = req.body
+    }
+
     // Find restaurant
     const restaurant = await Restaurant.findById(id)
 
@@ -142,13 +172,13 @@ const updateRestaurant = asyncHandler(async (req, res) => {
 
     // Add logo URL if file was uploaded
     if (req.file) {
-      req.body.logoUrl = getFileUrl(req.file.filename, 'restaurant')
+      restaurantData.logoUrl = getFileUrl(req.file.filename, 'restaurant')
     }
 
     // Update restaurant
     const updatedRestaurant = await Restaurant.findByIdAndUpdate(
       id,
-      req.body,
+      restaurantData,
       { new: true, runValidators: true }
     )
 

@@ -1,5 +1,6 @@
 export interface UserInfoResponse {
     success: boolean
+    error?: string
     data: {
         _id: string
         email: string
@@ -8,6 +9,10 @@ export interface UserInfoResponse {
             firstName?: string
             lastName?: string
             phoneNumber?: string
+        }
+        stats?: {
+            restaurantCount: number
+            menuCount: number
         }
     }
 }

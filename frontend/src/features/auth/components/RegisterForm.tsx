@@ -3,11 +3,12 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { Button, Card, ErrorDisplay, FormInput } from '@/components/common'
+import { Button, FormInput } from '@/components/common'
 import { useNotificationContext } from '@/contexts/NotificationContext'
 import { useRegister } from '../hooks/useRegister'
 import { RegisterFormData } from '../types/auth.types'
 import { registerSchema } from '../validations/register.validation'
+import AuthCard from './AuthCard'
 
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate()
@@ -51,18 +52,21 @@ const RegisterForm: React.FC = () => {
         }
     }
 
+    const footerContent = (
+        <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <a href="/login" className="font-medium text-primary-600 hover:text-primary-500">
+                Log in
+            </a>
+        </p>
+    )
+
     return (
-        <Card className="max-w-md w-full mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Create an Account</h2>
-
-            {serverError && (
-                <ErrorDisplay
-                    message={serverError}
-                    variant="banner"
-                    className="mb-4"
-                />
-            )}
-
+        <AuthCard
+            title="Create an Account"
+            error={serverError}
+            footerContent={footerContent}
+        >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <FormInput
                     label="Email Address"
@@ -95,16 +99,7 @@ const RegisterForm: React.FC = () => {
                     </Button>
                 </div>
             </form>
-
-            <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
-                    Already have an account?{' '}
-                    <a href="/login" className="font-medium text-primary-600 hover:text-primary-500">
-                        Log in
-                    </a>
-                </p>
-            </div>
-        </Card>
+        </AuthCard>
     )
 }
 

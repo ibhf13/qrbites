@@ -56,6 +56,16 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         }
     }
 
+    const dismissNotification = useCallback((id: string) => {
+        setNotifications((prev) => prev.filter((notification) => notification.id !== id))
+        closeSnackbar(id)
+    }, [closeSnackbar])
+
+    const clearAllNotifications = useCallback(() => {
+        setNotifications([])
+        closeSnackbar()
+    }, [closeSnackbar])
+
     const showNotification = useCallback((options: NotificationOptions): string => {
         const id = Math.random().toString(36).substring(2, 11)
         const newNotification: Notification = {
@@ -69,13 +79,16 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         enqueueSnackbar(options.message, {
             key: id,
             variant: options.type as VariantType,
-            autoHideDuration: options.duration || 5000,
+            autoHideDuration: options.duration || 3000,
             anchorOrigin: mapPositionToNotistack(options.position),
             preventDuplicate: true,
-            onClose: () => {
-                dismissNotification(id)
-                if (options.onDismiss) {
-                    options.onDismiss()
+            persist: false,
+            onClose: (_, reason) => {
+                if (reason !== 'instructed') {
+                    dismissNotification(id)
+                    if (options.onDismiss) {
+                        options.onDismiss()
+                    }
                 }
             },
             action: options.actions
@@ -99,7 +112,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         })
 
         return id
-    }, [enqueueSnackbar, closeSnackbar])
+    }, [enqueueSnackbar, closeSnackbar, dismissNotification])
 
     const showSuccess = useCallback((message: string, options?: Omit<NotificationOptions, 'type' | 'message'>): string => {
         return showNotification({ type: 'success', message, ...options })
@@ -116,16 +129,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     const showInfo = useCallback((message: string, options?: Omit<NotificationOptions, 'type' | 'message'>): string => {
         return showNotification({ type: 'info', message, ...options })
     }, [showNotification])
-
-    const dismissNotification = useCallback((id: string) => {
-        setNotifications((prev) => prev.filter((notification) => notification.id !== id))
-        closeSnackbar(id)
-    }, [closeSnackbar])
-
-    const clearAllNotifications = useCallback(() => {
-        setNotifications([])
-        closeSnackbar()
-    }, [closeSnackbar])
 
     return (
         <NotificationContext.Provider

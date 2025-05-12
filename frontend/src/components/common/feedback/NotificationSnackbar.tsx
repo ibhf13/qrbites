@@ -60,7 +60,7 @@ export const NotificationSnackbar = forwardRef<HTMLDivElement, NotificationProps
 
     const handleClose = () => {
         if (onClose) {
-            onClose(id, 'click')
+            onClose(id, 'clickCloseIcon')
         }
     }
 
@@ -81,6 +81,7 @@ export const NotificationSnackbar = forwardRef<HTMLDivElement, NotificationProps
                     type="button"
                     onClick={handleClose}
                     className="inline-flex text-white hover:text-gray-200 focus:outline-none"
+                    aria-label="Close notification"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

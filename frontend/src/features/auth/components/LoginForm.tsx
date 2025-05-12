@@ -3,12 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { Button, Card, ErrorDisplay, FormInput } from '@/components/common'
+import { Button, FormInput } from '@/components/common'
 import env from '@/config/env'
 import { useNotificationContext } from '@/contexts/NotificationContext'
 import { useLogin } from '../hooks/useLogin'
 import { LoginFormData } from '../types/auth.types'
 import { loginSchema } from '../validations/login.validation'
+import AuthCard from './AuthCard'
 
 const LoginForm: React.FC = () => {
     const navigate = useNavigate()
@@ -44,7 +45,7 @@ const LoginForm: React.FC = () => {
             const success = await login(data)
             if (success) {
                 showSuccess('Login successful!')
-                navigate('/dashboard') // Redirect to dashboard after login
+                navigate('/dashboard')
                 reset()
             }
         } catch (error) {
@@ -68,18 +69,28 @@ const LoginForm: React.FC = () => {
         onSubmit(demoCredentials)
     }
 
+    const footerContent = (
+        <>
+            <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <a href="/register" className="font-medium text-primary-600 hover:text-primary-500">
+                    Sign up
+                </a>
+            </p>
+            <p className="text-sm text-gray-600 mt-2">
+                <a href="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
+                    Forgot your password?
+                </a>
+            </p>
+        </>
+    )
+
     return (
-        <Card className="max-w-md w-full mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Log In</h2>
-
-            {serverError && (
-                <ErrorDisplay
-                    message={serverError}
-                    variant="banner"
-                    className="mb-4"
-                />
-            )}
-
+        <AuthCard
+            title="Log In"
+            error={serverError}
+            footerContent={footerContent}
+        >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <FormInput
                     label="Email Address"
@@ -137,21 +148,7 @@ const LoginForm: React.FC = () => {
                     </Button>
                 </div>
             </form>
-
-            <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
-                    Don't have an account?{' '}
-                    <a href="/register" className="font-medium text-primary-600 hover:text-primary-500">
-                        Sign up
-                    </a>
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                    <a href="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
-                        Forgot your password?
-                    </a>
-                </p>
-            </div>
-        </Card>
+        </AuthCard>
     )
 }
 

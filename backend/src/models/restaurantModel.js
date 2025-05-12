@@ -124,7 +124,7 @@ const restaurantSchema = new Schema({
     type: [hoursSchema],
     default: []
   },
-  logo: {
+  logoUrl: {
     type: String,
     default: null
   },

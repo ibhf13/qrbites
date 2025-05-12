@@ -30,12 +30,39 @@ app.use(express.urlencoded({ extended: true }))
 // app.use(express.static(path.join(process.cwd(), 'public')))
 
 // Security middleware
-app.use(helmet())
-app.use(cors())
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' } // Allow cross-origin resource sharing
+}))
+
+// Configure CORS for all routes
+app.use(cors({
+  origin: ['http://localhost:3000', '*'], // Add your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  exposedHeaders: ['Content-Length', 'X-Requested-With', 'Content-Type', 'Accept']
+}))
 
 // Logging middleware
 app.use(morgan('dev'))
 app.use(loggerMiddleware)
+
+// Add CORS headers for static files before serving them
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  next()
+})
+
+// Also handle potential /restaurants/ path for images
+app.use('/restaurants', (req, res, next) => {
+  if (req.url.includes('.jpg') || req.url.includes('.png') || req.url.includes('.webp') || req.url.includes('.gif')) {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  }
+  next()
+})
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
