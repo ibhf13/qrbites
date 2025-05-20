@@ -1,10 +1,8 @@
-// Register module aliases
 require('module-alias/register')
 require('dotenv').config()
 const mongoose = require('mongoose')
 const app = require('./app')
 
-// MongoDB connection
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI)
@@ -15,8 +13,7 @@ const connectDB = async () => {
   }
 }
 
-// Start server
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 5000
 const startServer = async () => {
   try {
     await connectDB()

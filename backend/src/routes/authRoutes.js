@@ -16,11 +16,9 @@ const { authLimiter, createUserLimiter } = require('@middlewares/rateLimitMiddle
 
 const router = express.Router()
 
-// Public routes with rate limiting
 router.post('/register', createUserLimiter, validateRequest(registerSchema), register)
 router.post('/login', authLimiter, validateRequest(loginSchema), login)
 
-// Protected routes
 router.get('/me', protect, getMe)
 router.put('/password', protect, validateRequest(changePasswordSchema), changePassword)
 

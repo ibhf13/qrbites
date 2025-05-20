@@ -17,13 +17,15 @@ QrBites is a platform that transforms photos of restaurant menus into digital me
 - **Formatting:** Prettier
 
 Install core dependencies with:
+
 ```bash
 npm install
 ```
 
 Install development dependencies with:
+
 ```bash
-npm install --save-dev 
+npm install --save-dev
 ```
 
 ---
@@ -58,10 +60,11 @@ const [count, setCount] = useState(0); // Type inferred as number
   - Use composition over inheritance
 
 - **Custom Hooks:** Extract reusable logic into custom hooks
+
   ```tsx
   // Example custom hook
   const useMenuData = (restaurantId: string) => {
-    return useQuery(['menu', restaurantId], () => 
+    return useQuery(['menu', restaurantId], () =>
       fetchMenu(restaurantId)
     );
   };
@@ -84,15 +87,15 @@ const [count, setCount] = useState(0); // Type inferred as number
 // Example of proper error handling in async operations
 const MenuLoader: React.FC<{ restaurantId: string }> = ({ restaurantId }) => {
   const { data, error, isLoading } = useMenuData(restaurantId);
-  
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
-  
+
   if (error) {
     return <ErrorDisplay message="Failed to load menu. Please try again." />;
   }
-  
+
   return <MenuDisplay items={data} />;
 };
 ```
@@ -199,12 +202,14 @@ describe('MenuItem', () => {
 ## 5. Performance & Accessibility
 
 ### Performance Requirements
+
 - First Contentful Paint: < 1.5s
 - Time to Interactive: < 3s
 - Optimize images and lazy-load off-screen content
 - Implement code splitting for routes and large components
 
 ### Accessibility Standards
+
 - Follow WCAG 2.1 AA standards
 - Ensure proper heading hierarchy
 - Use semantic HTML elements
@@ -217,12 +222,14 @@ describe('MenuItem', () => {
 ## 6. Git & Development Workflow
 
 ### Branching Strategy
+
 - `main` - Production branch
 - `develop` - Development branch
 - `feature/[feature-name]` - Feature branches
 - `bugfix/[bug-description]` - Bug fix branches
 
 ### Commit Message Format
+
 ```
 type(scope): short description
 
@@ -233,6 +240,7 @@ Types: feat, fix, docs, style, refactor, test, chore
 Example: `feat(menu): add filter for dietary restrictions`
 
 ### Pull Request Process
+
 1. Create PR from feature branch to develop
 2. Ensure all tests pass
 3. Get at least one code review
@@ -254,4 +262,3 @@ Example: `feat(menu): add filter for dietary restrictions`
 // Accessing environment variables
 const apiUrl = process.env.REACT_APP_API_URL;
 ```
-

@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { Button, FormInput } from '@/components/common'
-import { useNotificationContext } from '@/contexts/NotificationContext'
-import { useRegister } from '../hooks/useRegister'
+import { Button, FormInput, Typography } from '@/components/common'
+import { useNotificationActions } from '@/features/notifications'
+import { useRegisterAction } from '../hooks/useAuthActions'
 import { RegisterFormData } from '../types/auth.types'
 import { registerSchema } from '../validations/register.validation'
 import AuthCard from './AuthCard'
@@ -13,11 +13,10 @@ import AuthCard from './AuthCard'
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate()
     const [serverError, setServerError] = useState<string | null>(null)
-    const { showSuccess, showError } = useNotificationContext()
-    const { register: registerUser, isLoading, error, clearError } = useRegister()
+    const { showSuccess } = useNotificationActions()
+    const { register: registerUser, isLoading, error, clearError } = useRegisterAction()
 
-    // Clear server error when auth context error changes
-    React.useEffect(() => {
+    useEffect(() => {
         setServerError(error)
     }, [error])
 
@@ -38,27 +37,25 @@ const RegisterForm: React.FC = () => {
         setServerError(null)
         clearError()
 
-        try {
-            const success = await registerUser(data)
-            if (success) {
-                showSuccess('Registration successful! You can now log in.')
-                navigate('/login') // Redirect to login after registration
-                reset()
-            }
-        } catch (error) {
-            showError('Registration failed. Please try again.')
-            // Error is already handled by the useRegister hook and displayed via serverError
-            // No need for additional handling here
+        const result = await registerUser(data)
+
+        if (result.success) {
+            showSuccess('Registration successful! You can now log in.')
+            navigate('/login')
+            reset()
         }
     }
 
     const footerContent = (
-        <p className="text-sm text-gray-600">
+        <Typography as="p" variant="body" color="muted" align="center">
             Already have an account?{' '}
-            <a href="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link
+                to="/login"
+                className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+            >
                 Log in
-            </a>
-        </p>
+            </Link>
+        </Typography>
     )
 
     return (
@@ -73,6 +70,7 @@ const RegisterForm: React.FC = () => {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
+                    autoComplete="email"
                     disabled={isSubmitting || isLoading}
                     error={errors.email?.message}
                     {...register('email')}
@@ -83,21 +81,20 @@ const RegisterForm: React.FC = () => {
                     id="password"
                     type="password"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     disabled={isSubmitting || isLoading}
                     error={errors.password?.message}
                     {...register('password')}
                 />
 
-                <div>
-                    <Button
-                        type="submit"
-                        isFullWidth
-                        isLoading={isSubmitting || isLoading}
-                        disabled={isSubmitting || isLoading}
-                    >
-                        Register
-                    </Button>
-                </div>
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={isSubmitting || isLoading}
+                    disabled={isSubmitting || isLoading}
+                >
+                    Register
+                </Button>
             </form>
         </AuthCard>
     )

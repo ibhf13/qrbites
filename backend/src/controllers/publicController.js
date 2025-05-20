@@ -1,8 +1,8 @@
-const asyncHandler = require('@middlewares/asyncHandler')
-const Menu = require('@models/menuModel')
-const Restaurant = require('@models/restaurantModel')
-const MenuItem = require('@models/menuItemModel')
-const { notFound, badRequest } = require('@utils/errorUtils')
+const { asyncHandler, notFound, badRequest } = require('@utils/errorUtils')
+const Menu = require('@models/menu')
+const Restaurant = require('@models/restaurant')
+const MenuItem = require('@models/menuItem')
+const { getCompleteMenuData, processMenuForPublic } = require('@services/menuDataService')
 
 /**
  * Get public restaurant information
@@ -111,36 +111,12 @@ const getPublicMenuItems = asyncHandler(async (req, res) => {
 const getCompletePublicMenu = asyncHandler(async (req, res) => {
     const { menuId } = req.params
 
-    // Find menu by ID
-    const menu = await Menu.findById(menuId)
-        .select('name description imageUrl restaurantId qrCodeUrl')
-        .populate('restaurantId', 'name description logoUrl address contacts')
-
-    if (!menu) {
-        throw notFound('Menu not found')
-    }
-
-    // Get all menu items for this menu (without pagination)
-    const menuItems = await MenuItem.find({ menuId })
-        .select('name description price imageUrl category dietary')
-        .sort({ category: 1, name: 1 })
-
-    // Get distinct categories
-    const categories = await MenuItem.distinct('category', { menuId })
-
-    // Group menu items by category
-    const itemsByCategory = categories.reduce((acc, category) => {
-        acc[category] = menuItems.filter(item => item.category === category)
-        return acc
-    }, {})
+    // Use the menu data service to get complete menu data
+    const completeMenuData = await getCompleteMenuData(menuId)
 
     res.json({
         success: true,
-        data: {
-            menu,
-            categories,
-            itemsByCategory
-        }
+        data: completeMenuData
     })
 })
 

@@ -6,12 +6,11 @@ const restaurantMockEnhanced = {
         _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'),
         name: 'Test Restaurant',
         description: 'A test restaurant for unit testing',
-        address: {
+        location: {
             street: '123 Test St',
+            houseNumber: '123',
             city: 'Test City',
-            state: 'Test State',
             zipCode: '12345',
-            country: 'Test Country'
         },
         phone: '+1234567890',
         email: 'restaurant@test.com',
@@ -21,12 +20,11 @@ const restaurantMockEnhanced = {
         _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439012'),
         name: 'Second Restaurant',
         description: 'Another test restaurant',
-        address: {
+        location: {
             street: '456 Other St',
+            houseNumber: '456',
             city: 'Other City',
-            state: 'Other State',
             zipCode: '54321',
-            country: 'Other Country'
         },
         phone: '+0987654321',
         email: 'other@test.com',

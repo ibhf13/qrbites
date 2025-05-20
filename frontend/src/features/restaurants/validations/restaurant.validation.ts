@@ -8,11 +8,10 @@ export const contactSchema = z.object({
 })
 
 export const locationSchema = z.object({
-    address: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
+    street: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
+    houseNumber: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
     city: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
-    state: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
-    zipCode: z.string().regex(/^[0-9]{5}(-[0-9]{4})?$/, VALIDATION_MESSAGES.INVALID_ZIP),
-    country: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
+    zipCode: z.string().regex(/^[0-9]{5}$/, VALIDATION_MESSAGES.INVALID_ZIP),
 })
 
 export const businessHoursSchema = z.object({
@@ -33,7 +32,8 @@ export const restaurantFormSchema = z.object({
     location: locationSchema,
     hours: z.array(businessHoursSchema)
         .length(7, 'Business hours must include all 7 days'),
-    logo: z.any().optional(), // Will handle file validation separately
+    logo: z.any().optional(),
+    isActive: z.boolean().optional().default(true),
 })
 
 export const validateLogoFile = (file: File | null) => {

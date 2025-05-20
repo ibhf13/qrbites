@@ -1,15 +1,9 @@
 const Joi = require('joi')
-const mongoose = require('mongoose')
+const { validateObjectId, paginationSchema, searchSchema } = require('./commonValidation')
 
-// Schema for validating menu ID parameter
 const menuIdSchema = Joi.object({
     menuId: Joi.string()
-        .custom((value, helpers) => {
-            if (!mongoose.Types.ObjectId.isValid(value)) {
-                return helpers.error('any.invalid')
-            }
-            return value
-        })
+        .custom(validateObjectId)
         .required()
         .messages({
             'any.required': 'Menu ID is required',
@@ -17,15 +11,9 @@ const menuIdSchema = Joi.object({
         })
 })
 
-// Schema for validating restaurant ID parameter
 const restaurantIdSchema = Joi.object({
     restaurantId: Joi.string()
-        .custom((value, helpers) => {
-            if (!mongoose.Types.ObjectId.isValid(value)) {
-                return helpers.error('any.invalid')
-            }
-            return value
-        })
+        .custom(validateObjectId)
         .required()
         .messages({
             'any.required': 'Restaurant ID is required',
@@ -33,13 +21,11 @@ const restaurantIdSchema = Joi.object({
         })
 })
 
-// Schema for validating query parameters for menu items
 const menuItemsQuerySchema = Joi.object({
-    page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(20),
-    category: Joi.string().trim().allow(''),
-    search: Joi.string().trim().allow('')
-})
+    ...paginationSchema,
+    ...searchSchema,
+    category: Joi.string().trim().allow('')
+}).options({ stripUnknown: true })
 
 module.exports = {
     menuIdSchema,

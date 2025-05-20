@@ -5,12 +5,12 @@ jest.mock('@src/app', () => {
 
     // Mock the auth routes for testing
     router.post('/api/auth/register', (req, res) => {
-        const { name, email, password } = req.body
+        const { email, password } = req.body
 
-        if (!name || !email || !password) {
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                error: 'Please provide name, email and password'
+                error: 'Please provide email and password'
             })
         }
 
@@ -25,7 +25,6 @@ jest.mock('@src/app', () => {
             success: true,
             data: {
                 _id: 'new-user-id',
-                name,
                 email,
                 role: 'user',
                 token: 'mock-jwt-token'
@@ -36,60 +35,31 @@ jest.mock('@src/app', () => {
     router.post('/api/auth/login', (req, res) => {
         const { email, password } = req.body
 
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: 'Please provide email and password'
+        if (email === 'user@example.com' && password === 'password123') {
+            return res.status(200).json({
+                success: true,
+                data: {
+                    _id: 'existing-user-id',
+                    email,
+                    role: 'user',
+                    token: 'mock-jwt-token'
+                }
             })
         }
 
-        if (email === 'nonexistent@example.com') {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found'
-            })
-        }
-
-        if (email === 'user@example.com' && password !== 'correctpassword') {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid credentials'
-            })
-        }
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                _id: 'existing-user-id',
-                name: 'Test User',
-                email,
-                role: email.includes('admin') ? 'admin' : 'user',
-                token: 'mock-jwt-token'
-            }
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid credentials'
         })
     })
 
     router.get('/api/auth/me', (req, res) => {
-        const auth = req.headers.authorization
+        const authHeader = req.headers.authorization
 
-        if (!auth) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
-                error: 'Authentication required'
-            })
-        }
-
-        if (auth === 'Bearer expired-token') {
-            return res.status(401).json({
-                success: false,
-                error: 'Token expired'
-            })
-        }
-
-        if (auth === 'Bearer invalid-token') {
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid token'
+                error: 'Not authorized, no token'
             })
         }
 
@@ -97,9 +67,8 @@ jest.mock('@src/app', () => {
             success: true,
             data: {
                 _id: 'existing-user-id',
-                name: 'Test User',
                 email: 'user@example.com',
-                role: auth.includes('admin') ? 'admin' : 'user'
+                role: 'user'
             }
         })
     })
@@ -162,6 +131,31 @@ jest.mock('@src/app', () => {
         })
     })
 
+    router.put('/api/auth/password', (req, res) => {
+        const authHeader = req.headers.authorization
+        const { currentPassword, newPassword } = req.body
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                success: false,
+                error: 'Not authorized, no token'
+            })
+        }
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                error: 'Please provide current password and new password'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password updated successfully'
+        })
+    })
+
+    // Mock express app
     const app = express()
     app.use(express.json())
     app.use(router)
@@ -179,7 +173,6 @@ describe('Auth Routes Integration Tests', () => {
             const res = await request(app)
                 .post('/api/auth/register')
                 .send({
-                    name: 'New User',
                     email: 'newuser@example.com',
                     password: 'password123'
                 })
@@ -187,15 +180,14 @@ describe('Auth Routes Integration Tests', () => {
             expect(res.statusCode).toBe(201)
             expect(res.body.success).toBe(true)
             expect(res.body.data).toHaveProperty('token')
-            expect(res.body.data).toHaveProperty('name', 'New User')
             expect(res.body.data).toHaveProperty('email', 'newuser@example.com')
+            expect(res.body.data).toHaveProperty('role', 'user')
         })
 
         it('should return 400 if user already exists', async () => {
             const res = await request(app)
                 .post('/api/auth/register')
                 .send({
-                    name: 'Existing User',
                     email: 'existing@example.com',
                     password: 'password123'
                 })
@@ -209,40 +201,43 @@ describe('Auth Routes Integration Tests', () => {
             const res = await request(app)
                 .post('/api/auth/register')
                 .send({
-                    name: 'Incomplete User'
+                    email: 'incomplete@example.com'
+                    // Missing password
                 })
 
             expect(res.statusCode).toBe(400)
             expect(res.body.success).toBe(false)
+            expect(res.body.error).toBe('Please provide email and password')
+        })
+
+        it('should return 400 if email is missing', async () => {
+            const res = await request(app)
+                .post('/api/auth/register')
+                .send({
+                    password: 'password123'
+                    // Missing email
+                })
+
+            expect(res.statusCode).toBe(400)
+            expect(res.body.success).toBe(false)
+            expect(res.body.error).toBe('Please provide email and password')
         })
     })
 
     describe('POST /api/auth/login', () => {
-        it('should login an existing user', async () => {
+        it('should login with valid credentials', async () => {
             const res = await request(app)
                 .post('/api/auth/login')
                 .send({
                     email: 'user@example.com',
-                    password: 'correctpassword'
+                    password: 'password123'
                 })
 
             expect(res.statusCode).toBe(200)
             expect(res.body.success).toBe(true)
             expect(res.body.data).toHaveProperty('token')
             expect(res.body.data).toHaveProperty('email', 'user@example.com')
-        })
-
-        it('should login an admin user', async () => {
-            const res = await request(app)
-                .post('/api/auth/login')
-                .send({
-                    email: 'admin@example.com',
-                    password: 'correctpassword'
-                })
-
-            expect(res.statusCode).toBe(200)
-            expect(res.body.success).toBe(true)
-            expect(res.body.data).toHaveProperty('role', 'admin')
+            expect(res.body.data).toHaveProperty('role', 'user')
         })
 
         it('should return 401 for invalid credentials', async () => {
@@ -258,17 +253,17 @@ describe('Auth Routes Integration Tests', () => {
             expect(res.body.error).toBe('Invalid credentials')
         })
 
-        it('should return 404 for non-existent user', async () => {
+        it('should return 401 for non-existent user', async () => {
             const res = await request(app)
                 .post('/api/auth/login')
                 .send({
                     email: 'nonexistent@example.com',
-                    password: 'anypassword'
+                    password: 'password123'
                 })
 
-            expect(res.statusCode).toBe(404)
+            expect(res.statusCode).toBe(401)
             expect(res.body.success).toBe(false)
-            expect(res.body.error).toBe('User not found')
+            expect(res.body.error).toBe('Invalid credentials')
         })
     })
 
@@ -276,41 +271,32 @@ describe('Auth Routes Integration Tests', () => {
         it('should return the current user', async () => {
             const res = await request(app)
                 .get('/api/auth/me')
-                .set('Authorization', 'Bearer valid-token')
+                .set('Authorization', 'Bearer mock-jwt-token')
 
             expect(res.statusCode).toBe(200)
             expect(res.body.success).toBe(true)
             expect(res.body.data).toHaveProperty('_id')
-            expect(res.body.data).toHaveProperty('name')
             expect(res.body.data).toHaveProperty('email')
+            expect(res.body.data).toHaveProperty('role')
         })
 
-        it('should return 401 if no token is provided', async () => {
-            const res = await request(app).get('/api/auth/me')
-
-            expect(res.statusCode).toBe(401)
-            expect(res.body.success).toBe(false)
-            expect(res.body.error).toBe('Authentication required')
-        })
-
-        it('should return 401 if token is expired', async () => {
+        it('should return 401 without token', async () => {
             const res = await request(app)
                 .get('/api/auth/me')
-                .set('Authorization', 'Bearer expired-token')
 
             expect(res.statusCode).toBe(401)
             expect(res.body.success).toBe(false)
-            expect(res.body.error).toBe('Token expired')
+            expect(res.body.error).toBe('Not authorized, no token')
         })
 
-        it('should return 401 if token is invalid', async () => {
+        it('should return 401 with invalid token format', async () => {
             const res = await request(app)
                 .get('/api/auth/me')
-                .set('Authorization', 'Bearer invalid-token')
+                .set('Authorization', 'invalid-token-format')
 
             expect(res.statusCode).toBe(401)
             expect(res.body.success).toBe(false)
-            expect(res.body.error).toBe('Invalid token')
+            expect(res.body.error).toBe('Not authorized, no token')
         })
     })
 
@@ -393,6 +379,49 @@ describe('Auth Routes Integration Tests', () => {
 
             expect(res.statusCode).toBe(400)
             expect(res.body.success).toBe(false)
+        })
+    })
+
+    describe('PUT /api/auth/password', () => {
+        it('should change password with valid data', async () => {
+            const res = await request(app)
+                .put('/api/auth/password')
+                .set('Authorization', 'Bearer mock-jwt-token')
+                .send({
+                    currentPassword: 'oldpassword',
+                    newPassword: 'newpassword123'
+                })
+
+            expect(res.statusCode).toBe(200)
+            expect(res.body.success).toBe(true)
+            expect(res.body.message).toBe('Password updated successfully')
+        })
+
+        it('should return 401 without token', async () => {
+            const res = await request(app)
+                .put('/api/auth/password')
+                .send({
+                    currentPassword: 'oldpassword',
+                    newPassword: 'newpassword123'
+                })
+
+            expect(res.statusCode).toBe(401)
+            expect(res.body.success).toBe(false)
+            expect(res.body.error).toBe('Not authorized, no token')
+        })
+
+        it('should return 400 if required fields are missing', async () => {
+            const res = await request(app)
+                .put('/api/auth/password')
+                .set('Authorization', 'Bearer mock-jwt-token')
+                .send({
+                    currentPassword: 'oldpassword'
+                    // Missing newPassword
+                })
+
+            expect(res.statusCode).toBe(400)
+            expect(res.body.success).toBe(false)
+            expect(res.body.error).toBe('Please provide current password and new password')
         })
     })
 }) 

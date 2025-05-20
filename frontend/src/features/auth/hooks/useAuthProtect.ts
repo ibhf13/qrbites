@@ -1,36 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuthContext } from '../contexts/AuthContext'
+import { AuthProtectionConfig, AuthProtectionState } from '../types/auth.types'
 
-type ProtectionLevel = 'auth' | 'guest' | 'admin' | 'none'
 
-interface UseAuthProtectProps {
-    protectionLevel?: ProtectionLevel
-    redirectPath?: string
-}
-
-/**
- * Hook to protect routes based on authentication state
- * 
- * @param protectionLevel - Level of protection required
- *   - 'auth': User must be authenticated
- *   - 'guest': User must NOT be authenticated
- *   - 'admin': User must be authenticated and have admin role
- *   - 'none': No protection (default)
- * @param redirectPath - Path to redirect to if protection fails
- * @returns Object with isAuthorized and isLoading flags
- */
-export const useAuthProtect = ({
-    protectionLevel = 'none',
-    redirectPath = '/login'
-}: UseAuthProtectProps = {}) => {
-    const { isAuthenticated, user, loading } = useAuth()
+export const useAuthProtection = (config: AuthProtectionConfig = {}): AuthProtectionState => {
+    const { protectionLevel = 'none', redirectPath = '/login' } = config
+    const { isAuthenticated, user, loading } = useAuthContext()
     const navigate = useNavigate()
     const location = useLocation()
     const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
 
     useEffect(() => {
-        // Don't check until auth is loaded
         if (loading) return
 
         let authorized = false
@@ -52,9 +33,9 @@ export const useAuthProtect = ({
 
         setIsAuthorized(authorized)
 
-        // Redirect if not authorized
         if (!authorized && protectionLevel !== 'none') {
             const currentPath = location.pathname
+
             navigate(redirectPath, {
                 replace: true,
                 state: { from: currentPath }
@@ -62,5 +43,8 @@ export const useAuthProtect = ({
         }
     }, [isAuthenticated, user, loading, protectionLevel, navigate, redirectPath, location.pathname])
 
-    return { isAuthorized, isLoading: loading }
+    return {
+        isAuthorized,
+        isLoading: loading
+    }
 } 

@@ -11,18 +11,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [theme, setTheme] = useState<Theme>(() => {
-        // Check if theme is saved in localStorage
         const savedTheme = localStorage.getItem('theme')
+
         if (savedTheme === 'light' || savedTheme === 'dark') {
             return savedTheme as Theme
         }
 
-        // Check if user prefers dark mode
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
         return prefersDark ? 'dark' : 'light'
     })
 
-    // Update the HTML element class when theme changes
     useEffect(() => {
         const root = window.document.documentElement
 
@@ -32,7 +31,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             root.classList.remove('dark')
         }
 
-        // Save to localStorage
         localStorage.setItem('theme', theme)
     }, [theme])
 
@@ -47,7 +45,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     )
 }
 
-// Hook for consuming the theme context
 export const useTheme = (): ThemeContextType => {
     const context = useContext(ThemeContext)
 

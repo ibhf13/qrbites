@@ -3,8 +3,8 @@ const path = require('path')
 const QRCode = require('qrcode')
 const { v4: uuidv4 } = require('uuid')
 const mongoose = require('mongoose')
-const Menu = require('@models/menuModel')
-const Restaurant = require('@models/restaurantModel')
+const Menu = require('@models/menu')
+const Restaurant = require('@models/restaurant')
 const { dirs } = require('@services/fileUploadService')
 const { generateQRCode, getQRCodeUrl, generateMenuQRCode } = require('@services/qrCodeService')
 const { connectDB, clearDB, closeDB } = require('@tests/testUtils/dbHandler')
@@ -136,7 +136,7 @@ describe('QR Code Service', () => {
 
             const result = getQRCodeUrl('test.png')
 
-            expect(result).toBe('http://localhost:3000/uploads/qrcodes/test.png')
+            expect(result).toBe('http://localhost:5000/uploads/qrcodes/test.png')
 
             // Restore environment variable
             process.env.BASE_URL = originalBaseUrl
@@ -153,7 +153,7 @@ describe('QR Code Service', () => {
 
             const result = await generateMenuQRCode(menuId, restaurantId)
 
-            expect(result).toBe('http://localhost:3000/uploads/qrcodes/mock-uuid.png')
+            expect(result).toBe('http://localhost:5000/uploads/qrcodes/mock-uuid.png')
             expect(QRCode.toFile).toHaveBeenCalledWith(
                 path.join(dirs.qrcode, 'mock-uuid.png'),
                 'http://localhost:5000/r/123456789?restaurant=987654321',
@@ -191,11 +191,10 @@ describe('QR Code Service', () => {
                     email: 'test@restaurant.com'
                 },
                 location: {
-                    address: '123 Test Street',
+                    street: '123 Test Street',
+                    houseNumber: '123',
                     city: 'Test City',
-                    state: 'Test State',
                     zipCode: '12345',
-                    country: 'Test Country'
                 }
             })
 
@@ -208,7 +207,7 @@ describe('QR Code Service', () => {
             const result = await generateMenuQRCode(menu._id, restaurant._id)
 
             // Verify QR code was generated with correct URL
-            expect(result).toBe('http://localhost:3000/uploads/qrcodes/mock-uuid.png')
+            expect(result).toBe('http://localhost:5000/uploads/qrcodes/mock-uuid.png')
             expect(QRCode.toFile).toHaveBeenCalledWith(
                 path.join(dirs.qrcode, 'mock-uuid.png'),
                 `http://localhost:5000/r/${menu._id}?restaurant=${restaurant._id}`,

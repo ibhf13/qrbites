@@ -83,7 +83,7 @@ jest.mock('@src/app', () => {
             success: true,
             data: {
                 _id: id,
-                logoUrl: `http://localhost:3000/uploads/restaurants/test-upload.jpg`
+                logoUrl: `http://localhost:5000/uploads/restaurants/test-upload.jpg`
             }
         })
     })
@@ -112,7 +112,7 @@ jest.mock('@src/app', () => {
             success: true,
             data: {
                 _id: id,
-                imageUrl: `http://localhost:3000/uploads/menus/test-upload.jpg`
+                imageUrl: `http://localhost:5000/uploads/menus/test-upload.jpg`
             }
         })
     })
@@ -133,7 +133,7 @@ jest.mock('@src/app', () => {
             success: true,
             data: {
                 _id: id,
-                imageUrl: `http://localhost:3000/uploads/menu-items/test-upload.jpg`
+                imageUrl: `http://localhost:5000/uploads/menu-items/test-upload.jpg`
             }
         })
     })

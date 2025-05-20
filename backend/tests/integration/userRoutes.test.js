@@ -127,6 +127,22 @@ jest.mock('@src/app', () => {
         }
     })
 
+    router.delete('/api/users/account', (req, res) => {
+        const auth = req.headers.authorization
+
+        if (!auth) {
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Account deactivated successfully'
+        })
+    })
+
     router.delete('/api/users/:id', (req, res) => {
         const { id } = req.params
         const auth = req.headers.authorization
@@ -358,6 +374,36 @@ describe('User Routes Integration Tests', () => {
             expect(res.statusCode).toBe(404)
             expect(res.body.success).toBe(false)
             expect(res.body.error).toBe('User not found')
+        })
+    })
+
+    describe('DELETE /api/users/account', () => {
+        it('should deactivate current user account', async () => {
+            const res = await request(app)
+                .delete('/api/users/account')
+                .set('Authorization', userToken)
+
+            expect(res.statusCode).toBe(200)
+            expect(res.body.success).toBe(true)
+            expect(res.body.message).toBe('Account deactivated successfully')
+        })
+
+        it('should deactivate admin account', async () => {
+            const res = await request(app)
+                .delete('/api/users/account')
+                .set('Authorization', adminToken)
+
+            expect(res.statusCode).toBe(200)
+            expect(res.body.success).toBe(true)
+            expect(res.body.message).toBe('Account deactivated successfully')
+        })
+
+        it('should return 401 if no token is provided', async () => {
+            const res = await request(app).delete('/api/users/account')
+
+            expect(res.statusCode).toBe(401)
+            expect(res.body.success).toBe(false)
+            expect(res.body.error).toBe('Authentication required')
         })
     })
 }) 

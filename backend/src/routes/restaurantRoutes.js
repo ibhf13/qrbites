@@ -14,16 +14,13 @@ const { upload } = require('@services/fileUploadService')
 
 const router = express.Router()
 
-// Public routes
-router.get('/', getRestaurants)
-router.get('/:id', getRestaurantById)
+router.get('/', protect, getRestaurants)
+router.get('/:id', protect, getRestaurantById)
 
-// Protected routes
 router.post('/', protect, upload.single('logo'), validateRequest(restaurantSchema), createRestaurant)
 router.put('/:id', protect, upload.single('logo'), validateRequest(restaurantUpdateSchema), updateRestaurant)
 router.delete('/:id', protect, deleteRestaurant)
 
-// Logo upload route
 router.post('/:id/logo', protect, upload.single('logo'), uploadLogo)
 
 module.exports = router 

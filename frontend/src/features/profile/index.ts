@@ -1,17 +1,7 @@
-// API
 export * from './api/profile.api'
-
-// Types
+export * from './components'
+export * from './hooks'
 export * from './types/profile.types'
-
-// Components
-export { default as AvatarUpload } from './components/AvatarUpload'
-export { default as PasswordChangeForm } from './components/PasswordChangeForm'
-export { default as ProfileForm } from './components/ProfileForm'
-
-// Hooks
-export { useProfileData } from './hooks/useProfileData'
-
-// Validations
+export * from './utils/errorHandling'
+export * from './utils/storage'
 export * from './validations/profileValidation'
-

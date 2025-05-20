@@ -1,4 +1,4 @@
-const MenuItem = require('@models/menuItemModel')
+const MenuItem = require('@models/menuItem')
 const menuItemMock = require('../fixtures/mocks/menuItemMock')
 const logger = require('@utils/logger')
 const fs = require('fs')

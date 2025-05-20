@@ -16,12 +16,6 @@ const logError = (error, context = {}) => {
     }
 
     logger.error('Application error', logData)
-
-    // In a production environment, this could send to a remote logging service
-    if (process.env.NODE_ENV === 'production') {
-        // Example: Send to a remote error tracking service
-        // sendToErrorTrackingService(logData);
-    }
 }
 
 /**

@@ -16,7 +16,7 @@ export const SNACKBAR_CONFIG: Partial<SnackbarProviderProps> = {
 export const QUERY_CLIENT_CONFIG: QueryClientConfig = {
     defaultOptions: {
         queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
+            staleTime: 1000 * 60 * 5,
             retry: 1,
             refetchOnWindowFocus: false,
         },

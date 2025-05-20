@@ -1,4 +1,4 @@
-const Menu = require('@models/menuModel')
+const Menu = require('@models/menu')
 const menuMock = require('../fixtures/mocks/menuMockEnhanced')
 const logger = require('@utils/logger')
 const fs = require('fs')

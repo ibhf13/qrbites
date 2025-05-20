@@ -1,12 +1,11 @@
+import { Button, Checkbox, FormInput, Typography, Box, FlexBox } from '@/components/common'
+import env from '@/config/env'
+import { useNotificationActions } from '@/features/notifications'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
-
-import { Button, FormInput } from '@/components/common'
-import env from '@/config/env'
-import { useNotificationContext } from '@/contexts/NotificationContext'
-import { useLogin } from '../hooks/useLogin'
+import { Link, useNavigate } from 'react-router-dom'
+import { useLoginAction } from '../hooks/useAuthActions'
 import { LoginFormData } from '../types/auth.types'
 import { loginSchema } from '../validations/login.validation'
 import AuthCard from './AuthCard'
@@ -14,10 +13,9 @@ import AuthCard from './AuthCard'
 const LoginForm: React.FC = () => {
     const navigate = useNavigate()
     const [serverError, setServerError] = useState<string | null>(null)
-    const { showSuccess, showError } = useNotificationContext()
-    const { login, isLoading, error, clearError } = useLogin()
+    const { showSuccess } = useNotificationActions()
+    const { login, isLoading, error, clearError } = useLoginAction()
 
-    // Clear server error when auth context error changes
     useEffect(() => {
         setServerError(error)
     }, [error])
@@ -41,25 +39,20 @@ const LoginForm: React.FC = () => {
         setServerError(null)
         clearError()
 
-        try {
-            const success = await login(data)
-            if (success) {
-                showSuccess('Login successful!')
-                navigate('/dashboard')
-                reset()
-            }
-        } catch (error) {
-            showError('Login failed. Please check your credentials and try again.')
+        const result = await login(data)
+
+        if (result.success) {
+            showSuccess('Login successful!')
+            navigate('/')
+            reset()
         }
     }
 
     const handleDemoLogin = () => {
-        // Set demo credentials
         setValue('email', env.demoEmail)
         setValue('password', env.demoPassword)
         setValue('rememberMe', true)
 
-        // Submit the form with demo credentials
         const demoCredentials: LoginFormData = {
             email: env.demoEmail,
             password: env.demoPassword,
@@ -70,19 +63,25 @@ const LoginForm: React.FC = () => {
     }
 
     const footerContent = (
-        <>
-            <p className="text-sm text-gray-600">
+        <FlexBox direction="col" gap="sm">
+            <Typography variant="body2" color="muted" align="center">
                 Don't have an account?{' '}
-                <a href="/register" className="font-medium text-primary-600 hover:text-primary-500">
+                <Link
+                    to="/register"
+                    className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                >
                     Sign up
-                </a>
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-                <a href="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
+                </Link>
+            </Typography>
+            <Typography variant="body2" color="muted" align="center">
+                <Link
+                    to="/forgot-password"
+                    className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                >
                     Forgot your password?
-                </a>
-            </p>
-        </>
+                </Link>
+            </Typography>
+        </FlexBox>
     )
 
     return (
@@ -97,6 +96,7 @@ const LoginForm: React.FC = () => {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
+                    autoComplete="email"
                     disabled={isSubmitting || isLoading}
                     error={errors.email?.message}
                     {...register('email')}
@@ -107,46 +107,43 @@ const LoginForm: React.FC = () => {
                     id="password"
                     type="password"
                     placeholder="••••••••"
+                    autoComplete="current-password"
                     disabled={isSubmitting || isLoading}
                     error={errors.password?.message}
                     {...register('password')}
                 />
 
-                <div className="flex items-center">
-                    <input
-                        id="rememberMe"
-                        type="checkbox"
-                        {...register('rememberMe')}
-                        className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                    />
-                    <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
-                        Remember me
-                    </label>
-                </div>
+                <Checkbox
+                    id="rememberMe"
+                    label="Remember me"
+                    {...register('rememberMe')}
+                />
 
-                <div>
-                    <Button
-                        type="submit"
-                        isFullWidth
-                        isLoading={isSubmitting || isLoading}
-                        disabled={isSubmitting || isLoading}
-                    >
-                        Log In
-                    </Button>
-                </div>
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={isSubmitting || isLoading}
+                    disabled={isSubmitting || isLoading}
+                >
+                    Log In
+                </Button>
 
-                <div className="text-center pt-2">
-                    <p className="text-sm text-gray-500 mb-2">or</p>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        isFullWidth
-                        onClick={handleDemoLogin}
-                        disabled={isSubmitting || isLoading}
-                    >
-                        Demo Login
-                    </Button>
-                </div>
+                <Box pt="sm">
+                    <FlexBox direction="col" align="center" gap="sm">
+                        <Typography variant="body2" color="muted" align="center">
+                            or
+                        </Typography>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            fullWidth
+                            onClick={handleDemoLogin}
+                            disabled={isSubmitting || isLoading}
+                        >
+                            Demo Login
+                        </Button>
+                    </FlexBox>
+                </Box>
             </form>
         </AuthCard>
     )

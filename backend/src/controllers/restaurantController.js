@@ -1,4 +1,4 @@
-const Restaurant = require('@models/restaurantModel')
+const Restaurant = require('@models/restaurant')
 const {
   asyncHandler,
   notFound,
@@ -12,7 +12,7 @@ const { getFileUrl } = require('@services/fileUploadService')
 /**
  * Get all restaurants
  * @route GET /api/restaurants
- * @access Public
+ * @access Private (users see only their own restaurants)
  */
 const getRestaurants = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, name, sortBy = 'createdAt', order = 'desc' } = req.query
@@ -23,6 +23,11 @@ const getRestaurants = asyncHandler(async (req, res) => {
   // Add name filter if provided
   if (name) {
     query.name = { $regex: name, $options: 'i' }
+  }
+
+  // SECURITY FIX: Filter by user ownership (unless admin)
+  if (req.user && req.user.role !== 'admin') {
+    query.userId = req.user._id
   }
 
   // Build sort object
@@ -96,31 +101,16 @@ const getRestaurantById = asyncHandler(async (req, res) => {
  */
 const createRestaurant = asyncHandler(async (req, res) => {
   try {
-    // Parse the restaurant data from formData
-    let restaurantData
-
-    // Check if data was sent as JSON string
-    if (req.body.data) {
-      try {
-        restaurantData = JSON.parse(req.body.data)
-      } catch (err) {
-        throw badRequest('Invalid restaurant data format')
-      }
-    } else {
-      // Fallback to regular request body (for backwards compatibility)
-      restaurantData = req.body
-    }
-
     // Add user ID from authenticated user
-    restaurantData.userId = req.user._id
+    req.body.userId = req.user._id
 
     // Add logo URL if file was uploaded
     if (req.file) {
-      restaurantData.logoUrl = getFileUrl(req.file.filename, 'restaurant')
+      req.body.logoUrl = getFileUrl(req.file.filename, 'restaurant')
     }
 
     // Create restaurant
-    const restaurant = await Restaurant.create(restaurantData)
+    const restaurant = await Restaurant.create(req.body)
 
     logger.success(`Restaurant created: ${restaurant.name} by user ${req.user._id}`)
 
@@ -143,21 +133,6 @@ const updateRestaurant = asyncHandler(async (req, res) => {
   const { id } = req.params
 
   try {
-    // Parse the restaurant data from formData
-    let restaurantData
-
-    // Check if data was sent as JSON string
-    if (req.body.data) {
-      try {
-        restaurantData = JSON.parse(req.body.data)
-      } catch (err) {
-        throw badRequest('Invalid restaurant data format')
-      }
-    } else {
-      // Fallback to regular request body (for backwards compatibility)
-      restaurantData = req.body
-    }
-
     // Find restaurant
     const restaurant = await Restaurant.findById(id)
 
@@ -172,13 +147,13 @@ const updateRestaurant = asyncHandler(async (req, res) => {
 
     // Add logo URL if file was uploaded
     if (req.file) {
-      restaurantData.logoUrl = getFileUrl(req.file.filename, 'restaurant')
+      req.body.logoUrl = getFileUrl(req.file.filename, 'restaurant')
     }
 
     // Update restaurant
     const updatedRestaurant = await Restaurant.findByIdAndUpdate(
       id,
-      restaurantData,
+      req.body,
       { new: true, runValidators: true }
     )
 

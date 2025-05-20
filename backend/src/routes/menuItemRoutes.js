@@ -14,16 +14,13 @@ const { upload } = require('@services/fileUploadService')
 
 const router = express.Router()
 
-// Public routes
 router.get('/', getMenuItems)
 router.get('/:id', getMenuItemById)
 
-// Protected routes
 router.post('/', protect, upload.single('image'), validateRequest(menuItemSchema), createMenuItem)
 router.put('/:id', protect, upload.single('image'), validateRequest(menuItemUpdateSchema), updateMenuItem)
 router.delete('/:id', protect, deleteMenuItem)
 
-// Image upload route
 router.post('/:id/image', protect, upload.single('image'), uploadImage)
 
 module.exports = router 

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
-const User = require('@models/userModel')
-const { unauthorized, forbidden } = require('@utils/errorUtils')
+const User = require('@models/user')
+const { unauthorized, forbidden, badRequest, notFound } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
 
 /**
@@ -108,8 +108,113 @@ const checkOwnership = (getResourceUserId) => {
     }
 }
 
+/**
+ * Middleware to add user's restaurant IDs to request for filtering
+ * Helps ensure users only see their own restaurant data
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object  
+ * @param {Function} next - Express next function
+ */
+const addUserRestaurants = async (req, res, next) => {
+    try {
+        if (req.user && req.user.role !== 'admin') {
+            const Restaurant = require('@models/restaurant')
+            const userRestaurants = await Restaurant.find({ userId: req.user._id }).select('_id')
+            req.userRestaurantIds = userRestaurants.map(r => r._id.toString())
+        }
+        next()
+    } catch (error) {
+        logger.error('Error fetching user restaurants:', error)
+        next(error)
+    }
+}
+
+/**
+ * Middleware to check if a restaurant belongs to the authenticated user
+ * @param {string} paramName - Name of the parameter containing restaurant ID (default: 'restaurantId')
+ * @returns {Function} Express middleware
+ */
+const checkRestaurantOwnership = (paramName = 'restaurantId') => {
+    return async (req, res, next) => {
+        try {
+            // Skip for admin users
+            if (req.user.role === 'admin') {
+                return next()
+            }
+
+            const restaurantId = req.params[paramName] || req.body[paramName]
+
+            if (!restaurantId) {
+                return next(badRequest('Restaurant ID is required'))
+            }
+
+            const Restaurant = require('@models/restaurant')
+            const restaurant = await Restaurant.findById(restaurantId)
+
+            if (!restaurant) {
+                return next(notFound('Restaurant not found'))
+            }
+
+            const isOwner = restaurant.userId.toString() === req.user._id.toString()
+
+            if (!isOwner) {
+                logger.warn(`User ${req.user._id} attempted to access restaurant ${restaurantId} they don't own`)
+                return next(forbidden('Not authorized to access this restaurant'))
+            }
+
+            // Store restaurant in request for use in controllers
+            req.restaurant = restaurant
+            next()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
+
+/**
+ * Optional authentication middleware - sets req.user if token is provided but doesn't fail if not
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
+const optionalAuth = async (req, res, next) => {
+    try {
+        let token
+
+        // Check if token exists in headers
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+            token = req.headers.authorization.split(' ')[1]
+        }
+
+        // If no token, continue without setting user
+        if (!token) {
+            return next()
+        }
+
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        // Find user from token
+        const user = await User.findById(decoded.id).select('-password')
+
+        if (user && user.isActive) {
+            // Set user in request if found and active
+            req.user = user
+        }
+
+        next()
+    } catch (error) {
+        // If token is invalid, continue without setting user (don't throw error)
+        logger.debug('Optional auth failed, continuing without user', error.message)
+        next()
+    }
+}
+
 module.exports = {
     protect,
     restrictTo,
-    checkOwnership
+    checkOwnership,
+    addUserRestaurants,
+    checkRestaurantOwnership,
+    optionalAuth
 } 

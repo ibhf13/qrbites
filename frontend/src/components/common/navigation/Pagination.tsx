@@ -1,136 +1,111 @@
 import React from 'react'
+import { Button } from '../buttons'
+import { FlexBox, Typography } from '../layout'
 
-interface PaginationProps {
+export interface PaginationProps {
     currentPage: number
     totalPages: number
     onPageChange: (page: number) => void
     className?: string
+    showPrevNext?: boolean
+    maxVisiblePages?: number
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
     currentPage,
     totalPages,
     onPageChange,
-    className = '',
+    className,
+    showPrevNext = true,
+    maxVisiblePages = 5
 }) => {
-    // Calculate which page numbers to show
-    const getPageNumbers = () => {
-        const maxPagesToShow = 5
-        const pageNumbers: (number | string)[] = []
+    const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+    const halfVisible = Math.floor(maxVisiblePages / 2)
 
-        if (totalPages <= maxPagesToShow) {
-            // If we have fewer pages than our max, show all pages
-            for (let i = 1; i <= totalPages; i++) {
-                pageNumbers.push(i)
-            }
-        } else {
-            // Always show first page
-            pageNumbers.push(1)
+    let visiblePages = pages
 
-            // Calculate start and end of pagination range
-            let start = Math.max(2, currentPage - 1)
-            let end = Math.min(totalPages - 1, currentPage + 1)
+    if (totalPages > maxVisiblePages) {
+        const start = Math.max(1, currentPage - halfVisible)
+        const end = Math.min(totalPages, start + maxVisiblePages - 1)
 
-            // Adjust the range if at boundaries
-            if (currentPage <= 2) {
-                end = 4
-            } else if (currentPage >= totalPages - 1) {
-                start = totalPages - 3
-            }
-
-            // Add ellipsis after first if needed
-            if (start > 2) {
-                pageNumbers.push('...')
-            }
-
-            // Add the page range
-            for (let i = start; i <= end; i++) {
-                pageNumbers.push(i)
-            }
-
-            // Add ellipsis before last if needed
-            if (end < totalPages - 1) {
-                pageNumbers.push('...')
-            }
-
-            // Always show last page
-            if (totalPages > 1) {
-                pageNumbers.push(totalPages)
-            }
-        }
-
-        return pageNumbers
+        visiblePages = pages.slice(start - 1, end)
     }
 
-    const pageNumbers = getPageNumbers()
-
-    if (totalPages <= 1) {
-        return null
-    }
+    const showFirstEllipsis = visiblePages[0] > 1
+    const showLastEllipsis = visiblePages[visiblePages.length - 1] < totalPages
 
     return (
-        <nav aria-label="Page navigation" className={`flex justify-center mt-6 ${className}`}>
-            <ul className="inline-flex items-center -space-x-px">
-                {/* Previous page button */}
-                <li>
-                    <button
-                        onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className={`block px-3 py-2 ml-0 leading-tight border rounded-l-lg 
-              ${currentPage === 1
-                                ? 'text-gray-400 bg-white border-gray-300 cursor-not-allowed'
-                                : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'}`
-                        }
-                        aria-label="Previous page"
-                    >
-                        <span className="sr-only">Previous</span>
-                        <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </button>
-                </li>
+        <FlexBox align="center" justify="center" gap="xs" className={className}>
+            {showPrevNext && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3"
+                >
+                    Previous
+                </Button>
+            )}
 
-                {/* Page numbers */}
-                {pageNumbers.map((page, index) => (
-                    <li key={`page-${page}-${index}`}>
-                        {typeof page === 'number' ? (
-                            <button
-                                onClick={() => onPageChange(page)}
-                                className={`px-3 py-2 leading-tight border ${currentPage === page
-                                        ? 'z-10 text-blue-600 border-blue-300 bg-blue-50'
-                                        : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'
-                                    }`}
-                                aria-current={currentPage === page ? 'page' : undefined}
-                            >
-                                {page}
-                            </button>
-                        ) : (
-                            <span className="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300">
-                                {page}
-                            </span>
-                        )}
-                    </li>
-                ))}
-
-                {/* Next page button */}
-                <li>
-                    <button
-                        onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className={`block px-3 py-2 leading-tight border rounded-r-lg 
-              ${currentPage === totalPages
-                                ? 'text-gray-400 bg-white border-gray-300 cursor-not-allowed'
-                                : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700'}`
-                        }
-                        aria-label="Next page"
+            {showFirstEllipsis && (
+                <>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(1)}
+                        className="w-9 h-9 p-0"
                     >
-                        <span className="sr-only">Next</span>
-                        <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </button>
-                </li>
-            </ul>
-        </nav>
+                        1
+                    </Button>
+                    <Typography as="p" variant="body" color="muted" className="px-2">
+                        ...
+                    </Typography>
+                </>
+            )}
+
+            {visiblePages.map((page) => (
+                <Button
+                    key={page}
+                    variant={page === currentPage ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => onPageChange(page)}
+                    className="w-9 h-9 p-0"
+                    aria-current={page === currentPage ? 'page' : undefined}
+                >
+                    {page}
+                </Button>
+            ))}
+
+            {showLastEllipsis && (
+                <>
+                    <Typography as="p" variant="body" color="muted" className="px-2">
+                        ...
+                    </Typography>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(totalPages)}
+                        className="w-9 h-9 p-0"
+                    >
+                        {totalPages}
+                    </Button>
+                </>
+            )}
+
+            {showPrevNext && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-3"
+                >
+                    Next
+                </Button>
+            )}
+        </FlexBox>
     )
-} 
+}
+
+export default Pagination

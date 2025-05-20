@@ -1,227 +1,231 @@
 import React from 'react'
+import { cn } from '@/utils/cn'
 
-// Container component
-export interface ContainerProps {
-    children: React.ReactNode
-    className?: string
-    maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full' | 'none'
-    padding?: boolean
+type Columns = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+type Gap = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+type Justify = 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly'
+type Align = 'start' | 'end' | 'center' | 'baseline' | 'stretch'
+
+interface GridProps extends React.HTMLAttributes<HTMLDivElement> {
+    cols?: Columns
+    colsSm?: Columns
+    colsMd?: Columns
+    colsLg?: Columns
+    colsXl?: Columns
+    rows?: number
+    gap?: Gap
+    gapX?: Gap
+    gapY?: Gap
+    justify?: Justify
+    align?: Align
+    auto?: boolean
+    responsive?: boolean
+    minColWidth?: string
 }
 
-export const Container: React.FC<ContainerProps> = ({
-    children,
-    className = '',
-    maxWidth = 'lg',
-    padding = true,
-}) => {
-    const getMaxWidthClass = (): string => {
-        switch (maxWidth) {
-            case 'xs':
-                return 'max-w-screen-xs'
-            case 'sm':
-                return 'max-w-screen-sm'
-            case 'md':
-                return 'max-w-screen-md'
-            case 'lg':
-                return 'max-w-screen-lg'
-            case 'xl':
-                return 'max-w-screen-xl'
-            case '2xl':
-                return 'max-w-screen-2xl'
-            case 'full':
-                return 'max-w-full'
-            case 'none':
-                return ''
-            default:
-                return 'max-w-screen-lg'
-        }
-    }
+const columnMap: Record<Columns, string> = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-2',
+    3: 'grid-cols-3',
+    4: 'grid-cols-4',
+    5: 'grid-cols-5',
+    6: 'grid-cols-6',
+    7: 'grid-cols-7',
+    8: 'grid-cols-8',
+    9: 'grid-cols-9',
+    10: 'grid-cols-10',
+    11: 'grid-cols-11',
+    12: 'grid-cols-12'
+}
 
-    const paddingClass = padding ? 'px-4 sm:px-6 md:px-8' : ''
+const responsiveColumnMap = {
+    sm: {
+        1: 'sm:grid-cols-1',
+        2: 'sm:grid-cols-2',
+        3: 'sm:grid-cols-3',
+        4: 'sm:grid-cols-4',
+        5: 'sm:grid-cols-5',
+        6: 'sm:grid-cols-6',
+        7: 'sm:grid-cols-7',
+        8: 'sm:grid-cols-8',
+        9: 'sm:grid-cols-9',
+        10: 'sm:grid-cols-10',
+        11: 'sm:grid-cols-11',
+        12: 'sm:grid-cols-12'
+    },
+    md: {
+        1: 'md:grid-cols-1',
+        2: 'md:grid-cols-2',
+        3: 'md:grid-cols-3',
+        4: 'md:grid-cols-4',
+        5: 'md:grid-cols-5',
+        6: 'md:grid-cols-6',
+        7: 'md:grid-cols-7',
+        8: 'md:grid-cols-8',
+        9: 'md:grid-cols-9',
+        10: 'md:grid-cols-10',
+        11: 'md:grid-cols-11',
+        12: 'md:grid-cols-12'
+    },
+    lg: {
+        1: 'lg:grid-cols-1',
+        2: 'lg:grid-cols-2',
+        3: 'lg:grid-cols-3',
+        4: 'lg:grid-cols-4',
+        5: 'lg:grid-cols-5',
+        6: 'lg:grid-cols-6',
+        7: 'lg:grid-cols-7',
+        8: 'lg:grid-cols-8',
+        9: 'lg:grid-cols-9',
+        10: 'lg:grid-cols-10',
+        11: 'lg:grid-cols-11',
+        12: 'lg:grid-cols-12'
+    },
+    xl: {
+        1: 'xl:grid-cols-1',
+        2: 'xl:grid-cols-2',
+        3: 'xl:grid-cols-3',
+        4: 'xl:grid-cols-4',
+        5: 'xl:grid-cols-5',
+        6: 'xl:grid-cols-6',
+        7: 'xl:grid-cols-7',
+        8: 'xl:grid-cols-8',
+        9: 'xl:grid-cols-9',
+        10: 'xl:grid-cols-10',
+        11: 'xl:grid-cols-11',
+        12: 'xl:grid-cols-12'
+    }
+} as const
+
+const gapMap: Record<Gap, string> = {
+    none: 'gap-0',
+    xs: 'gap-1',
+    sm: 'gap-2',
+    md: 'gap-4',
+    lg: 'gap-6',
+    xl: 'gap-8',
+    '2xl': 'gap-12'
+}
+
+const gapXMap: Record<Gap, string> = {
+    none: 'gap-x-0',
+    xs: 'gap-x-1',
+    sm: 'gap-x-2',
+    md: 'gap-x-4',
+    lg: 'gap-x-6',
+    xl: 'gap-x-8',
+    '2xl': 'gap-x-12'
+}
+
+const gapYMap: Record<Gap, string> = {
+    none: 'gap-y-0',
+    xs: 'gap-y-1',
+    sm: 'gap-y-2',
+    md: 'gap-y-4',
+    lg: 'gap-y-6',
+    xl: 'gap-y-8',
+    '2xl': 'gap-y-12'
+}
+
+const justifyMap: Record<Justify, string> = {
+    start: 'justify-items-start',
+    end: 'justify-items-end',
+    center: 'justify-items-center',
+    between: 'justify-items-stretch',
+    around: 'justify-items-stretch',
+    evenly: 'justify-items-stretch'
+}
+
+const alignMap: Record<Align, string> = {
+    start: 'items-start',
+    end: 'items-end',
+    center: 'items-center',
+    baseline: 'items-baseline',
+    stretch: 'items-stretch'
+}
+
+export const Grid: React.FC<GridProps> = ({
+    cols = 1,
+    colsSm,
+    colsMd,
+    colsLg,
+    colsXl,
+    rows,
+    gap = 'md',
+    gapX,
+    gapY,
+    justify,
+    align,
+    auto = false,
+    responsive = true,
+    minColWidth,
+    className,
+    children,
+    ...rest
+}) => {
+    const getResponsiveClasses = () => {
+        if (auto) return 'grid grid-cols-auto'
+        if (minColWidth) return `grid grid-cols-[repeat(auto-fit,minmax(${minColWidth},1fr))]`
+
+        if (responsive) {
+            const baseClass = 'grid grid-cols-1'
+            const responsiveClasses = []
+
+            if (colsSm !== undefined) {
+                responsiveClasses.push(responsiveColumnMap.sm[colsSm])
+            } else if (cols > 1) {
+                responsiveClasses.push(cols > 2 ? 'sm:grid-cols-2' : `sm:${columnMap[cols]}`)
+            }
+
+            if (colsMd !== undefined) {
+                responsiveClasses.push(responsiveColumnMap.md[colsMd])
+            } else if (cols > 2) {
+                responsiveClasses.push(cols > 3 ? 'md:grid-cols-3' : `md:${columnMap[cols]}`)
+            }
+
+            if (colsLg !== undefined) {
+                responsiveClasses.push(responsiveColumnMap.lg[colsLg])
+            } else if (cols > 3) {
+                responsiveClasses.push(`lg:${columnMap[cols]}`)
+            }
+
+            if (colsXl !== undefined) {
+                responsiveClasses.push(responsiveColumnMap.xl[colsXl])
+            } else if (cols > 4) {
+                responsiveClasses.push(`xl:${columnMap[cols]}`)
+            }
+
+            return [baseClass, ...responsiveClasses].join(' ')
+        }
+
+        return [
+            'grid',
+            columnMap[cols],
+            colsSm && responsiveColumnMap.sm[colsSm],
+            colsMd && responsiveColumnMap.md[colsMd],
+            colsLg && responsiveColumnMap.lg[colsLg],
+            colsXl && responsiveColumnMap.xl[colsXl]
+        ].filter(Boolean).join(' ')
+    }
 
     return (
         <div
-            className={`
-        mx-auto
-        w-full
-        ${getMaxWidthClass()}
-        ${paddingClass}
-        ${className}
-      `}
+            className={cn(
+                getResponsiveClasses(),
+                rows && `grid-rows-${rows}`,
+                gapX ? gapXMap[gapX] : gapY ? gapYMap[gapY] : gapMap[gap],
+                gapY && gapYMap[gapY],
+                justify && justifyMap[justify],
+                align && alignMap[align],
+                className
+            )}
+            {...rest}
         >
             {children}
         </div>
     )
 }
 
-// Row component
-export interface RowProps {
-    children: React.ReactNode
-    className?: string
-    spacing?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12
-    justifyContent?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly'
-    alignItems?: 'start' | 'end' | 'center' | 'baseline' | 'stretch'
-    noWrap?: boolean
-}
+Grid.displayName = 'Grid'
 
-export const Row: React.FC<RowProps> = ({
-    children,
-    className = '',
-    spacing = 4,
-    justifyContent = 'start',
-    alignItems = 'start',
-    noWrap = false,
-}) => {
-    const getSpacingClass = (): string => {
-        if (spacing === 0) return ''
-        return `-mx-${spacing / 2}`
-    }
-
-    const getJustifyContentClass = (): string => {
-        switch (justifyContent) {
-            case 'start':
-                return 'justify-start'
-            case 'end':
-                return 'justify-end'
-            case 'center':
-                return 'justify-center'
-            case 'between':
-                return 'justify-between'
-            case 'around':
-                return 'justify-around'
-            case 'evenly':
-                return 'justify-evenly'
-            default:
-                return 'justify-start'
-        }
-    }
-
-    const getAlignItemsClass = (): string => {
-        switch (alignItems) {
-            case 'start':
-                return 'items-start'
-            case 'end':
-                return 'items-end'
-            case 'center':
-                return 'items-center'
-            case 'baseline':
-                return 'items-baseline'
-            case 'stretch':
-                return 'items-stretch'
-            default:
-                return 'items-start'
-        }
-    }
-
-    const getWrapClass = (): string => {
-        return noWrap ? 'flex-nowrap' : 'flex-wrap'
-    }
-
-    // Add spacing to direct children (columns) using React.Children.map
-    const childrenWithSpacing = React.Children.map(children, child => {
-        if (React.isValidElement(child) && spacing !== 0) {
-            return React.cloneElement(child, {
-                ...child.props,
-                className: `${child.props.className || ''} px-${spacing / 2}`
-            })
-        }
-        return child
-    })
-
-    return (
-        <div
-            className={`
-        flex
-        ${getWrapClass()}
-        ${getSpacingClass()}
-        ${getJustifyContentClass()}
-        ${getAlignItemsClass()}
-        ${className}
-      `}
-        >
-            {childrenWithSpacing}
-        </div>
-    )
-}
-
-// Column component
-export type ColSpan = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 'auto' | 'full'
-export type ColOrder = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 'first' | 'last' | 'none'
-export type ColOffset = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11
-
-export interface ColProps {
-    children: React.ReactNode
-    className?: string
-    span?: ColSpan
-    sm?: ColSpan
-    md?: ColSpan
-    lg?: ColSpan
-    xl?: ColSpan
-    offset?: ColOffset
-    order?: ColOrder
-}
-
-export const Col: React.FC<ColProps> = ({
-    children,
-    className = '',
-    span = 'full',
-    sm,
-    md,
-    lg,
-    xl,
-    offset,
-    order,
-}) => {
-    const getSpanClass = (size: ColSpan | undefined, breakpoint: string = ''): string => {
-        if (size === undefined) return ''
-
-        const prefix = breakpoint ? `${breakpoint}:` : ''
-
-        if (size === 'auto') return `${prefix}w-auto`
-        if (size === 'full') return `${prefix}w-full`
-
-        return `${prefix}w-${size}/12`
-    }
-
-    const getOffsetClass = (): string => {
-        if (offset === undefined) return ''
-        if (offset === 0) return 'ml-0'
-        return `ml-${offset}/12`
-    }
-
-    const getOrderClass = (): string => {
-        if (order === undefined) return ''
-
-        if (order === 'first') return 'order-first'
-        if (order === 'last') return 'order-last'
-        if (order === 'none') return 'order-none'
-
-        return `order-${order}`
-    }
-
-    return (
-        <div
-            className={`
-        ${getSpanClass(span)}
-        ${getSpanClass(sm, 'sm')}
-        ${getSpanClass(md, 'md')}
-        ${getSpanClass(lg, 'lg')}
-        ${getSpanClass(xl, 'xl')}
-        ${getOffsetClass()}
-        ${getOrderClass()}
-        ${className}
-      `}
-        >
-            {children}
-        </div>
-    )
-}
-
-// Example usage:
-// <Container>
-//   <Row gapX="4" gapY="6">
-//     <Col span={12} md={6} lg={4}>Column 1</Col>
-//     <Col span={12} md={6} lg={4}>Column 2</Col>
-//     <Col span={12} md={6} lg={4}>Column 3</Col>
-//   </Row>
-// </Container> 
+export default Grid

@@ -1,6 +1,6 @@
-const MenuItem = require('@models/menuItemModel')
-const Menu = require('@models/menuModel')
-const Restaurant = require('@models/restaurantModel')
+const MenuItem = require('@models/menuItem')
+const Menu = require('@models/menu')
+const Restaurant = require('@models/restaurant')
 const {
     asyncHandler,
     notFound,

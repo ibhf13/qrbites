@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const User = require('@models/userModel')
+const User = require('@models/user')
 const {
   asyncHandler,
   badRequest,
@@ -107,9 +107,14 @@ const login = asyncHandler(async (req, res) => {
  */
 const getMe = asyncHandler(async (req, res) => {
   // req.user is already set by auth middleware
+  // Populate with profile data
+  const userWithProfile = await User.findById(req.user._id)
+    .select('-password')
+    .populate('profile')
+
   res.json({
     success: true,
-    data: req.user
+    data: userWithProfile
   })
 })
 

@@ -17,12 +17,6 @@ interface UseVirtualizedListReturn<T> {
     scrollTo: (index: number) => void
 }
 
-/**
- * Hook for creating a virtualized list for better performance
- * @param items List items to virtualize
- * @param options Configuration options for the virtualized list
- * @returns Virtualized list props and methods
- */
 export function useVirtualizedList<T>(
     items: T[],
     { itemHeight, overscan = 3, initialScrollTop = 0 }: UseVirtualizedListOptions
@@ -30,12 +24,11 @@ export function useVirtualizedList<T>(
     const containerRef = useRef<HTMLDivElement>(null)
     const [scrollTop, setScrollTop] = useState(initialScrollTop)
 
-    // Calculate total list height
     const totalHeight = useMemo(() => items.length * itemHeight, [items.length, itemHeight])
 
-    // Handle scroll events
     useEffect(() => {
         const container = containerRef.current
+
         if (!container) return
 
         const handleScroll = () => {
@@ -43,12 +36,12 @@ export function useVirtualizedList<T>(
         }
 
         container.addEventListener('scroll', handleScroll)
+
         return () => {
             container.removeEventListener('scroll', handleScroll)
         }
     }, [])
 
-    // Calculate which items should be rendered
     const virtualItems = useMemo(() => {
         if (!items.length) return []
 
@@ -60,6 +53,7 @@ export function useVirtualizedList<T>(
 
         return Array.from({ length: endIndex - startIndex + 1 }, (_, i) => {
             const index = startIndex + i
+
             return {
                 index,
                 item: items[index],
@@ -68,7 +62,6 @@ export function useVirtualizedList<T>(
         })
     }, [items, scrollTop, itemHeight, overscan])
 
-    // Scroll to specific item by index
     const scrollTo = (index: number) => {
         if (containerRef.current) {
             containerRef.current.scrollTop = index * itemHeight

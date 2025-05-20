@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const User = require('@models/userModel')
+const User = require('@models/user')
 const userMock = require('../fixtures/mocks/userMock')
 const logger = require('@utils/logger')
 

@@ -85,7 +85,7 @@ describe('File Upload Service', () => {
 
         it('should generate correct URL for a file', () => {
             const result = getFileUrl('test-file.jpg', 'menu')
-            expect(result).toBe('http://localhost:3000/uploads/menus/test-file.jpg')
+            expect(result).toBe('http://localhost:5000/uploads/menus/test-file.jpg')
         })
 
         it('should use BASE_URL from environment if available', () => {

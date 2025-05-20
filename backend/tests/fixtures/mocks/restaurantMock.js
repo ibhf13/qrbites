@@ -11,11 +11,10 @@ const restaurantMock = {
       website: 'https://testrestaurant.com'
     },
     location: {
-      address: '123 Test Street',
-      city: 'Test City',
-      state: 'Test State',
-      zipCode: '12345',
-      country: 'Test Country'
+      street: 'Teststraße',
+      houseNumber: '123',
+      city: 'Frankfurt',
+      zipCode: '60311'
     },
     hours: [
       {
@@ -71,11 +70,10 @@ const restaurantMock = {
       website: 'invalid-website'
     },
     location: {
-      address: '',
+      street: '',
+      houseNumber: '',
       city: '',
-      state: '',
-      zipCode: 'invalid',
-      country: ''
+      zipCode: 'invalid123' // invalid German postal code
     },
     description: 'A'.repeat(1001) // too long
   },
@@ -85,8 +83,9 @@ const restaurantMock = {
       phone: '+0987654321'
     },
     location: {
-      address: '456 New Street',
-      city: 'Updated City'
+      street: 'Neue Straße',
+      houseNumber: '456',
+      city: 'Stuttgart'
     },
     isActive: false
   },
@@ -99,11 +98,10 @@ const restaurantMock = {
         email: 'contact@italianbistro.com'
       },
       location: {
-        address: '123 Italian Street',
-        city: 'Food City',
-        state: 'State',
-        zipCode: '12345',
-        country: 'Country'
+        street: 'Italienische Straße',
+        houseNumber: '123',
+        city: 'Dresden',
+        zipCode: '01067'
       },
       cuisineType: ['Italian'],
       userId: new mongoose.Types.ObjectId('60d21b4667d0d8992e610c60'),
@@ -119,11 +117,10 @@ const restaurantMock = {
         email: 'contact@sushipalace.com'
       },
       location: {
-        address: '456 Japanese Avenue',
-        city: 'Food City',
-        state: 'State',
-        zipCode: '12345',
-        country: 'Country'
+        street: 'Japanische Allee',
+        houseNumber: '456',
+        city: 'Düsseldorf',
+        zipCode: '40213'
       },
       cuisineType: ['Japanese', 'Asian'],
       userId: new mongoose.Types.ObjectId('60d21b4667d0d8992e610c60'),
@@ -139,11 +136,10 @@ const restaurantMock = {
         email: 'contact@tacoheaven.com'
       },
       location: {
-        address: '789 Mexican Boulevard',
-        city: 'Food City',
-        state: 'State',
-        zipCode: '12345',
-        country: 'Country'
+        street: 'Mexikanischer Boulevard',
+        houseNumber: '789',
+        city: 'Hannover',
+        zipCode: '30159'
       },
       cuisineType: ['Mexican'],
       userId: new mongoose.Types.ObjectId('60d21b4667d0d8992e610c61'),

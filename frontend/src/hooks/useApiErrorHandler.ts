@@ -1,95 +1,117 @@
-import { AxiosError } from 'axios'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback } from 'react'
-import { useNotificationContext } from '../contexts/NotificationContext'
+import { useAuthContext } from '@/features/auth/contexts/AuthContext'
+import { useNotificationContext } from '@/features/notifications/contexts/NotificationContext'
 
-interface ApiErrorOptions {
-    fallbackMessage?: string
-    showNotification?: boolean
-    logError?: boolean
-    title?: string
-}
 
-interface ValidationErrors {
-    [fieldName: string]: string[]
-}
-
-const defaultOptions: ApiErrorOptions = {
-    fallbackMessage: 'An unexpected error occurred',
-    showNotification: true,
-    logError: true,
-    title: 'Error'
+interface ApiError {
+    message: string
+    code?: string
+    status?: number
 }
 
 export const useApiErrorHandler = () => {
+    const { logout } = useAuthContext()
     const { showError } = useNotificationContext()
 
-    const handleApiError = useCallback((
-        error: unknown,
-        options: ApiErrorOptions = {}
-    ) => {
-        const finalOptions = { ...defaultOptions, ...options }
+    const handleApiError = useCallback((error: ApiError | Error | any) => {
+        console.error('API Error:', error)
 
-        if (finalOptions.logError) {
-            console.error('API Error:', error)
+        if (error?.response?.status === 401) {
+            showError('Your session has expired. Please log in again.')
+            logout()
+
+            return
         }
 
-        // Handle Axios errors specifically
-        if (error instanceof AxiosError) {
-            const status = error.response?.status
-            const data = error.response?.data
+        if (error?.response?.status === 403) {
+            showError('You do not have permission to perform this action.')
 
-            // Handle different status codes
-            if (status === 401) {
-                if (finalOptions.showNotification) {
-                    showError('Your session has expired. Please log in again.', {
-                        title: 'Authentication Error'
-                    })
-                }
-                // Could trigger a logout action here
-                return 'authentication_error'
-            }
+            return
+        }
 
-            // Handle validation errors (usually 422)
-            if (status === 422 && data?.errors) {
-                const validationErrors = data.errors as ValidationErrors
+        if (error?.response?.status === 404) {
+            showError('The requested resource was not found.')
 
-                // Count total errors
-                const totalErrors = Object.values(validationErrors).reduce(
-                    (count, fieldErrors) => count + fieldErrors.length, 0
-                )
+            return
+        }
 
-                if (finalOptions.showNotification) {
-                    const errorMsg = `Please correct the ${totalErrors} ${totalErrors === 1 ? 'error' : 'errors'} in your submission.`
-                    showError(errorMsg, { title: 'Validation Error' })
-                }
+        if (error?.response?.status === 429) {
+            showError('Too many requests. Please wait a moment and try again.')
 
-                return {
-                    type: 'validation_error',
-                    errors: validationErrors
-                }
-            }
+            return
+        }
 
-            // Generic error with message from response
-            if (data?.message && finalOptions.showNotification) {
-                const message = typeof data.message === 'string' ? data.message : String(data.message)
-                showError(message, {
-                    title: finalOptions.title || 'Error'
+        if (error?.response?.status >= 500) {
+            showError('A server error occurred. Please try again later.')
+
+            return
+        }
+
+        if (error?.code === 'NETWORK_ERROR' || !error?.response) {
+            showError('Network error. Please check your connection and try again.')
+
+            return
+        }
+
+        if (error?.response?.data) {
+            const errorData = error.response.data
+            const message = errorData.message || errorData.error?.message || 'An error occurred'
+
+            showError(message)
+
+            return
+        }
+
+        const message = error?.message || 'An unexpected error occurred'
+
+        showError(message)
+    }, [logout, showError])
+
+    const handleSecurityError = useCallback((error: ApiError | Error | any, operation?: string) => {
+        console.error('Security Error:', error, 'Operation:', operation)
+
+        const operationContext = operation ? ` while ${operation}` : ''
+
+        if (error?.response?.status === 401) {
+            showError(`Authentication failed${operationContext}. Please log in again.`)
+            logout()
+
+            return
+        }
+
+        if (error?.response?.status === 403) {
+            showError(`Access denied${operationContext}. You do not have permission for this action.`)
+
+            return
+        }
+
+        handleApiError(error)
+    }, [handleApiError, logout, showError])
+
+    const handleValidationError = useCallback((error: any) => {
+        if (error?.response?.data?.errors) {
+            const errors = error.response.data.errors
+
+            if (Array.isArray(errors)) {
+                errors.forEach((err: any) => {
+                    showError(err.message || err)
                 })
-                return 'api_error'
+
+                return
             }
         }
 
-        // For all other errors, show a generic message
-        if (finalOptions.showNotification) {
-            showError(finalOptions.fallbackMessage || 'An unexpected error occurred', {
-                title: finalOptions.title || 'Error'
-            })
-        }
+        const message = error?.response?.data?.message || 'Validation failed'
 
-        return 'unknown_error'
+        showError(message)
     }, [showError])
 
-    return { handleApiError }
+    return {
+        handleApiError,
+        handleSecurityError,
+        handleValidationError
+    }
 }
 
 export default useApiErrorHandler 

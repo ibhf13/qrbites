@@ -11,14 +11,24 @@ jest.mock('@src/app', () => {
                 {
                     _id: 'restaurant-id-1',
                     name: 'Restaurant One',
-                    address: '123 Test St',
+                    location: {
+                        street: '123 Test St',
+                        houseNumber: '123',
+                        city: 'Test City',
+                        zipCode: '12345'
+                    },
                     phone: '123-456-7890',
                     ownerId: 'user-id-1'
                 },
                 {
                     _id: 'restaurant-id-2',
                     name: 'Restaurant Two',
-                    address: '456 Test Ave',
+                    location: {
+                        street: '456 Test Ave',
+                        houseNumber: '456',
+                        city: 'Test City',
+                        zipCode: '12345'
+                    },
                     phone: '987-654-3210',
                     ownerId: 'user-id-2'
                 }
@@ -41,7 +51,12 @@ jest.mock('@src/app', () => {
                 data: {
                     _id: 'restaurant-id-1',
                     name: 'Restaurant One',
-                    address: '123 Test St',
+                    location: {
+                        street: '123 Test St',
+                        houseNumber: '123',
+                        city: 'Test City',
+                        zipCode: '12345'
+                    },
                     phone: '123-456-7890',
                     ownerId: 'user-id-1',
                     description: 'A test restaurant',
@@ -205,7 +220,12 @@ describe('Restaurant Routes Integration Tests', () => {
             expect(res.body.success).toBe(true)
             expect(res.body.data).toHaveProperty('_id', 'restaurant-id-1')
             expect(res.body.data).toHaveProperty('name', 'Restaurant One')
-            expect(res.body.data).toHaveProperty('address', '123 Test St')
+            expect(res.body.data).toHaveProperty('location', {
+                street: '123 Test St',
+                houseNumber: '123',
+                city: 'Test City',
+                zipCode: '12345'
+            })
             expect(res.body.data).toHaveProperty('openingHours')
         })
 
@@ -230,7 +250,12 @@ describe('Restaurant Routes Integration Tests', () => {
         it('should create a new restaurant with valid data', async () => {
             const newRestaurant = {
                 name: 'New Test Restaurant',
-                address: '789 Test Blvd',
+                location: {
+                    street: '789 Test Blvd',
+                    houseNumber: '789',
+                    city: 'Test City',
+                    zipCode: '12345'
+                },
                 phone: '555-123-4567',
                 cuisine: 'Test Cuisine',
                 description: 'A new test restaurant'
@@ -245,7 +270,7 @@ describe('Restaurant Routes Integration Tests', () => {
             expect(res.body.success).toBe(true)
             expect(res.body.data).toHaveProperty('_id')
             expect(res.body.data).toHaveProperty('name', newRestaurant.name)
-            expect(res.body.data).toHaveProperty('address', newRestaurant.address)
+            expect(res.body.data).toHaveProperty('location', newRestaurant.location)
             expect(res.body.data).toHaveProperty('ownerId')
             expect(res.body.data).toHaveProperty('createdAt')
             expect(res.body.data).toHaveProperty('updatedAt')
@@ -256,7 +281,12 @@ describe('Restaurant Routes Integration Tests', () => {
                 .post('/api/restaurants')
                 .send({
                     name: 'Unauthorized Restaurant',
-                    address: '123 Unauthorized St'
+                    location: {
+                        street: '123 Unauthorized St',
+                        houseNumber: '123',
+                        city: 'Unauthorized City',
+                        zipCode: '12345'
+                    }
                 })
 
             expect(res.statusCode).toBe(401)
@@ -270,7 +300,12 @@ describe('Restaurant Routes Integration Tests', () => {
                 .set('Authorization', ownerToken)
                 .send({
                     name: 'Ab', // Too short
-                    address: '123 Test St'
+                    location: {
+                        street: '123 Test St',
+                        houseNumber: '123',
+                        city: 'Test City',
+                        zipCode: '12345'
+                    }
                 })
 
             expect(res.statusCode).toBe(400)

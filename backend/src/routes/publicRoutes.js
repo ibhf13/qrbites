@@ -8,14 +8,12 @@ const {
     menuItemsQuerySchema
 } = require('@validations/publicValidation')
 
-// Public restaurant endpoint
 router.get(
     '/restaurants/:restaurantId',
     validateParams(restaurantIdSchema),
     publicController.getPublicRestaurant
 )
 
-// Public menu endpoints
 router.get(
     '/menus/:menuId',
     validateParams(menuIdSchema),

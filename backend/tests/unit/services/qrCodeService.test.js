@@ -99,7 +99,7 @@ describe('QR Code Service', () => {
         it('should use default URL if BASE_URL is not set', () => {
             const result = getQRCodeUrl('test.png')
 
-            expect(result).toBe('http://localhost:3000/uploads/qrcodes/test.png')
+            expect(result).toBe('http://localhost:5000/uploads/qrcodes/test.png')
         })
     })
 
@@ -113,7 +113,7 @@ describe('QR Code Service', () => {
 
             const result = await generateMenuQRCode(menuId, restaurantId)
 
-            expect(result).toBe('http://localhost:3000/uploads/qrcodes/mock-uuid.png')
+            expect(result).toBe('http://localhost:5000/uploads/qrcodes/mock-uuid.png')
             expect(QRCode.toFile).toHaveBeenCalledWith(
                 path.join(dirs.qrcode, 'mock-uuid.png'),
                 'http://localhost:5000/r/123456789?restaurant=987654321',

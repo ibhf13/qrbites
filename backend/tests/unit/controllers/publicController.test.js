@@ -1,17 +1,27 @@
 const mongoose = require('mongoose')
 
 // Mock the models
-jest.mock('@models/restaurantModel')
-jest.mock('@models/menuModel')
-jest.mock('@models/menuItemModel')
+jest.mock('@models/restaurant')
+jest.mock('@models/menu')
+jest.mock('@models/menuItem')
 
 // Mock asyncHandler to pass through the function
-jest.mock('@middlewares/asyncHandler', () => (fn) => async (...args) => fn(...args))
+jest.mock('@utils/errorUtils', () => ({
+    ...jest.requireActual('@utils/errorUtils'),
+    asyncHandler: (fn) => async (...args) => fn(...args)
+}))
+
+// Mock the menu data service
+jest.mock('@services/menuDataService', () => ({
+    getCompleteMenuData: jest.fn(),
+    processMenuForPublic: jest.fn()
+}))
 
 // Import the controller and models after mocking
-const Restaurant = require('@models/restaurantModel')
-const Menu = require('@models/menuModel')
-const MenuItem = require('@models/menuItemModel')
+const Restaurant = require('@models/restaurant')
+const Menu = require('@models/menu')
+const MenuItem = require('@models/menuItem')
+const { getCompleteMenuData } = require('@services/menuDataService')
 const { notFound } = require('@utils/errorUtils')
 
 const {
@@ -168,6 +178,50 @@ describe('Public Controller', () => {
             req.params.menuId = new mongoose.Types.ObjectId().toString()
 
             await expect(getPublicMenuItems(req, res)).rejects.toThrow('Menu not found')
+        })
+    })
+
+    describe('getCompletePublicMenu', () => {
+        it('should get complete menu data using menu data service', async () => {
+            const menuId = new mongoose.Types.ObjectId()
+            const mockCompleteMenuData = {
+                menu: {
+                    id: menuId,
+                    name: 'Test Menu',
+                    description: 'Test Description',
+                    restaurant: { id: 'restaurant123', name: 'Test Restaurant' }
+                },
+                categories: ['Appetizers', 'Main Course'],
+                itemsByCategory: {
+                    'Appetizers': [{ name: 'Salad', price: 10 }],
+                    'Main Course': [{ name: 'Steak', price: 25 }]
+                },
+                totalItems: 2
+            }
+
+            getCompleteMenuData.mockResolvedValue(mockCompleteMenuData)
+
+            req.params.menuId = menuId.toString()
+
+            await getCompletePublicMenu(req, res)
+
+            expect(getCompleteMenuData).toHaveBeenCalledWith(menuId.toString())
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                data: mockCompleteMenuData
+            })
+        })
+
+        it('should handle errors from menu data service', async () => {
+            const menuId = new mongoose.Types.ObjectId()
+            const error = new Error('Menu not found')
+
+            getCompleteMenuData.mockRejectedValue(error)
+
+            req.params.menuId = menuId.toString()
+
+            await expect(getCompletePublicMenu(req, res)).rejects.toThrow('Menu not found')
+            expect(getCompleteMenuData).toHaveBeenCalledWith(menuId.toString())
         })
     })
 

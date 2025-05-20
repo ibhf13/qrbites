@@ -14,19 +14,17 @@ interface ValidationErrorSummaryProps {
 export const ValidationErrorSummary: React.FC<ValidationErrorSummaryProps> = ({
     errors,
     onDismiss,
-    className = '',
+    className,
 }) => {
     if (!errors || Object.keys(errors).length === 0) {
         return null
     }
 
-    // Get total error count
     const totalErrors = Object.values(errors).reduce(
         (count, fieldErrors) => count + fieldErrors.length,
         0
     )
 
-    // Get a flat list of all errors with field names
     const errorMessages = Object.entries(errors).flatMap(([field, fieldErrors]) =>
         fieldErrors.map(error => `${field}: ${error}`)
     )
@@ -48,4 +46,4 @@ export const ValidationErrorSummary: React.FC<ValidationErrorSummaryProps> = ({
     )
 }
 
-export default ValidationErrorSummary 
+export default ValidationErrorSummary

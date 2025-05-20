@@ -1,3 +1,5 @@
+import { Menu } from "@/features/menus/types/menu.types"
+
 export interface ContactInfo {
     phone: string
     email?: string
@@ -5,11 +7,10 @@ export interface ContactInfo {
 }
 
 export interface Location {
-    address: string
+    street: string
+    houseNumber: string
     city: string
-    state: string
     zipCode: string
-    country: string
 }
 
 export interface BusinessHours {
@@ -36,8 +37,8 @@ export interface Restaurant {
     isActive: boolean
     createdAt: string
     updatedAt: string
-    menus?: string[] // Virtual field from backend
-    stats?: RestaurantStats // Stats from backend
+    menus?: Menu[]
+    stats?: RestaurantStats
 }
 
 export interface RestaurantFormData {
@@ -48,6 +49,7 @@ export interface RestaurantFormData {
     location: Location
     hours: BusinessHours[]
     logo?: File
+    logoUrl?: string
     bannerImage?: File
     isActive?: boolean
 }

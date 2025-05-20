@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 const { protect, restrictTo, checkOwnership } = require('@middlewares/authMiddleware')
-const User = require('@models/userModel')
+const User = require('@models/user')
 const { unauthorized, forbidden } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
 
 // Mock dependencies
 jest.mock('jsonwebtoken')
-jest.mock('@models/userModel')
+jest.mock('@models/user')
 jest.mock('@utils/errorUtils')
 jest.mock('@utils/logger')
 
@@ -60,7 +60,6 @@ describe('Authentication Middleware', () => {
             // Mock user find
             const mockUser = {
                 _id: '60d21b4667d0d8992e610c60',
-                name: 'Test User',
                 email: 'test@example.com',
                 role: 'user',
                 isActive: true
@@ -100,7 +99,6 @@ describe('Authentication Middleware', () => {
             // Mock disabled user
             const mockUser = {
                 _id: '60d21b4667d0d8992e610c60',
-                name: 'Test User',
                 email: 'test@example.com',
                 role: 'user',
                 isActive: false
@@ -164,7 +162,6 @@ describe('Authentication Middleware', () => {
             // Setup authenticated user
             req.user = {
                 _id: '60d21b4667d0d8992e610c60',
-                name: 'Test User',
                 email: 'test@example.com',
                 role: 'user'
             }
@@ -202,7 +199,6 @@ describe('Authentication Middleware', () => {
             // Setup authenticated user
             req.user = {
                 _id: new mongoose.Types.ObjectId('60d21b4667d0d8992e610c60'),
-                name: 'Test User',
                 email: 'test@example.com',
                 role: 'user'
             }

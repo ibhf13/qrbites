@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const User = require('@models/userModel')
+const User = require('@models/user')
 const authController = require('@controllers/authController')
 const userMock = require('@mocks/userMockEnhanced')
 const { unauthorized, badRequest, notFound } = require('@utils/errorUtils')
@@ -14,7 +14,7 @@ jest.mock('bcryptjs', () => ({
     compare: jest.fn()
 }))
 
-jest.mock('@models/userModel')
+jest.mock('@models/user')
 
 jest.mock('@utils/logger', () => ({
     success: jest.fn(),
@@ -228,13 +228,32 @@ describe('Auth Controller Tests', () => {
     describe('getMe', () => {
         it('should return the current user profile', async () => {
             // Set req.user as it would be set by auth middleware
-            req.user = { ...userMock.validUser }
+            req.user = { _id: userMock.validUser._id }
+
+            // Mock User.findById with populate
+            const userWithProfile = {
+                _id: userMock.validUser._id,
+                email: userMock.validUser.email,
+                role: userMock.validUser.role,
+                isActive: userMock.validUser.isActive,
+                profile: null // No profile yet
+            }
+
+            const mockQuery = {
+                select: jest.fn().mockReturnThis(),
+                populate: jest.fn().mockResolvedValue(userWithProfile)
+            }
+
+            User.findById = jest.fn().mockReturnValue(mockQuery)
 
             await authController.getMe(req, res, next)
 
+            expect(User.findById).toHaveBeenCalledWith(req.user._id)
+            expect(mockQuery.select).toHaveBeenCalledWith('-password')
+            expect(mockQuery.populate).toHaveBeenCalledWith('profile')
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
-                data: req.user
+                data: userWithProfile
             })
         })
     })

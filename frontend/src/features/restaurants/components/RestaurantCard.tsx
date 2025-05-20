@@ -1,125 +1,153 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { Card, Typography, Box, FlexBox } from '@/components/common'
 import { Restaurant } from '../types/restaurant.types'
+import {
+    PencilIcon,
+    TrashIcon,
+    MapPinIcon,
+    BuildingStorefrontIcon
+} from '@heroicons/react/24/outline'
 
 interface RestaurantCardProps {
     restaurant: Restaurant
     onEdit: (id: string) => void
     onDelete: (id: string) => void
+    loading?: boolean
 }
 
 export const RestaurantCard: React.FC<RestaurantCardProps> = ({
     restaurant,
     onEdit,
-    onDelete
+    onDelete,
+    loading = false
 }) => {
-    const { _id, name, description, logoUrl, location, stats, isActive } = restaurant
+    const navigate = useNavigate()
+    const { _id, name, description, logoUrl, isActive, location } = restaurant
 
-    // Format date from ISO string
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString)
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        }).format(date)
-    }
-
-    // Handle card actions with click stop propagation to prevent navigation
-    const handleEdit = (e: React.MouseEvent) => {
+    const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation()
-        e.preventDefault()
         onEdit(_id)
     }
 
-    const handleDelete = (e: React.MouseEvent) => {
+    const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation()
-        e.preventDefault()
         onDelete(_id)
     }
 
-    return (
-        <Link
-            to={`/restaurants/${_id}`}
-            className="block rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-200"
-        >
-            <div className="relative h-40 overflow-hidden rounded-t-lg bg-gray-100">
-                {logoUrl ? (
-                    <img
-                        src={logoUrl}
-                        alt={`${name} logo`}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <div className="flex items-center justify-center h-full bg-blue-50">
-                        <span className="text-4xl font-bold text-blue-300">
-                            {name.substring(0, 2).toUpperCase()}
-                        </span>
-                    </div>
-                )}
-                {!isActive && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
-                        Inactive
-                    </div>
-                )}
-            </div>
+    const handleViewMenus = () => {
+        if (!loading) {
+            navigate(`/restaurants/${_id}`)
+        }
+    }
 
-            <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-semibold text-gray-800 line-clamp-1">{name}</h3>
-                    <div className="flex">
-                        <button
-                            onClick={handleEdit}
-                            aria-label="Edit restaurant"
-                            className="p-1 text-gray-500 hover:text-blue-600 mr-1"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            aria-label="Delete restaurant"
-                            className="p-1 text-gray-500 hover:text-red-600"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                {description && (
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-3">{description}</p>
-                )}
-
-                <div className="space-y-2">
-                    {location && (
-                        <div className="flex items-center text-sm text-gray-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span className="line-clamp-1">
-                                {[location.city, location.state].filter(Boolean).join(', ')}
-                            </span>
-                        </div>
-                    )}
-
-                    <div className="flex items-center text-sm text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <span>
-                            {stats?.menuCount || 0} Menu{(stats?.menuCount || 0) !== 1 ? 's' : ''}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-400">
-                    Updated {formatDate(restaurant.updatedAt)}
-                </div>
-            </div>
-        </Link>
+    const imagePlaceholder = (
+        <Box className="flex items-center justify-center w-full h-36 bg-white dark:bg-white">
+            <Typography variant="body" className="font-bold text-black text-2xl">
+                {name ? name.substring(0, 2).toUpperCase() : 'R'}
+            </Typography>
+        </Box>
     )
-} 
+
+    const imageFallback = (
+        <Box className="flex items-center justify-center h-full bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
+            <Box className="text-center space-y-1.5">
+                <Box className="w-8 h-8 bg-orange-200 dark:bg-orange-800 rounded-lg flex items-center justify-center mx-auto">
+                    <BuildingStorefrontIcon className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                </Box>
+                <Typography variant="caption" color="muted" className="text-xs">
+                    Failed to load
+                </Typography>
+            </Box>
+        </Box>
+    )
+
+    const getLocationText = () => {
+        if (!location) return 'No address provided'
+
+        const { street, houseNumber, city, zipCode } = location
+        const parts = [
+            street && houseNumber ? `${street} ${houseNumber}` : street || houseNumber,
+            city,
+            zipCode
+        ].filter(Boolean)
+
+        return parts.length > 0 ? parts.join(', ') : 'No address provided'
+    }
+
+    return (
+        <Card
+            variant="default"
+            hoverEffect="lift"
+            interactive
+            loading={loading}
+            onClick={handleViewMenus}
+            image={{
+                src: logoUrl,
+                alt: `${name} logo`,
+                aspectRatio: 'video',
+                placeholder: !logoUrl ? imagePlaceholder : undefined,
+                fallback: imageFallback,
+                objectFit: 'cover',
+                className: 'h-36'
+            }}
+            badges={[
+                {
+                    label: isActive ? 'Active' : 'Inactive',
+                    color: isActive ? 'success' : 'warning',
+                    variant: 'filled',
+                    position: 'top-left'
+                }
+            ]}
+            actions={[
+                {
+                    icon: PencilIcon,
+                    label: 'Edit restaurant',
+                    onClick: handleEdit,
+                    variant: 'primary'
+                },
+                {
+                    icon: TrashIcon,
+                    label: 'Delete restaurant',
+                    onClick: handleDelete,
+                    variant: 'danger'
+                }
+            ]}
+            contentPadding="sm"
+            className="h-full flex flex-col"
+        >
+            <Box className="flex-1 space-y-2.5">
+                <Typography
+                    variant="heading"
+                    color="neutral"
+                    className="font-semibold line-clamp-1 text-base"
+                >
+                    {name}
+                </Typography>
+
+                <Typography
+                    variant="body"
+                    color="muted"
+                    className={`text-sm line-clamp-2 min-h-[2.25rem] ${description
+                        ? "text-slate-600 dark:text-slate-400"
+                        : "text-slate-400 dark:text-slate-500 italic"
+                        }`}
+                >
+                    {description || 'No description provided'}
+                </Typography>
+
+                <FlexBox className="gap-2 bg-gray-50 dark:bg-gray-800 rounded-md px-2 py-1.5 mt-auto">
+                    <MapPinIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0" />
+                    <Typography
+                        variant="caption"
+                        className="text-slate-500 dark:text-slate-400 line-clamp-2 text-xs"
+                    >
+                        {getLocationText()}
+                    </Typography>
+                </FlexBox>
+            </Box>
+        </Card>
+    )
+}
+
+export default RestaurantCard

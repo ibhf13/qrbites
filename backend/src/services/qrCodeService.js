@@ -13,7 +13,6 @@ const { dirs } = require('@services/fileUploadService')
  */
 const generateQRCode = async (url, options = {}) => {
     try {
-        // Default options
         const defaultOptions = {
             errorCorrectionLevel: 'H',
             type: 'png',
@@ -25,20 +24,16 @@ const generateQRCode = async (url, options = {}) => {
             }
         }
 
-        // Merge options
         const qrOptions = { ...defaultOptions, ...options }
 
-        // Ensure QR code directory exists
         if (!fs.existsSync(dirs.qrcode)) {
             fs.mkdirSync(dirs.qrcode, { recursive: true })
             logger.info(`Created QR code directory: ${dirs.qrcode}`)
         }
 
-        // Generate a unique filename
         const filename = `${uuidv4()}.png`
         const filePath = path.join(dirs.qrcode, filename)
 
-        // Generate the QR code
         await QRCode.toFile(filePath, url, qrOptions)
 
         logger.info(`QR code generated successfully: ${filename}`)
@@ -57,7 +52,6 @@ const generateQRCode = async (url, options = {}) => {
 const getQRCodeUrl = (filename) => {
     if (!filename) return null
 
-    // Create URL that can be used in the frontend
     const baseUrl = process.env.BASE_URL || process.env.API_URL || 'http://localhost:5000'
     return `${baseUrl}/uploads/qrcodes/${filename}`
 }
@@ -70,14 +64,11 @@ const getQRCodeUrl = (filename) => {
  */
 const generateMenuQRCode = async (menuId, restaurantId) => {
     try {
-        // The URL that the QR code will point to - Using new redirect endpoint
         const baseUrl = process.env.API_URL || 'http://localhost:5000'
         const url = `${baseUrl}/r/${menuId}?restaurant=${restaurantId}`
 
-        // Generate the QR code
         const filename = await generateQRCode(url)
 
-        // Return the URL to access the QR code
         return getQRCodeUrl(filename)
     } catch (error) {
         logger.error(`Error generating menu QR code for menu ${menuId}:`, error)

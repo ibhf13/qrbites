@@ -1,8 +1,8 @@
-// Export all restaurant components
-export { RestaurantCard } from './RestaurantCard'
+export { default as RestaurantCard } from './RestaurantCard'
 export { default as RestaurantCreationForm } from './RestaurantCreationForm'
 export { default as RestaurantEditForm } from './RestaurantEditForm'
-export { RestaurantList } from './RestaurantList'
-export { RestaurantListFilters } from './RestaurantListFilters'
-export { RestaurantListSkeleton } from './RestaurantListSkeleton'
-
+export { default as RestaurantFormDialog } from './RestaurantFormDialog'
+export { default as RestaurantsPage } from '../pages/RestaurantsPage'
+export { default as RestaurantListSkeleton } from './RestaurantListSkeleton'
+export { default as BaseRestaurantForm } from './BaseRestaurantForm'
+export * from './form-steps'

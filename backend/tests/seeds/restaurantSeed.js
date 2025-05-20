@@ -1,4 +1,4 @@
-const Restaurant = require('@models/restaurantModel')
+const Restaurant = require('@models/restaurant')
 const restaurantMock = require('../fixtures/mocks/restaurantMock')
 const logger = require('@utils/logger')
 const fs = require('fs')

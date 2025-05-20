@@ -1,15 +1,6 @@
 const Joi = require('joi')
-const mongoose = require('mongoose')
+const { validateObjectId } = require('./commonValidation')
 
-// Helper function to validate ObjectId
-const validateObjectId = (value, helpers) => {
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-        return helpers.error('any.invalid')
-    }
-    return value
-}
-
-// Schema for creating a new menu
 const menuSchema = Joi.object({
     name: Joi.string()
         .min(3)

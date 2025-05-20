@@ -1,4 +1,4 @@
-import { Card, ErrorDisplay } from '@/components/common'
+import { Card, ErrorDisplay, Typography, Box } from '@/components/common'
 import React from 'react'
 
 interface AuthCardProps {
@@ -16,7 +16,9 @@ const AuthCard: React.FC<AuthCardProps> = ({
 }) => {
     return (
         <Card className="max-w-md w-full mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{title}</h2>
+            <Typography variant="heading" align="center" color="neutral" className="mb-6">
+                {title}
+            </Typography>
 
             {error && (
                 <ErrorDisplay
@@ -29,9 +31,9 @@ const AuthCard: React.FC<AuthCardProps> = ({
             {children}
 
             {footerContent && (
-                <div className="mt-6 text-center">
+                <Box mt="xl" className="text-center">
                     {footerContent}
-                </div>
+                </Box>
             )}
         </Card>
     )

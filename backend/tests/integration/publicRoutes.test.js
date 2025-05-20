@@ -1,9 +1,9 @@
 const request = require('supertest')
 const mongoose = require('mongoose')
 const app = require('@app')
-const Menu = require('@models/menuModel')
-const Restaurant = require('@models/restaurantModel')
-const MenuItem = require('@models/menuItemModel')
+const Menu = require('@models/menu')
+const Restaurant = require('@models/restaurant')
+const MenuItem = require('@models/menuItem')
 const { clearDB } = require('@tests/setup')
 const restaurantMock = require('@tests/fixtures/mocks/restaurantMock')
 const menuMock = require('@tests/fixtures/mocks/menuMock')
@@ -156,7 +156,16 @@ describe('Public Routes Integration Tests', () => {
             expect(res.body.data.menu).toBeDefined()
             expect(res.body.data.categories).toBeDefined()
             expect(res.body.data.itemsByCategory).toBeDefined()
-            // Update or remove assertions about specific items
+            expect(res.body.data.totalItems).toBeDefined()
+
+            // Verify the menu structure matches the new service
+            expect(res.body.data.menu.name).toBe('Test Menu')
+            expect(res.body.data.menu.restaurant).toBeDefined()
+            expect(res.body.data.totalItems).toBe(3) // We created 3 menu items
+
+            // Verify categories are returned
+            expect(Array.isArray(res.body.data.categories)).toBe(true)
+            expect(res.body.data.categories.length).toBeGreaterThan(0)
         })
     })
 

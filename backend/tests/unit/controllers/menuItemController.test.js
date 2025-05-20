@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
-const MenuItem = require('@models/menuItemModel')
-const Menu = require('@models/menuModel')
-const Restaurant = require('@models/restaurantModel')
+const MenuItem = require('@models/menuItem')
+const Menu = require('@models/menu')
+const Restaurant = require('@models/restaurant')
 const menuItemController = require('@controllers/menuItemController')
 const menuItemMock = require('@mocks/menuItemMock')
 const menuMock = require('@mocks/menuMockEnhanced')
@@ -10,9 +10,9 @@ const userMock = require('@mocks/userMockEnhanced')
 const { notFound, forbidden, badRequest } = require('@utils/errorUtils')
 
 // Mock dependencies
-jest.mock('@models/menuItemModel')
-jest.mock('@models/menuModel')
-jest.mock('@models/restaurantModel')
+jest.mock('@models/menuItem')
+jest.mock('@models/menu')
+jest.mock('@models/restaurant')
 jest.mock('@services/errorLogService', () => ({
     logDatabaseError: jest.fn()
 }))

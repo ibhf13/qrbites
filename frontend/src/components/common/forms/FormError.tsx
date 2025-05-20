@@ -1,32 +1,35 @@
 import React from 'react'
+import { Box, Typography } from '@/components/common'
 
 interface FormErrorProps {
     errors?: string | string[]
     className?: string
 }
 
-export const FormError: React.FC<FormErrorProps> = ({ errors, className = '' }) => {
-    // Return nothing if no errors
+export const FormError: React.FC<FormErrorProps> = ({
+    errors,
+    className
+}) => {
     if (!errors || (Array.isArray(errors) && errors.length === 0)) {
         return null
     }
 
-    // Convert string error to array
     const errorList = Array.isArray(errors) ? errors : [errors]
 
     return (
-        <div className={`mt-1 ${className}`}>
+        <Box mt="xs" className={className}>
             {errorList.map((error, index) => (
-                <p
+                <Typography
                     key={index}
-                    className="text-sm text-red-600 dark:text-red-400"
+                    variant="caption"
+                    color="error"
                     role="alert"
                 >
                     {error}
-                </p>
+                </Typography>
             ))}
-        </div>
+        </Box>
     )
 }
 
-export default FormError 
+export default FormError

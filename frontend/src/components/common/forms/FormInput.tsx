@@ -1,4 +1,6 @@
 import React, { forwardRef } from 'react'
+import { cn } from '@/utils/cn'
+import { Box, FlexBox, Typography } from '@/components/common'
 
 export interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string
@@ -21,14 +23,14 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             error,
             leftIcon,
             rightIcon,
-            containerClassName = '',
-            labelClassName = '',
-            inputClassName = '',
-            helperClassName = '',
-            errorClassName = '',
+            containerClassName,
+            labelClassName,
+            inputClassName,
+            helperClassName,
+            errorClassName,
             id,
             disabled,
-            className = '',
+            className,
             ...rest
         },
         ref
@@ -36,56 +38,81 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         const inputId = id || Math.random().toString(36).substring(2, 9)
 
         return (
-            <div className={`mb-4 ${containerClassName}`}>
+            <Box mb="md" className={containerClassName}>
                 {label && (
-                    <label
-                        htmlFor={inputId}
-                        className={`block text-sm font-medium text-gray-700 mb-1 ${labelClassName}`}
+                    <Typography
+                        variant="caption"
+                        color="neutral"
+                        className={cn('block mb-1', labelClassName)}
                     >
                         {label}
-                    </label>
+                    </Typography>
                 )}
-                <div className="relative rounded-md">
+                <Box className="relative" rounded="md">
                     {leftIcon && (
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FlexBox
+                            align="center"
+                            className="absolute inset-y-0 left-0 pl-3 pointer-events-none text-neutral-400 dark:text-neutral-500"
+                        >
                             {leftIcon}
-                        </div>
+                        </FlexBox>
                     )}
                     <input
                         ref={ref}
                         id={inputId}
                         disabled={disabled}
-                        className={`
-              w-full rounded-md 
-              ${leftIcon ? 'pl-10' : 'pl-4'} 
-              ${rightIcon ? 'pr-10' : 'pr-4'} 
-              py-2 
-              border ${error ? 'border-red-300' : 'border-gray-300'} 
-              ${error ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-primary-500 focus:border-primary-500'}
-              text-gray-900 placeholder-gray-400
-              disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed
-              ${inputClassName}
-              ${className}
-            `}
+                        className={cn(
+                            'w-full rounded-md py-2 border',
+                            'text-neutral-900 dark:text-neutral-100',
+                            'bg-white dark:bg-neutral-800',
+                            'placeholder-neutral-400 dark:placeholder-neutral-500',
+                            'disabled:bg-neutral-100 dark:disabled:bg-neutral-700',
+                            'disabled:text-neutral-500 dark:disabled:text-neutral-400',
+                            'disabled:cursor-not-allowed',
+                            'focus-visible:outline-none focus-visible:ring-2',
+                            {
+                                'pl-10': leftIcon,
+                                'pl-4': !leftIcon,
+                                'pr-10': rightIcon,
+                                'pr-4': !rightIcon,
+                                'border-error-300 dark:border-error-600 focus-visible:ring-error-500 focus-visible:border-error-500': error,
+                                'border-neutral-300 dark:border-neutral-600 focus-visible:ring-primary-500 focus-visible:border-primary-500': !error
+                            },
+                            inputClassName,
+                            className
+                        )}
                         {...rest}
                     />
                     {rightIcon && (
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <FlexBox
+                            align="center"
+                            className="absolute inset-y-0 right-0 pr-3 pointer-events-none text-neutral-400 dark:text-neutral-500"
+                        >
                             {rightIcon}
-                        </div>
+                        </FlexBox>
                     )}
-                </div>
+                </Box>
                 {helperText && !error && (
-                    <p className={`mt-1 text-sm text-gray-500 ${helperClassName}`}>{helperText}</p>
+                    <Typography
+                        variant="caption"
+                        color="neutral"
+                        className={cn('mt-1', helperClassName)}>
+                        {helperText}
+                    </Typography>
                 )}
                 {error && (
-                    <p className={`mt-1 text-sm text-red-600 ${errorClassName}`}>{error}</p>
+                    <Typography
+                        variant="caption"
+                        color="error"
+                        className={cn('mt-1', errorClassName)}>
+                        {error}
+                    </Typography>
                 )}
-            </div>
+            </Box>
         )
     }
 )
 
 FormInput.displayName = 'FormInput'
 
-export default FormInput 
+export default FormInput

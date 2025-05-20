@@ -1,6 +1,5 @@
 const Joi = require('joi')
 
-// Schema for creating a new restaurant
 const restaurantSchema = Joi.object({
     name: Joi.string()
         .min(2)
@@ -30,25 +29,22 @@ const restaurantSchema = Joi.object({
         }),
 
     location: Joi.object({
-        address: Joi.string().required().messages({
-            'string.base': 'Address must be a text',
-            'any.required': 'Address is required'
+        street: Joi.string().required().messages({
+            'string.base': 'Street must be a text',
+            'any.required': 'Street is required'
+        }),
+        houseNumber: Joi.string().required().messages({
+            'string.base': 'House number must be a text',
+            'any.required': 'House number is required'
         }),
         city: Joi.string().required().messages({
             'string.base': 'City must be a text',
             'any.required': 'City is required'
         }),
-        state: Joi.string().required().messages({
-            'string.base': 'State must be a text',
-            'any.required': 'State is required'
-        }),
-        zipCode: Joi.string().required().messages({
+        zipCode: Joi.string().pattern(/^[0-9]{5}$/).required().messages({
             'string.base': 'Zip code must be a text',
+            'string.pattern.base': 'Please provide a valid German postal code (5 digits, e.g., 12345)',
             'any.required': 'Zip code is required'
-        }),
-        country: Joi.string().required().messages({
-            'string.base': 'Country must be a text',
-            'any.required': 'Country is required'
         })
     }).required().messages({
         'object.base': 'Location information is required',
@@ -105,7 +101,6 @@ const restaurantSchema = Joi.object({
         })
 })
 
-// Schema for updating a restaurant
 const restaurantUpdateSchema = Joi.object({
     name: Joi.string()
         .min(2)
@@ -134,11 +129,12 @@ const restaurantUpdateSchema = Joi.object({
         }),
 
     location: Joi.object({
-        address: Joi.string().optional(),
+        street: Joi.string().optional(),
+        houseNumber: Joi.string().optional(),
         city: Joi.string().optional(),
-        state: Joi.string().optional(),
-        zipCode: Joi.string().optional(),
-        country: Joi.string().optional()
+        zipCode: Joi.string().pattern(/^[0-9]{5}$/).optional().messages({
+            'string.pattern.base': 'Please provide a valid German postal code (5 digits, e.g., 12345)'
+        })
     }).optional(),
 
     contact: Joi.object({

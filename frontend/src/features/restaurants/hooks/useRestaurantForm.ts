@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { FORM_DEFAULT_VALUES } from '../constants/restaurant.const'
 import { RestaurantFormData, RestaurantFormMode } from '../types/restaurant.types'
@@ -8,12 +8,13 @@ import { restaurantFormSchema, validateLogoFile } from '../validations/restauran
 export const useRestaurantForm = (
     mode: RestaurantFormMode,
     initialData?: Partial<RestaurantFormData>,
-    onSubmit?: (data: RestaurantFormData) => Promise<void>
+    onSubmit?: (data: RestaurantFormData) => Promise<void>,
+    existingLogoUrl?: string
 ) => {
     const [currentStep, setCurrentStep] = useState(0)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [logoFile, setLogoFile] = useState<File | null>(null)
-    const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo?.toString() || null)
+    const [logoPreview, setLogoPreview] = useState<string | null>(existingLogoUrl || null)
     const [formError, setFormError] = useState<string | null>(null)
 
     const methods = useForm<RestaurantFormData>({
@@ -22,16 +23,86 @@ export const useRestaurantForm = (
         mode: 'onBlur',
     })
 
-    const nextStep = () => {
-        if (currentStep < 3) { // Total steps - 1
-            setCurrentStep(currentStep + 1)
+    useEffect(() => {
+        if (initialData) {
+            methods.reset(initialData)
+        }
+    }, [initialData, methods])
+
+    const validateCurrentStep = async () => {
+        const formData = methods.getValues()
+
+        switch (currentStep) {
+            case 0:
+                return await methods.trigger(['name', 'description', 'contact'])
+            case 1:
+                const locationValid = await methods.trigger(['location.street', 'location.houseNumber', 'location.city', 'location.zipCode'])
+
+                if (!locationValid) {
+                    setFormError('Please fill in all required location fields before proceeding.')
+
+                    return false
+                }
+
+                const location = formData.location
+
+                if (!location?.street?.trim() || !location?.houseNumber?.trim() || !location?.city?.trim() || !location?.zipCode?.trim()) {
+                    setFormError('All location fields (street, city, zip code) are required.')
+
+                    return false
+                }
+
+                return true
+            case 2:
+                return await methods.trigger(['hours'])
+            default:
+                return true
+        }
+    }
+
+    const nextStep = async () => {
+        if (currentStep < 3) {
+            setFormError(null)
+            const isValid = await validateCurrentStep()
+
+            if (isValid) {
+                setCurrentStep(currentStep + 1)
+            }
         }
     }
 
     const prevStep = () => {
         if (currentStep > 0) {
+            setFormError(null)
             setCurrentStep(currentStep - 1)
         }
+    }
+
+    const goToStep = async (targetStep: number) => {
+        if (targetStep < 0 || targetStep > 3) return
+
+        setFormError(null)
+
+        if (targetStep < currentStep) {
+            setCurrentStep(targetStep)
+
+            return
+        }
+
+        for (let step = currentStep; step < targetStep; step++) {
+            const originalStep = currentStep
+
+            setCurrentStep(step)
+            const isValid = await validateCurrentStep()
+
+            if (!isValid) {
+                setCurrentStep(originalStep)
+
+                return
+            }
+        }
+
+        setCurrentStep(targetStep)
     }
 
     const handleLogoChange = (file: File | null) => {
@@ -39,12 +110,12 @@ export const useRestaurantForm = (
             if (file) {
                 validateLogoFile(file)
                 setLogoFile(file)
-                // Create preview URL
                 const previewUrl = URL.createObjectURL(file)
+
                 setLogoPreview(previewUrl)
             } else {
                 setLogoFile(null)
-                setLogoPreview(initialData?.logo?.toString() || null)
+                setLogoPreview(existingLogoUrl || null)
             }
         } catch (error) {
             setFormError(error instanceof Error ? error.message : 'Invalid logo file')
@@ -58,7 +129,6 @@ export const useRestaurantForm = (
         setFormError(null)
 
         try {
-            // Add logo file to the form data if available
             const formData = {
                 ...data,
                 logo: logoFile || undefined
@@ -66,7 +136,6 @@ export const useRestaurantForm = (
 
             await onSubmit(formData)
 
-            // Clean up logo preview URL if it was created
             if (logoFile && logoPreview && logoPreview.startsWith('blob:')) {
                 URL.revokeObjectURL(logoPreview)
             }
@@ -87,6 +156,7 @@ export const useRestaurantForm = (
         formError,
         nextStep,
         prevStep,
+        goToStep,
         handleLogoChange,
         handleSubmit,
     }

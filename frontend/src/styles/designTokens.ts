@@ -1,221 +1,388 @@
-export const colors = {
-    // Primary colors - Refined deep teal that looks appetizing and professional
+import type { DesignTokens } from '../types/designTokens'
+
+const colors = {
     primary: {
-        50: '#ebfffc',
-        100: '#cefff8',
-        200: '#9ffff0',
-        300: '#67f5e2',
-        400: '#38dccf',
-        500: '#17bdb2',
-        600: '#0c9892',
-        700: '#0c7975',
-        800: '#0f5f5e',
-        900: '#104f4d',
-        950: '#023334',
+        50: '#f3f8ed',
+        100: '#e4efd8',
+        200: '#cae1b5',
+        300: '#9fc87e',
+        400: '#88b863',
+        500: '#6a9c46',
+        600: '#507c34',
+        700: '#3f5f2c',
+        800: '#354d27',
+        900: '#304225',
+        950: '#162310',
     },
-    // Secondary colors - Warm plum purple for accent elements
     secondary: {
-        50: '#fbf6ff',
-        100: '#f5eaff',
-        200: '#edd5ff',
-        300: '#e2b5ff',
-        400: '#d387fa',
-        500: '#c05df5',
-        600: '#a941e3',
-        700: '#8e31c1',
-        800: '#752a9d',
-        900: '#60227e',
-        950: '#42114d',
+        50: '#fef4f2',
+        100: '#ffe6e1',
+        200: '#ffd1c8',
+        300: '#ffb2a2',
+        400: '#fd846c',
+        500: '#f55d3e',
+        600: '#e34120',
+        700: '#bf3216',
+        800: '#9d2d17',
+        900: '#832c1a',
+        950: '#471308',
     },
-    // Accent colors - Vibrant orange-red for calls to action
     accent: {
-        50: '#fff8ed',
-        100: '#ffedd4',
-        200: '#ffd9a8',
-        300: '#ffbf71',
-        400: '#ff9939',
-        500: '#ff7614',
-        600: '#ed5f07',
-        700: '#c54708',
-        800: '#9c3a0f',
-        900: '#7e3210',
-        950: '#461705',
+        50: '#f3f8ed',
+        100: '#e4efd8',
+        200: '#cae1b5',
+        300: '#9fc87e',
+        400: '#88b863',
+        500: '#6a9c46',
+        600: '#507c34',
+        700: '#3f5f2c',
+        800: '#354d27',
+        900: '#304225',
+        950: '#162310',
     },
-    // Neutral colors - Warmer grays with a slight beige undertone for comfort
     neutral: {
-        50: '#fafaf8',
-        100: '#f5f5f1',
-        200: '#e7e6e1',
-        300: '#d5d3cc',
-        400: '#b1afa6',
-        500: '#908d83',
-        600: '#726f65',
-        700: '#575551',
-        800: '#3a3834',
-        900: '#1f1d1b',
-        950: '#0f0e0d',
+        50: '#f8fafc',
+        100: '#f1f5f9',
+        200: '#e2e8f0',
+        300: '#cbd5e1',
+        400: '#94a3b8',
+        500: '#64748b',
+        600: '#475569',
+        700: '#334155',
+        800: '#1e293b',
+        900: '#0f172a',
+        950: '#020617'
     },
-    // Food-themed complementary colors
-    complementary: {
-        mint: {
-            light: '#e0f5e9',
-            medium: '#a7e1c4',
-            dark: '#5bb98e',
-        },
-        tomato: {
-            light: '#fde3e3',
-            medium: '#f5a8a8',
-            dark: '#e05252',
-        },
-        lemon: {
-            light: '#fffaea',
-            medium: '#fff0c0',
-            dark: '#ffd763',
-        },
-        blueberry: {
-            light: '#e8eeff',
-            medium: '#bdc9ff',
-            dark: '#6c7bff',
-        },
+    success: {
+        50: '#ecfdf5',
+        100: '#d1fae5',
+        200: '#a7f3d0',
+        300: '#6ee7b7',
+        400: '#34d399',
+        500: '#10b981',
+        600: '#059669',
+        700: '#047857',
+        800: '#065f46',
+        900: '#064e3b',
+        950: '#022c22'
     },
-    // Semantic colors - Enhanced for better visibility
-    success: '#0cb67a', // Slightly more vibrant green
-    warning: '#ff9500', // More visible orange
-    error: '#e03131',   // Deeper red for better contrast
-    info: '#228be6',    // Brighter blue for information
+    warning: {
+        50: '#fffbeb',
+        100: '#fef3c7',
+        200: '#fde68a',
+        300: '#fcd34d',
+        400: '#fbbf24',
+        500: '#f59e0b',
+        600: '#d97706',
+        700: '#b45309',
+        800: '#92400e',
+        900: '#78350f',
+        950: '#451a03'
+    },
+    error: {
+        50: '#fef2f2',
+        100: '#fee2e2',
+        200: '#fecaca',
+        300: '#fca5a5',
+        400: '#f87171',
+        500: '#ef4444',
+        600: '#dc2626',
+        700: '#b91c1c',
+        800: '#991b1b',
+        900: '#7f1d1d',
+        950: '#450a0a'
+    },
+    info: {
+        50: '#eff6ff',
+        100: '#dbeafe',
+        200: '#bfdbfe',
+        300: '#93c5fd',
+        400: '#60a5fa',
+        500: '#3b82f6',
+        600: '#2563eb',
+        700: '#1d4ed8',
+        800: '#1e40af',
+        900: '#1e3a8a',
+        950: '#172554'
+    },
+    surface: {
+        primary: '#ffffff',
+        secondary: '#f8fafc',
+        tertiary: '#f1f5f9',
+        elevated: '#ffffff',
+        overlay: 'rgba(15, 23, 42, 0.05)',
+        glass: 'rgba(255, 255, 255, 0.1)',
+        mint: '#f0fdf2',
+        lime: '#fefce8'
+    },
+    brand: {
+        mint: '#A3EBB1',
+        lime: '#ECF87F',
+        sage: '#84cc16',
+        emerald: '#10b981',
+        teal: '#14b8a6',
+        cyan: '#06b6d4',
+        sky: '#0ea5e9',
+        indigo: '#6366f1'
+    }
 }
 
-export const typography = {
+const typography = {
     fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Poppins', 'sans-serif'],
+        sans: ['Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['Roboto', 'system-ui', 'sans-serif'],
+        mono: ['Roboto Mono', 'ui-monospace', 'monospace']
     },
     fontSize: {
-        xs: '0.75rem',    // 12px
-        sm: '0.875rem',   // 14px
-        base: '1rem',     // 16px
-        lg: '1.125rem',   // 18px
-        xl: '1.25rem',    // 20px
-        '2xl': '1.5rem',  // 24px
-        '3xl': '1.875rem', // 30px
-        '4xl': '2.25rem',  // 36px
-        '5xl': '3rem',     // 48px
+        xs: '12px',
+        sm: '14px',
+        base: '16px',
+        lg: '18px',
+        xl: '20px',
+        '2xl': '24px',
+        '3xl': '30px',
+        '4xl': '36px',
+        '5xl': '48px',
+        '6xl': '60px',
+        '7xl': '72px',
+        '8xl': '96px',
+        '9xl': '128px'
     },
     fontWeight: {
+        thin: 100,
+        extralight: 200,
         light: 300,
         normal: 400,
         medium: 500,
         semibold: 600,
         bold: 700,
+        extrabold: 800,
+        black: 900
     },
     lineHeight: {
         none: 1,
         tight: 1.25,
+        snug: 1.375,
         normal: 1.5,
-        relaxed: 1.75,
-        loose: 2,
+        relaxed: 1.625,
+        loose: 2
     },
+    letterSpacing: {
+        tighter: '-0.8px',
+        tight: '-0.4px',
+        normal: '0px',
+        wide: '0.4px',
+        wider: '0.8px',
+        widest: '1.6px'
+    }
 }
 
-export const spacing = {
-    '0': '0',
-    '0.5': '0.125rem', // 2px
-    '1': '0.25rem',    // 4px
-    '1.5': '0.375rem', // 6px
-    '2': '0.5rem',     // 8px
-    '2.5': '0.625rem', // 10px
-    '3': '0.75rem',    // 12px
-    '3.5': '0.875rem', // 14px
-    '4': '1rem',       // 16px
-    '5': '1.25rem',    // 20px
-    '6': '1.5rem',     // 24px
-    '8': '2rem',       // 32px
-    '10': '2.5rem',    // 40px
-    '12': '3rem',      // 48px
-    '16': '4rem',      // 64px
-    '20': '5rem',      // 80px
-    '24': '6rem',      // 96px
-    '32': '8rem',      // 128px
-    '40': '10rem',     // 160px
-    '48': '12rem',     // 192px
-    '56': '14rem',     // 224px
-    '64': '16rem',     // 256px
+const spacing = {
+    '0': '0px',
+    '1': '6px',
+    '2': '12px',
+    '3': '18px',
+    '4': '24px',
+    '5': '30px',
+    '6': '36px',
+    '7': '42px',
+    '8': '48px',
+    '9': '54px',
+    '10': '60px',
+    '11': '66px',
+    '12': '72px',
+    '14': '84px',
+    '16': '96px',
+    '18': '108px',
+    '20': '120px',
+    '24': '144px',
+    '28': '168px',
+    '32': '192px',
+    '36': '216px',
+    '40': '240px',
+    '44': '264px',
+    '48': '288px',
+    '52': '312px',
+    '56': '336px',
+    '60': '360px',
+    '64': '384px',
+    '72': '432px',
+    '80': '480px',
+    '88': '528px',
+    '96': '576px',
+    '112': '672px',
+    '128': '768px'
 }
 
-export const breakpoints = {
-    mobile: '640px',
-    tablet: '1024px',
-    desktop: '1025px',
+const shadows = {
+    xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    sm: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+    base: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+    md: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+    lg: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+    xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    '2xl': '0 50px 100px -20px rgba(0, 0, 0, 0.25)',
+    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+    none: '0 0 #0000',
+    glow: '0 0 20px rgba(163, 235, 177, 0.4)',
+    glowSecondary: '0 0 20px rgba(236, 248, 127, 0.4)',
+    elevated: '0 8px 30px rgba(0, 0, 0, 0.12)',
+    soft: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    crisp: '0 1px 3px rgba(0, 0, 0, 0.2)'
 }
 
-export const shadows = {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 10px 10px -5px rgba(0, 0, 0, 0.03)',
-    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.18)',
-    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
-    // New elegant shadow options
-    card: '0 4px 12px rgba(0, 0, 0, 0.05)',
-    hover: '0 10px 20px rgba(0, 0, 0, 0.08)',
-    button: '0 2px 8px rgba(0, 0, 0, 0.12)',
-    dropdown: '0 8px 16px rgba(0, 0, 0, 0.1)',
-    focus: '0 0 0 3px rgba(23, 189, 178, 0.35)',
+const borderRadius = {
+    none: '0px',
+    xs: '2px',
+    sm: '4px',
+    base: '6px',
+    md: '8px',
+    lg: '12px',
+    xl: '16px',
+    '2xl': '20px',
+    '3xl': '24px',
+    '4xl': '32px',
+    full: '9999px'
+}
+
+const transitions = {
     none: 'none',
+    all: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    default: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    fast: '100ms cubic-bezier(0.4, 0, 0.2, 1)',
+    slow: '300ms cubic-bezier(0.4, 0, 0.2, 1)',
+    smooth: '200ms cubic-bezier(0.25, 0.1, 0.25, 1)',
+    bounce: '300ms cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    elastic: '400ms cubic-bezier(0.175, 0.885, 0.32, 1.275)'
 }
 
-export const borderRadius = {
-    none: '0',
-    sm: '0.125rem',  // 2px
-    md: '0.375rem',  // 6px
-    lg: '0.5rem',    // 8px
-    xl: '0.75rem',   // 12px
-    '2xl': '1rem',   // 16px
-    '3xl': '1.5rem', // 24px
-    full: '9999px',
+
+const backdropBlur = {
+    none: '0px',
+    xs: '2px',
+    sm: '4px',
+    md: '8px',
+    lg: '12px',
+    xl: '16px',
+    '2xl': '24px',
+    '3xl': '40px'
 }
 
-export const zIndices = {
-    '0': 0,
-    '10': 10,
-    '20': 20,
-    '30': 30,
-    '40': 40,
-    '50': 50,
-    '60': 60,
-    auto: 'auto',
-}
-
-export const transitions = {
-    DEFAULT: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-    slow: '350ms cubic-bezier(0.4, 0, 0.2, 1)',
-    fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
-    // New transition options
-    bounce: '300ms cubic-bezier(0.34, 1.56, 0.64, 1)', // Slight bounce for interactive elements
-    slide: '250ms cubic-bezier(0.25, 0.46, 0.45, 0.94)', // Smooth slide
-    emphasis: '250ms cubic-bezier(0.17, 0.67, 0.83, 0.67)', // Emphasized animation
-}
-
-// New gradient options that match the color palette
-export const gradients = {
-    primary: {
-        horizontal: 'linear-gradient(to right, #17bdb2, #0c7975)',
-        vertical: 'linear-gradient(to bottom, #17bdb2, #0c7975)',
-        diagonal: 'linear-gradient(135deg, #17bdb2, #0c7975)',
+const keyframes = {
+    fadeIn: {
+        '0%': { opacity: '0' },
+        '100%': { opacity: '1' }
     },
-    secondary: {
-        horizontal: 'linear-gradient(to right, #c05df5, #8e31c1)',
-        vertical: 'linear-gradient(to bottom, #c05df5, #8e31c1)',
-        diagonal: 'linear-gradient(135deg, #c05df5, #8e31c1)',
+    fadeInUp: {
+        '0%': { opacity: '0', transform: 'translateY(20px)' },
+        '100%': { opacity: '1', transform: 'translateY(0)' }
     },
-    accent: {
-        horizontal: 'linear-gradient(to right, #ff7614, #c54708)',
-        vertical: 'linear-gradient(to bottom, #ff7614, #c54708)',
-        diagonal: 'linear-gradient(135deg, #ff7614, #c54708)',
+    fadeInDown: {
+        '0%': { opacity: '0', transform: 'translateY(-20px)' },
+        '100%': { opacity: '1', transform: 'translateY(0)' }
     },
-    // Food-themed gradients
-    fresh: 'linear-gradient(135deg, #5bb98e, #38dccf)',
-    warm: 'linear-gradient(135deg, #e05252, #ff9939)',
-    vibrant: 'linear-gradient(135deg, #ff7614, #ffd763)',
-    cool: 'linear-gradient(135deg, #6c7bff, #38dccf)',
-} 
+    scaleIn: {
+        '0%': { opacity: '0', transform: 'scale(0.95)' },
+        '100%': { opacity: '1', transform: 'scale(1)' }
+    },
+    slideInRight: {
+        '0%': { opacity: '0', transform: 'translateX(20px)' },
+        '100%': { opacity: '1', transform: 'translateX(0)' }
+    },
+    slideInLeft: {
+        '0%': { opacity: '0', transform: 'translateX(-20px)' },
+        '100%': { opacity: '1', transform: 'translateX(0)' }
+    },
+    pulse: {
+        '0%, 100%': { opacity: '1' },
+        '50%': { opacity: '0.8' }
+    },
+    float: {
+        '0%, 100%': { transform: 'translateY(0px)' },
+        '50%': { transform: 'translateY(-8px)' }
+    },
+    glow: {
+        '0%, 100%': { boxShadow: '0 0 20px rgba(163, 235, 177, 0.4)' },
+        '50%': { boxShadow: '0 0 30px rgba(163, 235, 177, 0.6)' }
+    },
+    glowSecondary: {
+        '0%, 100%': { boxShadow: '0 0 20px rgba(236, 248, 127, 0.4)' },
+        '50%': { boxShadow: '0 0 30px rgba(236, 248, 127, 0.6)' }
+    }
+}
+
+const animation = {
+    'fade-in': 'fadeIn 0.4s ease-out',
+    'fade-in-up': 'fadeInUp 0.5s ease-out',
+    'fade-in-down': 'fadeInDown 0.5s ease-out',
+    'scale-in': 'scaleIn 0.3s ease-out',
+    'slide-in-right': 'slideInRight 0.4s ease-out',
+    'slide-in-left': 'slideInLeft 0.4s ease-out',
+    'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+    'float': 'float 3s ease-in-out infinite',
+    'glow': 'glow 2s ease-in-out infinite alternate',
+    'glow-secondary': 'glowSecondary 2s ease-in-out infinite alternate'
+}
+
+const safelist = [
+    'animate-pulse',
+    'animate-spin',
+    'animate-fade-in',
+    'animate-fade-in-up',
+    'animate-fade-in-down',
+    'animate-scale-in',
+    'animate-slide-in-right',
+    'animate-slide-in-left',
+    'animate-float',
+    'animate-glow',
+    'animate-glow-secondary',
+    'transition-all',
+    'transition-colors',
+    'transition-transform',
+    'transition-opacity',
+    'duration-75',
+    'duration-100',
+    'duration-150',
+    'duration-200',
+    'duration-300',
+    'duration-500',
+    'duration-700',
+    'duration-1000',
+    'ease-in',
+    'ease-out',
+    'ease-in-out',
+    'ease-linear',
+    'scale-95',
+    'scale-100',
+    'scale-105',
+    'rotate-0',
+    'rotate-180',
+    '-translate-y-0.5',
+    '-translate-y-1',
+    '-translate-y-2',
+    'translate-y-0',
+    'hover:scale-[1.02]',
+    'active:scale-95',
+    'active:scale-98'
+]
+
+const tailwindConfig = {
+    content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+    darkMode: 'class'
+}
+
+const tokens: DesignTokens = {
+    colors,
+    typography,
+    spacing,
+    shadows,
+    borderRadius,
+    transitions,
+    keyframes,
+    animation,
+    backdropBlur,
+    safelist,
+    tailwindConfig
+}
+
+export default tokens

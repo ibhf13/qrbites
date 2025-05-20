@@ -1,12 +1,12 @@
 const mongoose = require('mongoose')
-const Restaurant = require('@models/restaurantModel')
+const Restaurant = require('@models/restaurant')
 const restaurantController = require('@controllers/restaurantController')
 const restaurantMock = require('@mocks/restaurantMockEnhanced')
 const userMock = require('@mocks/userMockEnhanced')
 const { notFound, forbidden, badRequest } = require('@utils/errorUtils')
 
 // Mock dependencies
-jest.mock('@models/restaurantModel')
+jest.mock('@models/restaurant')
 jest.mock('@services/errorLogService', () => ({
     logDatabaseError: jest.fn()
 }))
@@ -193,11 +193,10 @@ describe('Restaurant Controller Tests', () => {
                     website: 'https://newrestaurant.com'
                 },
                 location: {
-                    address: '123 New St',
+                    street: '123 New St',
+                    houseNumber: '123',
                     city: 'New City',
-                    state: 'New State',
                     zipCode: '12345',
-                    country: 'New Country'
                 },
                 hours: [
                     {
@@ -242,11 +241,10 @@ describe('Restaurant Controller Tests', () => {
                     website: 'https://newrestaurant.com'
                 },
                 location: {
-                    address: '123 New St',
+                    street: '123 New St',
+                    houseNumber: '123',
                     city: 'New City',
-                    state: 'New State',
                     zipCode: '12345',
-                    country: 'New Country'
                 }
             }
             req.user = { _id: userMock.validUser._id }

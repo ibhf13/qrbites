@@ -5,31 +5,25 @@ export const RESTAURANT_FORM_STEPS = [
     { id: 'logo', title: 'Logo' },
 ] as const
 
-export const API_ENDPOINTS = {
-    RESTAURANTS: '/api/restaurants',
-    RESTAURANT_DETAIL: (id: string) => `/api/restaurants/${id}`,
-    RESTAURANT_LOGO: (id: string) => `/api/restaurants/${id}/logo`,
-} as const
-
 export const FORM_DEFAULT_VALUES = {
-    name: '',
-    description: '',
+    name: 'test name',
+    description: 'test description',
     contact: {
-        phone: '',
-        email: '',
-        website: '',
+        phone: '+1234567890',
+        email: 'test@test.com',
+        website: 'https://test.com',
     },
     location: {
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: '',
+        street: 'test street',
+        houseNumber: '123',
+        city: 'test city',
+        zipCode: '12345',
     },
     hours: Array(7).fill(null).map((_, index) => ({
         day: index,
         closed: true,
     })),
+    isActive: true,
 } as const
 
 export const VALIDATION_MESSAGES = {
@@ -44,6 +38,6 @@ export const VALIDATION_MESSAGES = {
 } as const
 
 export const FILE_CONSTRAINTS = {
-    MAX_SIZE: 5 * 1024 * 1024, // 5MB
+    MAX_SIZE: 5 * 1024 * 1024,
     ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
 } as const 

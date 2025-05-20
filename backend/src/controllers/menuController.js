@@ -1,5 +1,5 @@
-const Menu = require('@models/menuModel')
-const Restaurant = require('@models/restaurantModel')
+const Menu = require('@models/menu')
+const Restaurant = require('@models/restaurant')
 const {
     asyncHandler,
     notFound,
@@ -14,7 +14,7 @@ const { generateMenuQRCode } = require('@services/qrCodeService')
 /**
  * Get all menus with optional filtering
  * @route GET /api/menus
- * @access Public
+ * @access Private (users see only their own restaurant menus)
  */
 const getMenus = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, name, restaurantId, sortBy = 'createdAt', order = 'desc' } = req.query
@@ -30,6 +30,18 @@ const getMenus = asyncHandler(async (req, res) => {
     // Add restaurant filter if provided
     if (restaurantId) {
         query.restaurantId = restaurantId
+    }
+
+    // SECURITY FIX: Filter by user's restaurants only (unless admin)
+    if (req.user && req.user.role !== 'admin') {
+        // First, get all restaurants owned by the user
+        const userRestaurants = await Restaurant.find({ userId: req.user._id }).select('_id')
+        const userRestaurantIds = userRestaurants.map(r => r._id)
+
+        // Filter menus to only include those from user's restaurants
+        query.restaurantId = query.restaurantId
+            ? { $in: [restaurantId, ...userRestaurantIds] }
+            : { $in: userRestaurantIds }
     }
 
     // Build sort object
@@ -127,9 +139,13 @@ const createMenu = asyncHandler(async (req, res) => {
             throw forbidden('Not authorized to create menu for this restaurant')
         }
 
-        // Add image URL if file was uploaded
-        if (req.file) {
-            req.body.imageUrl = getFileUrl(req.file.filename, 'menu')
+        // Add image URLs if files were uploaded
+        if (req.files && req.files.length > 0) {
+            // For now, use the first image as the main imageUrl for backward compatibility
+            req.body.imageUrl = getFileUrl(req.files[0].filename, 'menu')
+
+            // Store all image URLs for future use
+            req.body.imageUrls = req.files.map(file => getFileUrl(file.filename, 'menu'))
         }
 
         // Create menu
@@ -178,9 +194,13 @@ const updateMenu = asyncHandler(async (req, res) => {
             throw forbidden('Not authorized to update this menu')
         }
 
-        // Add image URL if file was uploaded
-        if (req.file) {
-            req.body.imageUrl = getFileUrl(req.file.filename, 'menu')
+        // Add image URLs if files were uploaded
+        if (req.files && req.files.length > 0) {
+            // For now, use the first image as the main imageUrl for backward compatibility
+            req.body.imageUrl = getFileUrl(req.files[0].filename, 'menu')
+
+            // Store all image URLs for future use
+            req.body.imageUrls = req.files.map(file => getFileUrl(file.filename, 'menu'))
         }
 
         // Update menu
