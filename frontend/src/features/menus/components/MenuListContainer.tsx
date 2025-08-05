@@ -1,5 +1,4 @@
 import React from 'react'
-import { LoadingSpinner, ErrorDisplay } from '@/components/common/feedback'
 import { Typography, FlexBox, Box, Grid } from '@/components/common'
 import { MenuCard } from './MenuCard'
 import { MenuListSkeleton } from './MenuListSkeleton'
@@ -8,7 +7,6 @@ import { Menu } from '../types/menu.types'
 interface MenuListContainerProps {
     menus: Menu[]
     isLoading: boolean
-    error?: string | null
     onEdit: (id: string) => void
     onDelete: (id: string) => void
     onGenerateQR: (id: string) => void
@@ -19,7 +17,6 @@ interface MenuListContainerProps {
 export const MenuListContainer: React.FC<MenuListContainerProps> = ({
     menus,
     isLoading,
-    error,
     onEdit,
     onDelete,
     onGenerateQR,
@@ -34,17 +31,6 @@ export const MenuListContainer: React.FC<MenuListContainerProps> = ({
         )
     }
 
-    if (error) {
-        return (
-            <Box className="px-2 sm:px-4 md:px-6">
-                <ErrorDisplay
-                    message={`Failed to load menus: ${error}`}
-                    className="py-8"
-                    variant="banner"
-                />
-            </Box>
-        )
-    }
 
     if (menus.length === 0) {
         return (
@@ -69,52 +55,39 @@ export const MenuListContainer: React.FC<MenuListContainerProps> = ({
     }
 
     return (
-        <Box className="space-y-4 -mx-2 sm:-mx-4 md:-mx-6">
-            <FlexBox
-                justify="between"
-                align="center"
-                className="px-2 sm:px-4 md:px-6"
+        <FlexBox direction='col' className='gap-4 px-2 md:px-4 py-2'>
+            <Typography
+                as="p"
+                variant="body"
+                color="neutral"
+                className="text-sm sm:text-base pt-2 "
             >
-                <Typography
-                    as="p"
-                    variant="body"
-                    color="neutral"
-                    className="text-sm sm:text-base"
-                >
-                    <span className="hidden sm:inline">
-                        {menus.length} menu{menus.length !== 1 ? 's' : ''} found
-                    </span>
-                    <span className="sm:hidden">
-                        {menus.length} menu{menus.length !== 1 ? 's' : ''}
-                    </span>
-                </Typography>
-            </FlexBox>
+                {menus.length} menu{menus.length !== 1 ? 's' : ''} found
+            </Typography>
 
-            <Box className="px-2 sm:px-4 md:px-6">
-                <Grid
-                    cols={1}
-                    colsSm={2}
-                    colsMd={3}
-                    colsLg={4}
-                    colsXl={4}
-                    gap="sm"
-                    responsive={true}
-                    className="sm:gap-4"
-                >
-                    {menus.map((menu) => (
-                        <MenuCard
-                            key={menu._id}
-                            menu={menu}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            onGenerateQR={onGenerateQR}
-                            onViewQR={onViewQR}
-                            onView={onView}
-                        />
-                    ))}
-                </Grid>
-            </Box>
-        </Box>
+            <Grid
+                cols={1}
+                colsSm={2}
+                colsMd={3}
+                colsLg={3}
+                colsXl={3}
+                gap="sm"
+                responsive={true}
+                className="gap-4 "
+            >
+                {menus.map((menu) => (
+                    <MenuCard
+                        key={menu._id}
+                        menu={menu}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onGenerateQR={onGenerateQR}
+                        onViewQR={onViewQR}
+                        onView={onView}
+                    />
+                ))}
+            </Grid>
+        </FlexBox>
     )
 }
 

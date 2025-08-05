@@ -63,7 +63,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <Box className="grid grid-cols-1 gap-6">
+            <Box className="grid grid-cols-1 gap-4">
                 <Input
                     label="Menu Name"
                     name="name"
@@ -103,7 +103,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({
 
                     {(existingImageUrl || previewUrl) && (
                         <Card variant="outlined" padding="md" className="mb-4">
-                            <Typography variant="subtitle2" color="neutral" gutterBottom>
+                            <Typography variant="subheading" color="neutral" gutterBottom>
                                 {previewUrl ? 'New image preview:' : 'Current image:'}
                             </Typography>
                             <FlexBox align="center" className="space-x-4">

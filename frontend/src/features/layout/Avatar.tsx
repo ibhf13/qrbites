@@ -10,7 +10,7 @@ interface AvatarProps {
 
 export const Avatar: React.FC<AvatarProps> = ({
     initials,
-    size = 'md',
+    size = 'sm',
     className = '',
 }) => {
     const getSizeClasses = (): { container: string, variant: 'overline' | 'caption' | 'body' } => {

@@ -25,12 +25,12 @@ const variantClasses = {
 
 const paddingClasses = {
     none: '',
-    xs: 'p-3',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-    xl: 'p-10',
-    '2xl': 'p-12'
+    xs: 'p-2',
+    sm: 'p-3',
+    md: 'p-4',
+    lg: 'p-6',
+    xl: 'p-8',
+    '2xl': 'p-10'
 }
 
 const Paper: React.FC<PaperProps> = ({
@@ -84,8 +84,9 @@ const Paper: React.FC<PaperProps> = ({
                             {title && (
                                 <Typography
                                     as="h1"
+                                    variant="title"
                                     color="neutral"
-                                    className="font-display font-bold tracking-tight text-2xl"
+                                    className="text-xl sm:text-2xl font-bold line-clamp-1"
                                 >
                                     {title}
                                 </Typography>

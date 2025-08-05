@@ -1,16 +1,23 @@
 import React from 'react'
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { Card, Typography, IconButton, Box } from '@/components/common'
+import { Box, FlexBox, Paper, IconButton } from '@/components/common'
 import { cn } from '@/utils/cn'
 
 interface FormDialogProps {
     isOpen: boolean
     onClose: () => void
     title: string
+    subtitle?: string
     children: React.ReactNode
+    footer?: React.ReactNode
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | 'full'
     className?: string
+    backdropClassName?: string
+    headerClassName?: string
+    contentClassName?: string
+    footerClassName?: string
+    showCloseButton?: boolean
 }
 
 const maxWidthClasses = {
@@ -30,45 +37,89 @@ const FormDialog: React.FC<FormDialogProps> = ({
     isOpen,
     onClose,
     title,
+    subtitle,
     children,
+    footer,
     maxWidth = '4xl',
-    className
+    className,
+    backdropClassName,
+    headerClassName,
+    contentClassName,
+    footerClassName,
+    showCloseButton = true
 }) => {
+    const headerActions = showCloseButton ? (
+        <IconButton
+            icon={XMarkIcon}
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+            aria-label="Close dialog"
+        />
+    ) : undefined
+
     return (
         <Dialog
             open={isOpen}
             onClose={onClose}
             className="relative z-50"
         >
-            <Box className="fixed inset-0 bg-black/30 dark:bg-black/50" aria-hidden="true" />
-            <Box className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto scrollbar-hide">
+            <Box
+                className={cn(
+                    "fixed inset-0 bg-black/30 dark:bg-black/50 transition-opacity",
+                    backdropClassName
+                )}
+                aria-hidden="true"
+            />
+
+            <FlexBox
+                className="fixed inset-0 p-4 overflow-y-auto scrollbar-hide"
+                justify="center"
+                align="center"
+            >
                 <DialogPanel className={cn('w-full', maxWidthClasses[maxWidth])}>
-                    <Card className={cn(
-                        'w-full max-h-[95vh] overflow-y-auto scrollbar-hide',
-                        className
-                    )}>
-                        <Box className="p-6 overflow-y-auto scrollbar-hide">
-                            <Box className="flex justify-between items-center mb-6">
-                                <DialogTitle>
-                                    <Typography as="h3" variant="heading" className="font-semibold">
-                                        {title}
-                                    </Typography>
-                                </DialogTitle>
-                                <IconButton
-                                    icon={XMarkIcon}
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={onClose}
-                                    className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                                />
-                            </Box>
-                            <Box className="overflow-y-auto scrollbar-hide">
-                                {children}
-                            </Box>
+                    <Paper
+                        title={title}
+                        subtitle={subtitle}
+                        actions={headerActions}
+                        variant="elevated"
+                        padding="none"
+                        className={cn(
+                            'w-full max-h-[95vh] overflow-hidden shadow-2xl',
+                            'animate-in fade-in-0 zoom-in-95 duration-200',
+                            className
+                        )}
+                        headerClassName={headerClassName}
+                    >
+                        <Box
+                            className={cn(
+                                'overflow-y-auto scrollbar-hide p-6',
+                                contentClassName
+                            )}
+                        >
+                            <DialogTitle className="sr-only">
+                                {title}
+                            </DialogTitle>
+                            {children}
                         </Box>
-                    </Card>
+
+                        {footer && (
+                            <Box
+                                className={cn(
+                                    "border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50",
+                                    footerClassName
+                                )}
+                                bg="neutral"
+                            >
+                                <FlexBox justify="end" gap="sm">
+                                    {footer}
+                                </FlexBox>
+                            </Box>
+                        )}
+                    </Paper>
                 </DialogPanel>
-            </Box>
+            </FlexBox>
         </Dialog>
     )
 }

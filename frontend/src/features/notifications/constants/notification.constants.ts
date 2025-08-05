@@ -1,6 +1,6 @@
 import { NotificationConfig, NotificationPosition, NotificationSeverity } from '../types/notification.types'
 
-            export const DEFAULT_NOTIFICATION_CONFIG: Required<NotificationConfig> = {
+export const DEFAULT_NOTIFICATION_CONFIG: Required<NotificationConfig> = {
     duration: 5000,
     dismissible: true,
     position: NotificationPosition.TOP_RIGHT,
@@ -54,6 +54,8 @@ export const NOTIFICATION_UI = {
     ANIMATION_DURATION: 300,
     HISTORY_PANEL_WIDTH: 380,
     HISTORY_PANEL_MAX_HEIGHT: 480,
+    HISTORY_PANEL_MOBILE_WIDTH: 280,
+    HISTORY_PANEL_MOBILE_MAX_HEIGHT: 360,
     SNACKBAR_MAX_WIDTH: 400,
     COMPACT_ITEM_HEIGHT: 64,
     NORMAL_ITEM_HEIGHT: 80,

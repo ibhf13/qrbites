@@ -6,7 +6,6 @@ import {
     PencilIcon,
     TrashIcon,
     MapPinIcon,
-    BuildingStorefrontIcon
 } from '@heroicons/react/24/outline'
 
 interface RestaurantCardProps {
@@ -41,26 +40,6 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({
         }
     }
 
-    const imagePlaceholder = (
-        <Box className="flex items-center justify-center w-full h-36 bg-white dark:bg-white">
-            <Typography variant="body" className="font-bold text-black text-2xl">
-                {name ? name.substring(0, 2).toUpperCase() : 'R'}
-            </Typography>
-        </Box>
-    )
-
-    const imageFallback = (
-        <Box className="flex items-center justify-center h-full bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
-            <Box className="text-center space-y-1.5">
-                <Box className="w-8 h-8 bg-orange-200 dark:bg-orange-800 rounded-lg flex items-center justify-center mx-auto">
-                    <BuildingStorefrontIcon className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-                </Box>
-                <Typography variant="caption" color="muted" className="text-xs">
-                    Failed to load
-                </Typography>
-            </Box>
-        </Box>
-    )
 
     const getLocationText = () => {
         if (!location) return 'No address provided'
@@ -86,11 +65,11 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({
                 src: logoUrl,
                 alt: `${name} logo`,
                 aspectRatio: 'video',
-                placeholder: !logoUrl ? imagePlaceholder : undefined,
-                fallback: imageFallback,
+                placeholder: logoUrl || name,
                 objectFit: 'cover',
                 className: 'h-36'
             }}
+
             badges={[
                 {
                     label: isActive ? 'Active' : 'Inactive',

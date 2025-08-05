@@ -15,7 +15,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     errors
 }) => {
     return (
-        <Card title="Basic Information" subtitle="Update your personal details">
+        <Card title="Basic Information" subtitle="Update your personal details" padding='sm'>
             <FlexBox direction="col" gap="md">
                 <FormInput
                     label="Email"

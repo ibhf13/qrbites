@@ -32,20 +32,20 @@ const Header: React.FC<HeaderProps> = ({ actions }) => {
             <Paper
                 variant="none"
                 padding="none"
-                className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 rounded-none"
+                className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 rounded-none h-12"
             >
                 <FlexBox
                     align="center"
                     justify="between"
-                    className="h-16 px-4 lg:px-6"
+                    className="h-12 px-3"
                 >
-                    <FlexBox align="center" gap="md" className="md:gap-8">
+                    <FlexBox align="center" className='w-full' gap="sm" >
                         <Box className="flex-shrink-0">
                             <Logo size="sm" />
                         </Box>
 
                         <nav>
-                            <FlexBox align="center" gap="xs">
+                            <FlexBox align="center" gap="sm" >
                                 {navigationItems.map((item) => (
                                     <NavItem
                                         key={item.path}
@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ actions }) => {
                         </nav>
                     </FlexBox>
 
-                    <FlexBox align="center" gap="md">
+                    <FlexBox align="center" gap="sm">
                         <ThemeToggleButton />
 
                         <NotificationPanel

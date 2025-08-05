@@ -74,18 +74,20 @@ const RestaurantsPage = () => {
             <Paper
                 title="Restaurants"
                 padding='md'
-                className='bg-white dark:bg-neutral-900'
+                className='bg-white dark:bg-neutral-900 '
+                headerClassName='py-2 px-2 md:px-4'
+                contentClassName='p-0 '
                 actions={
                     <IconButton
                         onClick={handleAddNew}
                         variant="primary"
                         icon={PlusIcon}
-                        className="flex-shrink-0"
+                        className="flex-shrink-0 px-2 "
                     >
                         <Typography
                             variant="body"
                             color="neutral"
-                            className="hidden sm:inline"
+                            className="hidden sm:inline pl-1"
                         >
                             Add Restaurant
                         </Typography>
@@ -99,7 +101,7 @@ const RestaurantsPage = () => {
                     </IconButton>
                 }
             >
-                <Box className="space-y-4 bg-white dark:bg-neutral-900 -mx-2 sm:-mx-4 md:-mx-6">
+                <Box className="space-y-2 bg-white dark:bg-neutral-900">
                     {isLoading ? (
                         <RestaurantListSkeleton count={6} gridLayout={true} />
                     ) : error ? (
@@ -112,49 +114,36 @@ const RestaurantsPage = () => {
                             />
                         </Box>
                     ) : (
-                        <>
-                            <FlexBox
-                                justify="between"
-                                align="center"
-                                className="px-2 sm:px-4 md:px-6"
+                        <FlexBox direction='col' className='gap-4 px-2 md:px-4 py-2'>
+                            <Typography
+                                as="p"
+                                variant="body"
+                                color="neutral"
+                                className="text-sm sm:text-base pt-2 "
                             >
-                                <Typography
-                                    as="p"
-                                    variant="body"
-                                    color="neutral"
-                                    className="text-sm sm:text-base"
-                                >
-                                    <span className="hidden sm:inline">
-                                        Showing {restaurants.length} of {totalCount} restaurants
-                                    </span>
-                                    <span className="sm:hidden">
-                                        {restaurants.length} of {totalCount}
-                                    </span>
-                                </Typography>
-                            </FlexBox>
+                                Showing {restaurants.length} of {totalCount} restaurants
+                            </Typography>
 
-                            <Box className="px-2 sm:px-4 md:px-6">
-                                <Grid
-                                    cols={1}
-                                    colsSm={2}
-                                    colsMd={3}
-                                    colsLg={3}
-                                    colsXl={3}
-                                    gap="sm"
-                                    responsive={true}
-                                    className="sm:gap-4"
-                                >
-                                    {restaurants.map((restaurant) => (
-                                        <RestaurantCard
-                                            key={restaurant._id}
-                                            restaurant={restaurant}
-                                            onEdit={() => handleEdit(restaurant)}
-                                            onDelete={() => handleDelete(restaurant)}
-                                        />
-                                    ))}
-                                </Grid>
-                            </Box>
-                        </>
+                            <Grid
+                                cols={1}
+                                colsSm={2}
+                                colsMd={3}
+                                colsLg={3}
+                                colsXl={3}
+                                gap="sm"
+                                responsive={true}
+                                className="gap-4 "
+                            >
+                                {restaurants.map((restaurant) => (
+                                    <RestaurantCard
+                                        key={restaurant._id}
+                                        restaurant={restaurant}
+                                        onEdit={() => handleEdit(restaurant)}
+                                        onDelete={() => handleDelete(restaurant)}
+                                    />
+                                ))}
+                            </Grid>
+                        </FlexBox>
                     )}
 
                     {totalPages > 1 && (

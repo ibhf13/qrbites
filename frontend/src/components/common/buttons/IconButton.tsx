@@ -18,23 +18,18 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     ariaLabel?: string
     tooltip?: string
     link?: string
+    padding?: string
 }
 
 const iconSizeMap: Record<Size, string> = {
-    xs: 'h-3 w-3',
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6',
-    xl: 'h-7 w-7'
+    xs: 'h-2 w-2',
+    sm: 'h-3 w-3',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5',
+    xl: 'h-6 w-6'
 }
 
-const iconOnlySizeMap: Record<Size, string> = {
-    xs: 'p-1',
-    sm: 'p-1.5',
-    md: 'p-2.5',
-    lg: 'p-3',
-    xl: 'p-4'
-}
+
 
 export const IconButton: React.FC<IconButtonProps> = (
     {
@@ -50,6 +45,7 @@ export const IconButton: React.FC<IconButtonProps> = (
         link,
         className,
         children,
+        padding,
         ...rest
     }) => {
     const iconSize = iconSizeMap[size]
@@ -63,7 +59,7 @@ export const IconButton: React.FC<IconButtonProps> = (
         if (iconPosition === 'left') {
             return (
                 <>
-                    <Icon className={cn(iconSize, 'mr-2')} aria-hidden />
+                    <Icon className={cn(iconSize)} aria-hidden />
                     {children}
                 </>
             )
@@ -72,7 +68,7 @@ export const IconButton: React.FC<IconButtonProps> = (
         return (
             <>
                 {children}
-                <Icon className={cn(iconSize, 'ml-2')} aria-hidden />
+                <Icon className={cn(iconSize)} aria-hidden />
             </>
         )
     }
@@ -86,7 +82,8 @@ export const IconButton: React.FC<IconButtonProps> = (
             rounded={rounded}
             link={link}
             className={cn(
-                isIconOnly && iconOnlySizeMap[size],
+                isIconOnly,
+                padding,
                 className
             )}
             aria-label={isIconOnly ? ariaLabel : undefined}

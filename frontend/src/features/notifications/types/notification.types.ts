@@ -66,6 +66,20 @@ export interface NotificationContextValue {
     readonly getNotificationById: (id: string) => Notification | undefined
 }
 
+export interface NotificationStorageConfig {
+    readonly maxStoredNotifications?: number
+    readonly maxStorageAge?: number
+    readonly enableLocalStorage?: boolean
+    readonly storageKey?: string
+    readonly cleanupInterval?: number
+}
+
+export interface LocalStorageHookReturn<T> {
+    readonly value: T
+    readonly setValue: (value: T | ((prev: T) => T)) => void
+    readonly clearValue: () => void
+}
+
 export interface NotificationActions {
     readonly showNotification: NotificationContextValue['showNotification']
     readonly showSuccess: NotificationContextValue['showSuccess']
@@ -86,7 +100,6 @@ export interface NotificationState {
 export interface NotificationItemProps {
     readonly notification: Notification
     readonly onDismiss?: (id: string) => void
-    readonly showActions?: boolean
     readonly showTimestamp?: boolean
     readonly compact?: boolean
 }

@@ -1,2 +1,2 @@
-export { useGenerateQRCode, useDownloadQRCode } from './useQRCode'
+export { useGenerateQRCode } from './useQRCode'
 export { useQRCodeActions } from './useQRCodeActions' 

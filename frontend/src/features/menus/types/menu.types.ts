@@ -3,7 +3,7 @@ export interface Menu {
     name: string
     description?: string
     imageUrl?: string
-    restaurantId: string | { _id: string; name: string }
+    restaurantId: { id: string; name: string }
     isActive: boolean
     qrCodeUrl?: string
     createdAt: string

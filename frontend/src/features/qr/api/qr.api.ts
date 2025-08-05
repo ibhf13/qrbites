@@ -1,5 +1,5 @@
 import { apiRequest, ApiResponse } from '@/config/api'
-import { QRCodeResponse, QRCodeFormat } from '../types/qr.types'
+import { QRCodeResponse } from '../types/qr.types'
 
 export const generateQRCode = async (menuId: string): Promise<ApiResponse<QRCodeResponse>> => {
     return apiRequest<QRCodeResponse>({
@@ -10,18 +10,27 @@ export const generateQRCode = async (menuId: string): Promise<ApiResponse<QRCode
 
 export const downloadQRCode = async (
     menuId: string,
-    format: QRCodeFormat = 'PNG'
 ): Promise<Blob> => {
-    const response = await fetch(`/api/menus/${menuId}/qrcode/download?format=${format}`, {
-        method: 'GET',
+    const response = await fetch(`/api/menus/${menuId}/qrcode`, {
+        method: 'POST',
         headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
         }
     })
 
     if (!response.ok) {
-        throw new Error('Failed to download QR code')
+        throw new Error('Failed to generate QR code')
     }
 
-    return response.blob()
+    const data = await response.json()
+    const qrCodeUrl = data.data.qrCodeUrl
+
+    const imageResponse = await fetch(qrCodeUrl)
+
+    if (!imageResponse.ok) {
+        throw new Error('Failed to fetch QR code image')
+    }
+
+    return imageResponse.blob()
 } 

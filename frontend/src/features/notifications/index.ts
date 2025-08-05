@@ -5,7 +5,9 @@ export {
     useNotificationState,
     useNotificationErrorHandler,
     useToastNotifications,
-    useActionNotifications
+    useActionNotifications,
+    useLocalStorage,
+    useNotificationStorage
 } from './hooks'
 
 export * from './components'
@@ -23,7 +25,11 @@ export type {
     NotificationItemProps,
     NotificationListProps,
     NotificationTriggerProps,
-    SnackbarNotificationProps
+    SnackbarNotificationProps,
+    NotificationStorageConfig,
+    LocalStorageHookReturn
 } from './types/notification.types'
 
-export * from './constants/notification.constants' 
+export * from './constants/notification.constants'
+
+export * from './utils/storage.utils' 

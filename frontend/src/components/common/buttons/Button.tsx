@@ -14,6 +14,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     rounded?: boolean
     link?: string
     responsive?: boolean
+    padding?: string
 }
 
 const base = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 disabled:cursor-not-allowed'
@@ -30,26 +31,26 @@ const variantMap: Record<Variant, string> = {
 }
 
 const sizeMap: Record<Size, string> = {
-    xs: 'px-2 py-1 text-xs rounded-md',
-    sm: 'px-3 py-1.5 text-sm rounded-lg',
-    md: 'px-5 py-2.5 text-base rounded-xl',
-    lg: 'px-7 py-3 text-lg rounded-xl',
-    xl: 'px-9 py-4 text-xl rounded-2xl'
+    xs: 'text-xs rounded-md',
+    sm: 'text-sm rounded-lg',
+    md: 'text-base rounded-xl',
+    lg: 'text-lg rounded-xl',
+    xl: 'text-xl rounded-2xl'
 }
 
 const responsiveSizeMap: Record<Size, string> = {
-    xs: 'px-2 py-1.5 text-xs rounded-md min-h-[32px] sm:px-2 sm:py-1 sm:text-xs sm:min-h-[28px]',
-    sm: 'px-3 py-2 text-sm rounded-lg min-h-[40px] sm:px-3 sm:py-1.5 sm:text-sm sm:min-h-[36px]',
-    md: 'px-5 py-3 text-base rounded-xl min-h-[48px] sm:px-5 sm:py-2.5 sm:text-base sm:min-h-[44px]',
-    lg: 'px-7 py-3.5 text-lg rounded-xl min-h-[52px] sm:px-7 sm:py-3 sm:text-lg sm:min-h-[48px]',
-    xl: 'px-9 py-4.5 text-xl rounded-2xl min-h-[56px] sm:px-9 sm:py-4 sm:text-xl sm:min-h-[52px]'
+    xs: 'text-xs rounded-md min-h-[28px] sm:text-xs sm:min-h-[28px]',
+    sm: 'text-sm rounded-lg min-h-[36px] sm:text-sm sm:min-h-[36px]',
+    md: 'text-base rounded-xl min-h-[44px] sm:text-base sm:min-h-[44px]',
+    lg: 'text-lg rounded-xl min-h-[48px] sm:text-lg sm:min-h-[48px]',
+    xl: 'text-xl rounded-2xl min-h-[56px] sm:text-xl sm:min-h-[52px]'
 }
 
 const iconSizeMap: Record<Size, string> = {
-    xs: 'h-3 w-3',
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6',
+    xs: 'h-2 w-2',
+    sm: 'h-3 w-3',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5',
     xl: 'h-7 w-7'
 }
 
@@ -64,6 +65,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
     className,
     disabled,
     children,
+    padding = 'p-2',
     ...rest
 }, ref) => {
     const mergedDisabled = disabled || isLoading
@@ -75,6 +77,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
         fullWidth && 'w-full',
         rounded && 'rounded-full',
         mergedDisabled && 'opacity-50 pointer-events-none',
+        padding,
         className
     )
 

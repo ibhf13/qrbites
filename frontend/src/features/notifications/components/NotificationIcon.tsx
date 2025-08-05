@@ -1,5 +1,5 @@
 import React from 'react'
-import { NotificationSeverity } from '../../types/notification.types'
+import { NotificationSeverity } from '../types/notification.types'
 import { cn } from '@/utils/cn'
 import {
     CheckCircleIcon,

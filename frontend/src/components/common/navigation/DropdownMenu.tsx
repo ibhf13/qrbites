@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { cn } from '@/utils/cn'
 import { Box, FlexBox, Typography } from '../layout'
 import { Button } from '../buttons'
-import { animations } from '@/utils/designTokenUtils'
 
 export interface DropdownMenuItem {
     id: string
@@ -27,7 +26,7 @@ export interface DropdownMenuProps {
 }
 
 const sizeClasses = {
-    sm: 'min-w-28',
+    sm: 'min-w-20',
     md: 'min-w-32',
     lg: 'min-w-40'
 }
@@ -116,9 +115,16 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
         return { top, left }
     }
 
-    const handleTriggerClick = () => {
+    const handleTriggerClick = (event?: React.MouseEvent) => {
+        if (event) {
+            event.stopPropagation()
+            event.preventDefault()
+        }
+
         if (!isOpen) {
-            setMenuPosition(calculateMenuPosition())
+            const position = calculateMenuPosition()
+
+            setMenuPosition(position)
         }
 
         setIsOpen(!isOpen)
@@ -184,18 +190,19 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
                     disabled={item.disabled}
                     fullWidth
                     className={cn(
-                        'justify-start h-auto py-2 px-3',
+                        'justify-start h-auto py-1.5 px-2',
                         'focus:ring-1 focus:ring-primary-500 focus:ring-inset',
+                        'min-h-0 text-xs',
                         item.variant === 'danger' && 'text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20'
                     )}
                     role="menuitem"
                     tabIndex={isOpen ? 0 : -1}
                 >
-                    <FlexBox align="center" gap="sm" className="w-full">
+                    <FlexBox align="center" gap="xs" className="w-full">
                         {item.icon && (
-                            <item.icon className="w-4 h-4 flex-shrink-0" />
+                            <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
                         )}
-                        <Typography variant="caption" className="truncate text-left">
+                        <Typography variant="caption" className="truncate text-left text-xs">
                             {item.label}
                         </Typography>
                     </FlexBox>
@@ -230,26 +237,24 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
                     bg="white"
                     shadow="lg"
                     border="light"
-                    rounded="lg"
-                    p="xs"
+                    rounded="md"
                     className={cn(
                         'fixed z-[9999] dark:bg-neutral-800 dark:border-neutral-700',
-                        'focus:outline-none',
-                        animations.fast,
-                        'animate-in fade-in-0 zoom-in-95',
+                        'focus:outline-none p-1 opacity-100',
                         sizeClasses[size],
                         menuClassName
                     )}
+                    style={{
+                        top: `${menuPosition.top + 4}px`,
+                        left: placement.includes('right') ? `${menuPosition.left - 120}px` : `${menuPosition.left}px`,
+                        transform: placement.includes('top') ? 'translateY(-100%)' : 'translateY(0)',
+                        display: 'block'
+                    }}
                     role="menu"
                     onKeyDown={handleMenuKeyDown}
                     tabIndex={-1}
-                    style={{
-                        top: `${menuPosition.top + 4}px`,
-                        left: placement.includes('right') ? `${menuPosition.left - 180}px` : `${menuPosition.left}px`,
-                        transform: placement.includes('top') ? 'translateY(-100%)' : 'translateY(0)'
-                    }}
                 >
-                    <FlexBox direction="col" gap="xs">
+                    <FlexBox direction="col" className="space-y-0.5">
                         {renderMenuItems()}
                     </FlexBox>
                 </Box>

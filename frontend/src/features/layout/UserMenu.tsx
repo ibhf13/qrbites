@@ -53,7 +53,7 @@ const UserMenu: React.FC = () => {
     ]
 
     const trigger = (
-        <FlexBox align="center" gap="sm">
+        <FlexBox align="center" gap="sm" >
             <Avatar initials={getUserInitials()} />
         </FlexBox>
     )

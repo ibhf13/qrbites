@@ -1,9 +1,9 @@
-import { CustomContentProps, SnackbarContent } from 'notistack'
+import { CustomContentProps, SnackbarContent, useSnackbar } from 'notistack'
 import React, { forwardRef } from 'react'
 import { FlexBox, Box, Typography } from '@/components/common/layout'
 import { IconButton } from '@/components/common/buttons'
-import { NotificationIcon } from './atoms'
-import { SnackbarNotificationProps, NotificationSeverity } from '../types/notification.types'
+import { NotificationIcon } from '.'
+import { NotificationSeverity } from '../types/notification.types'
 import { cn } from '@/utils/cn'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -13,6 +13,7 @@ interface NotificationSnackbarProps extends Omit<CustomContentProps, 'variant'> 
     variant?: NotificationSeverity
     title?: string
     persistent?: boolean
+    // eslint-disable-next-line
     onClose?: (event: any, reason: string) => void
 }
 
@@ -26,7 +27,13 @@ export const NotificationSnackbar = forwardRef<HTMLDivElement, NotificationSnack
         onClose,
     } = props
 
+    const { closeSnackbar } = useSnackbar()
+
     const handleClose = () => {
+        if (id) {
+            closeSnackbar(id)
+        }
+
         if (onClose) {
             onClose(undefined, 'clickCloseIcon')
         }
@@ -35,7 +42,7 @@ export const NotificationSnackbar = forwardRef<HTMLDivElement, NotificationSnack
     return (
         <SnackbarContent ref={ref} role="alert">
             <Box
-                p="md"
+                p="sm"
                 rounded="lg"
                 className={cn(
                     'min-w-0 max-w-md',
@@ -47,10 +54,10 @@ export const NotificationSnackbar = forwardRef<HTMLDivElement, NotificationSnack
                 )}
             >
                 <FlexBox
-                    align="start"
-                    justify="between"
+                    align="center"
+                    justify="center"
                 >
-                    <FlexBox align="start" gap="md" className="min-w-0 flex-1">
+                    <FlexBox align="center" gap="sm" className="min-w-0 flex-1">
                         <NotificationIcon
                             type={variant}
                             size="md"

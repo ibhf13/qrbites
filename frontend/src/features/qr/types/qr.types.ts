@@ -11,7 +11,7 @@ export interface QRCodeResponse {
 }
 
 export interface QRCodeViewerProps {
-    menuId: string
+    isOpen: boolean
     qrCodeUrl: string
     menuName: string
     targetUrl?: string
@@ -25,9 +25,6 @@ export interface QRCodeDisplayProps {
 }
 
 export interface QRCodeActionsProps {
-    targetUrl?: string
-    isDownloading?: boolean
-    onDownload: (format: QRCodeFormat) => void
     onPrint: () => void
     onCopyUrl: () => void
     onPreview: () => void

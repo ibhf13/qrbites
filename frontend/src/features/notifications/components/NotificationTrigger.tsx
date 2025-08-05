@@ -1,11 +1,11 @@
 import React from 'react'
 import { IconButton, Button } from '@/components/common/buttons'
 import { Box } from '@/components/common/layout'
-import { NotificationTriggerProps } from '../../types/notification.types'
-import { NotificationBadge } from '../atoms'
-import { NOTIFICATION_CLASSES } from '../../constants/notification.constants'
+import { NotificationBadge } from '.'
 import { cn } from '@/utils/cn'
 import { BellIcon } from '@heroicons/react/24/outline'
+import { NotificationTriggerProps } from '../types/notification.types'
+import { NOTIFICATION_CLASSES } from '../constants/notification.constants'
 
 export const NotificationTrigger: React.FC<NotificationTriggerProps> = ({
     notifications,
@@ -28,6 +28,7 @@ export const NotificationTrigger: React.FC<NotificationTriggerProps> = ({
                     variant="ghost"
                     size="md"
                     onClick={handleClick}
+                    padding="p-1"
                     className="text-neutral-600 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                     aria-label={`Notifications${hasNotifications ? ` (${notificationCount})` : ''}`}
                 >
@@ -43,6 +44,7 @@ export const NotificationTrigger: React.FC<NotificationTriggerProps> = ({
                 variant="ghost"
                 size="md"
                 onClick={handleClick}
+                padding="p-1"
                 className="text-neutral-600 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 ariaLabel={`Notifications${hasNotifications ? ` (${notificationCount})` : ''}`}
             />
@@ -57,7 +59,7 @@ export const NotificationTrigger: React.FC<NotificationTriggerProps> = ({
                 <NotificationBadge
                     count={notificationCount}
                     className="absolute -top-1 -right-1"
-                    size="sm"
+                    size="xs"
                 />
             )}
         </Box>

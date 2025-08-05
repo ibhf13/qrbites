@@ -35,13 +35,16 @@ const ProfilePage: React.FC = () => {
     }
 
     return (
-        <PageContainer maxWidth="7xl" fullHeight>
+        <PageContainer maxWidth="7xl" padding='sm'>
             <Paper
                 title="Profile Settings"
                 subtitle="Manage your account information and security settings"
                 className="bg-white dark:bg-neutral-900"
+                headerClassName='px-4 py-2'
+                contentClassName='px-2 md:px-3'
+
             >
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <Grid cols={2} gap="xl" className="grid-cols-1 lg:grid-cols-2 pt-4">
                         <BasicInfoForm
                             email={userInfo?.email}

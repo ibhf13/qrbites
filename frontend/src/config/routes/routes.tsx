@@ -11,7 +11,7 @@ const NotFoundPage = lazy(() => import('@/features/layout/NotFoundPage'))
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const RestaurantsPage = lazy(() => import('@/features/restaurants/pages/RestaurantsPage'))
 const MenusPage = lazy(() => import('@/features/menus/pages/MenusPage'))
-const PublicMenuPage = lazy(() => import('@/features/menus/pages/PublicMenuPage'))
+const PublicMenuPage = lazy(() => import('@/features/viewer/pages/PublicMenuPage'))
 
 export const routes: RouteObject[] = [
     {

@@ -1,14 +1,16 @@
 import { useParams } from 'react-router-dom'
-import { PageContainer, Paper } from '@/components/common/layout'
+import { PageContainer, Paper, Typography } from '@/components/common/layout'
 import { ErrorDisplay } from '@/components/common/feedback'
 import { QRCodeViewer } from '@/features/qr/components/QRCodeViewer'
 import { useMenuList, useMenuForm, useMenuActions } from '../hooks'
-import { MenuListContainer, MenusPageHeader, MenuFormDialog } from '../components'
+import { MenuListContainer, MenuFormDialog } from '../components'
+import { IconButton } from '@/components/common'
+import { PlusIcon } from '@heroicons/react/24/outline'
 
 const MenusPage = () => {
     const { restaurantId } = useParams<{ restaurantId: string }>()
 
-    const { menus, isLoading, error, refreshList } = useMenuList({
+    const { menus, isLoading, refreshList } = useMenuList({
         restaurantId: restaurantId || ''
     })
 
@@ -39,20 +41,39 @@ const MenusPage = () => {
     return (
         <PageContainer maxWidth="7xl" padding="sm" fullHeight>
             <Paper
+                title="Restaurant Menus"
                 padding="md"
-                className='bg-white dark:bg-neutral-900'
+                className='bg-white dark:bg-neutral-900 '
+                headerClassName='py-2 px-2 md:px-4'
+                contentClassName='p-0 '
                 actions={
-                    <MenusPageHeader
-                        title="Restaurant Menus"
-                        onAddMenu={menuForm.toggleForm}
-                        isFormOpen={menuForm.isFormOpen}
-                    />
+                    <IconButton
+                        onClick={menuForm.toggleForm}
+                        variant={menuForm.isFormOpen ? 'outline' : 'primary'}
+                        icon={PlusIcon}
+                        className="flex-shrink-0 px-2"
+                    >
+                        <Typography
+                            variant="body"
+                            color="neutral"
+                            className="hidden sm:inline pl-1"
+                        >
+                            {menuForm.isFormOpen ? 'Cancel' : 'Add Menu'}
+                        </Typography>
+                        <Typography
+                            variant="body"
+                            color="neutral"
+                            className="sm:hidden"
+                        >
+                            {menuForm.isFormOpen ? 'Cancel' : 'Add'}
+                        </Typography>
+                    </IconButton>
+
                 }
             >
                 <MenuListContainer
                     menus={menus}
                     isLoading={isLoading}
-                    error={error}
                     onEdit={menuActions.handleEdit}
                     onDelete={menuActions.handleDelete}
                     onGenerateQR={menuActions.handleGenerateQR}
@@ -76,15 +97,13 @@ const MenusPage = () => {
                 menuData={menuActions.editMenuData || undefined}
             />
 
-            {menuActions.qrViewerOpen && menuActions.selectedQRMenu && (
-                <QRCodeViewer
-                    menuId={menuActions.selectedQRMenu._id}
-                    qrCodeUrl={menuActions.selectedQRMenu.qrCodeUrl || ''}
-                    menuName={menuActions.selectedQRMenu.name}
-                    targetUrl={`${window.location.origin}/view/menu/${menuActions.selectedQRMenu._id}`}
-                    onClose={menuActions.closeQRViewer}
-                />
-            )}
+            <QRCodeViewer
+                isOpen={menuActions.qrViewerOpen && !!menuActions.selectedQRMenu}
+                qrCodeUrl={menuActions.selectedQRMenu?.qrCodeUrl || ''}
+                menuName={menuActions.selectedQRMenu?.name || ''}
+                targetUrl={`${window.location.origin}/view/menu/${menuActions.selectedQRMenu?._id}`}
+                onClose={menuActions.closeQRViewer}
+            />
         </PageContainer>
     )
 }

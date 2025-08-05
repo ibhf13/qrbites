@@ -1,8 +1,8 @@
 import React from 'react'
-import { NotificationPanel } from './organisms'
-import { useNotificationState } from '../hooks/useNotifications'
+import { useNotificationState } from '../hooks'
 import { NOTIFICATION_UI } from '../constants/notification.constants'
 import { cn } from '@/utils/cn'
+import NotificationPanel from './NotificationPanel'
 
 interface NotificationHistoryProps {
     maxItems?: number

@@ -1,13 +1,13 @@
 import React from 'react'
 import { Badge } from '@/components/common/feedback'
-import { NOTIFICATION_UI } from '../../constants/notification.constants'
+import { NOTIFICATION_UI } from '../constants/notification.constants'
 
 interface NotificationBadgeProps {
     readonly count: number
     readonly showZero?: boolean
     readonly maxCount?: number
     readonly className?: string
-    readonly size?: 'sm' | 'md' | 'lg'
+    readonly size?: 'xs' | 'sm' | 'md' | 'lg'
 }
 
 export const NotificationBadge: React.FC<NotificationBadgeProps> = ({

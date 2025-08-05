@@ -41,8 +41,9 @@ const NavItem: React.FC<NavItemProps> = ({
                 'flex items-center text-sm transition-colors duration-200',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-offset-neutral-900',
                 {
-                    'px-3 py-2 rounded-lg font-medium transition-all': standalone,
-                    'px-4 py-2.5 rounded-md': !standalone
+
+                    'px-1 sm:px-3 py-2 rounded-lg font-medium transition-all': standalone,
+                    'px-1 sm:px-4 py-2.5 rounded-md': !standalone
                 },
                 isActive ? getActiveClasses() : getInactiveClasses()
             )}

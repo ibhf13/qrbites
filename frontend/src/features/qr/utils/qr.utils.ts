@@ -6,6 +6,7 @@ export const downloadBlob = (blob: Blob, filename: string): void => {
 
     link.href = url
     link.download = filename
+    link.style.display = 'none'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -14,8 +15,9 @@ export const downloadBlob = (blob: Blob, filename: string): void => {
 
 export const getDownloadFilename = (format: QRCodeFormat, menuName?: string): string => {
     const cleanMenuName = menuName ? `-${menuName.replace(/[^a-zA-Z0-9]/g, '-')}` : ''
+    const timestamp = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
 
-    return `qr-code${cleanMenuName}.${format.toLowerCase()}`
+    return `qr-code${cleanMenuName}-${timestamp}.${format.toLowerCase()}`
 }
 
 export const copyToClipboard = async (text: string): Promise<void> => {
@@ -91,5 +93,29 @@ export const printQRCode = (qrCode: PrintableQRCode): void => {
 
     printWindow.document.write(html)
     printWindow.document.close()
-    printWindow.print()
+
+    // Wait for images to load before printing
+    printWindow.onload = () => {
+        printWindow.print()
+    }
+}
+
+/**
+ * Downloads an image from URL and converts to blob for download
+ */
+export const downloadImageFromUrl = async (imageUrl: string, filename: string): Promise<void> => {
+    try {
+        const response = await fetch(imageUrl)
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.statusText}`)
+        }
+
+        const blob = await response.blob()
+
+        downloadBlob(blob, filename)
+    } catch (error) {
+        console.error('Error downloading image:', error)
+        throw new Error('Failed to download image')
+    }
 } 

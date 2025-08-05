@@ -31,9 +31,3 @@ export const QR_CODE_TIPS: readonly string[] = [
     'Make QR codes at least 2cm x 2cm for mobile scanning'
 ] as const
 
-export const QR_CODE_VIEWER_CONFIG = {
-    maxWidth: 'max-w-4xl',
-    maxHeight: 'max-h-[90vh]',
-    imageSize: 'w-64 h-64',
-    zIndex: 'z-50'
-} as const 
