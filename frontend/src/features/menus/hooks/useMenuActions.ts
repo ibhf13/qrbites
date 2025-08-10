@@ -19,6 +19,7 @@ interface UseMenuActionsResult {
     handleEdit: (menuId: string) => void
     handleDelete: (menuId: string) => Promise<void>
     handleGenerateQR: (menuId: string) => Promise<void>
+    handleRegenerateQR: (menuId: string) => Promise<void>
     handleViewQR: (menuId: string) => void
     handleView: (menuId: string) => void
     isDeletingMenu: boolean
@@ -78,6 +79,22 @@ export const useMenuActions = ({
         }
     }
 
+    const handleRegenerateQR = async (menuId: string) => {
+        const menu = menus.find(m => m._id === menuId)
+        const menuName = menu?.name || 'menu'
+
+        if (window.confirm(`Are you sure you want to regenerate the QR code for "${menuName}"? The previous QR code will no longer work.`)) {
+            try {
+                await generateQRMutation.mutateAsync(menuId)
+                showSuccess('QR code regenerated successfully!')
+                refreshList()
+            } catch (error) {
+                showError('Failed to regenerate QR code')
+                console.error('QR regeneration error:', error)
+            }
+        }
+    }
+
     const handleViewQR = (menuId: string) => {
         const menu = menus.find(m => m._id === menuId)
 
@@ -115,6 +132,7 @@ export const useMenuActions = ({
         handleEdit,
         handleDelete,
         handleGenerateQR,
+        handleRegenerateQR,
         handleViewQR,
         handleView,
         isDeletingMenu: deleteMutation.isPending,

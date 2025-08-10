@@ -10,6 +10,7 @@ interface MenuListContainerProps {
     onEdit: (id: string) => void
     onDelete: (id: string) => void
     onGenerateQR: (id: string) => void
+    onRegenerateQR: (id: string) => void
     onViewQR: (id: string) => void
     onView?: (id: string) => void
 }
@@ -20,6 +21,7 @@ export const MenuListContainer: React.FC<MenuListContainerProps> = ({
     onEdit,
     onDelete,
     onGenerateQR,
+    onRegenerateQR,
     onViewQR,
     onView,
 }) => {
@@ -82,6 +84,7 @@ export const MenuListContainer: React.FC<MenuListContainerProps> = ({
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onGenerateQR={onGenerateQR}
+                        onRegenerateQR={onRegenerateQR}
                         onViewQR={onViewQR}
                         onView={onView}
                     />

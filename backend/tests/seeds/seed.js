@@ -5,10 +5,6 @@ const User = require('@models/user')
 const Restaurant = require('@models/restaurant')
 const Menu = require('@models/menu')
 const MenuItem = require('@models/menuItem')
-const { seedUsers } = require('./userSeed')
-const { seedRestaurants } = require('./restaurantSeed')
-const { seedMenus } = require('./menuSeed')
-const { seedMenuItems } = require('./menuItemSeed')
 
 /**
  * Seed all data into the database
@@ -32,19 +28,12 @@ const seedDatabase = async (clearExisting = true) => {
         }
 
         // Seed all data
-        const users = await seedUsers()
-        const restaurants = await seedRestaurants(users)
-        const menus = await seedMenus(restaurants)
-        const menuItems = await seedMenuItems(menus)
 
         logger.success('Database seeding completed successfully')
 
         // Return references to all seeded data
         return {
-            users,
-            restaurants,
-            menus,
-            menuItems
+
         }
     } catch (error) {
         logger.error('Error seeding database:', error)

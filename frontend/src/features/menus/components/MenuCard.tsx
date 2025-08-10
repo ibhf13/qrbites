@@ -6,7 +6,8 @@ import {
     PencilIcon,
     TrashIcon,
     CalendarIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import { Menu } from '../types/menu.types'
 
@@ -15,6 +16,7 @@ interface MenuCardProps {
     onEdit: (id: string) => void
     onDelete: (id: string) => void
     onGenerateQR: (id: string) => void
+    onRegenerateQR?: (id: string) => void
     onViewQR?: (id: string) => void
     onView?: (id: string) => void
     loading?: boolean
@@ -25,6 +27,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
     onEdit,
     onDelete,
     onGenerateQR,
+    onRegenerateQR,
     onViewQR,
     onView,
     loading = false
@@ -47,6 +50,13 @@ export const MenuCard: React.FC<MenuCardProps> = ({
             onViewQR(_id)
         } else {
             onGenerateQR(_id)
+        }
+    }
+
+    const handleRegenerateQR = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation()
+        if (onRegenerateQR) {
+            onRegenerateQR(_id)
         }
     }
 
@@ -86,6 +96,12 @@ export const MenuCard: React.FC<MenuCardProps> = ({
                     onClick: handleQRAction,
                     variant: 'primary'
                 },
+                ...(qrCodeUrl && onRegenerateQR ? [{
+                    icon: ArrowPathIcon,
+                    label: 'Regenerate QR Code',
+                    onClick: handleRegenerateQR,
+                    variant: 'primary' as const
+                }] : []),
                 {
                     icon: PencilIcon,
                     label: 'Edit menu',

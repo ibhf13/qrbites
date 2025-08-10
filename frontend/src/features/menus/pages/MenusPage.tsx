@@ -77,6 +77,7 @@ const MenusPage = () => {
                     onEdit={menuActions.handleEdit}
                     onDelete={menuActions.handleDelete}
                     onGenerateQR={menuActions.handleGenerateQR}
+                    onRegenerateQR={menuActions.handleRegenerateQR}
                     onViewQR={menuActions.handleViewQR}
                     onView={menuActions.handleView}
                 />
