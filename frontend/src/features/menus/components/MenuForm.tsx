@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/common/buttons/Button'
-import { Card, Typography, Box, FlexBox } from '@/components/common'
+import { Typography, Box, FlexBox } from '@/components/common'
 import Checkbox from '@/components/common/forms/Checkbox'
 import FileDropzone from '@/components/common/forms/FileDropzone'
 import Input from '@/components/common/forms/Input'
@@ -62,8 +62,8 @@ export const MenuForm: React.FC<MenuFormProps> = ({
     }, [previewUrl])
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <Box className="grid grid-cols-1 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <FlexBox direction="col" gap="md" className="w-full">
                 <Input
                     label="Menu Name"
                     name="name"
@@ -95,33 +95,13 @@ export const MenuForm: React.FC<MenuFormProps> = ({
                         required
                     />
                 )}
-
+            </FlexBox>
+            <FlexBox direction="col" gap="md">
                 <Box className="space-y-4">
-                    <Typography variant="body" color="neutral" className="block text-sm font-medium">
+                    <Typography variant="caption" color="neutral" className="block text-sm font-medium">
                         Menu Image
                     </Typography>
-
-                    {(existingImageUrl || previewUrl) && (
-                        <Card variant="outlined" padding="md" className="mb-4">
-                            <Typography variant="subheading" color="neutral" gutterBottom>
-                                {previewUrl ? 'New image preview:' : 'Current image:'}
-                            </Typography>
-                            <FlexBox align="center" className="space-x-4">
-                                <img
-                                    src={previewUrl || existingImageUrl || ''}
-                                    alt="Menu preview"
-                                    className="h-32 w-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
-                                />
-                                <Typography variant="caption" color="muted">
-                                    {previewUrl ? 'This image will be uploaded when you save' : 'Upload a new image below to replace this one'}
-                                </Typography>
-                            </FlexBox>
-                        </Card>
-                    )}
-
                     <FileDropzone
-                        title="Menu Image"
-                        subtitle="Upload your menu image"
                         onFileSelect={handleFileSelect}
                         accept={{
                             'image/jpeg': [],
@@ -131,27 +111,29 @@ export const MenuForm: React.FC<MenuFormProps> = ({
                         multiple={false}
                         maxSize={5 * 1024 * 1024}
                         helpText="Maximum 5MB. Supported formats: JPEG, PNG, WebP"
+                        initialPreview={existingImageUrl || undefined}
+                        showPreview={true}
                     />
                 </Box>
-
                 <Checkbox
                     label="Active Menu"
                     name="isActive"
                     checked={formData.isActive}
                     onChange={handleInputChange}
                 />
-            </Box>
+            </FlexBox>
 
-            <FlexBox justify="end" className="gap-4">
+            <FlexBox justify="end" className="gap-2">
                 <Button
                     type="button"
                     variant="outline"
                     onClick={onCancel}
                     disabled={isSubmitting}
+                    size="md"
                 >
                     Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={isSubmitting}>
+                <Button type="submit" variant="primary" disabled={isSubmitting} size="md">
                     {isSubmitting
                         ? (mode === 'create' ? 'Creating...' : 'Updating...')
                         : (mode === 'create' ? 'Create Menu' : 'Update Menu')

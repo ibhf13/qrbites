@@ -1,23 +1,24 @@
 import React from 'react'
-import {
-    BenefitsSection,
-    CTASection,
-    FeaturesSection,
-    HeroSection,
-    ProductShowcaseSection,
-    TestimonialsSection
-} from '../components'
+// import {
+//     BenefitsSection,
+//     CTASection,
+//     FeaturesSection,
+//     HeroSection,
+//     ProductShowcaseSection,
+//     TestimonialsSection
+// } from '../components'
 import { Box } from '@/components/common'
+import { HeroSection } from '../components'
 
 const HomePage: React.FC = () => {
     return (
         <Box className="min-h-screen">
             <HeroSection />
-            <FeaturesSection />
+            {/* <FeaturesSection />
             <ProductShowcaseSection />
             <BenefitsSection />
             <TestimonialsSection />
-            <CTASection />
+            <CTASection /> */}
         </Box>
     )
 }

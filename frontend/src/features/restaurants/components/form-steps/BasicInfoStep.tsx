@@ -5,8 +5,8 @@ import { Card, Typography, Checkbox, FormInput, Textarea, FlexBox, Box, Grid } f
 const BasicInfoStep: React.FC = () => {
     const { register, formState: { errors } } = useFormContext()
 
-
-    const getNestedError = (obj: any, path: string): string => {
+    // eslint-disable-next-line
+    const getNestedError = (obj: Record<string, any>, path: string): string => {
         if (!obj) return ''
         const keys = path.split('.')
         let current = obj
@@ -20,14 +20,14 @@ const BasicInfoStep: React.FC = () => {
     }
 
     return (
-        <FlexBox direction="col" gap="lg">
-            <Grid cols={1} colsLg={2} gap="lg">
-                <Card variant="soft" padding="lg" className="h-fit">
-                    <Typography variant="title" gutterBottom>
+        <FlexBox direction="col" gap="md">
+            <Grid cols={1} colsLg={2} gap="md">
+                <Card variant="outlined" padding="sm" className="bg-white dark:bg-neutral-900">
+                    <Typography variant="subheading" className="mb-2">
                         Restaurant Information
                     </Typography>
 
-                    <Box className="space-y-6">
+                    <Box className="space-y-4">
                         <FormInput
                             label="Restaurant Name*"
                             {...register('name')}
@@ -38,7 +38,7 @@ const BasicInfoStep: React.FC = () => {
                         <Textarea
                             label="Description"
                             {...register('description')}
-                            rows={5}
+                            rows={4}
                             placeholder="Describe your restaurant..."
                             error={getNestedError(errors, 'description')}
                         />
@@ -59,12 +59,12 @@ const BasicInfoStep: React.FC = () => {
                     </Box>
                 </Card>
 
-                <Card variant="soft" padding="lg" className="h-fit">
-                    <Typography variant="title" gutterBottom>
+                <Card variant="outlined" padding="sm" className="bg-white dark:bg-neutral-900">
+                    <Typography variant="subheading" className="mb-2">
                         Contact Information
                     </Typography>
 
-                    <Box className="space-y-6">
+                    <Box className="space-y-4">
                         <FormInput
                             label="Phone Number"
                             {...register('contact.phone')}
@@ -92,21 +92,6 @@ const BasicInfoStep: React.FC = () => {
                     </Box>
                 </Card>
             </Grid>
-
-            <Card variant="outlined" padding="lg" className="bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800">
-                <FlexBox align="start" gap="md">
-                    <Box className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-warning-500 dark:text-warning-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                    </Box>
-                    <Box>
-                        <Typography variant="body" className="text-warning-800 dark:text-warning-200">
-                            <span className="font-semibold">Important:</span> Phone numbers must be in international format starting with a + symbol (e.g., +49123456789)
-                        </Typography>
-                    </Box>
-                </FlexBox>
-            </Card>
         </FlexBox>
     )
 }

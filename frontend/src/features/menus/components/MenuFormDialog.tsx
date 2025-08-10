@@ -27,6 +27,7 @@ const MenuFormDialog: React.FC<MenuFormDialogProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title={title}
+            maxWidth="2xl"
         >
             <MenuForm
                 initialData={

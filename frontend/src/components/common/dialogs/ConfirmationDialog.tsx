@@ -68,7 +68,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                         {showCloseButton && (
                             <Box className="flex justify-between p-4 pb-0 items-center">
                                 <DialogTitle className="flex">
-                                    <Typography variant="heading" color="neutral">
+                                    <Typography as="span" variant="heading" color="neutral">
                                         {title}
                                     </Typography>
                                 </DialogTitle>

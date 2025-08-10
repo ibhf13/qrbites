@@ -133,7 +133,14 @@ export const MenuCard: React.FC<MenuCardProps> = ({
                     </Typography>
 
                     {qrCodeUrl && (
-                        <FlexBox className="items-center space-x-1 ml-auto">
+                        <FlexBox className="items-center space-x-1 ml-auto" onClick={(e) => {
+                            e.stopPropagation()
+                            if (qrCodeUrl && onViewQR) {
+                                onViewQR(_id)
+                            } else {
+                                onGenerateQR(_id)
+                            }
+                        }}>
                             <CheckCircleIcon className="w-3.5 h-3.5 text-green-500" />
                             <Typography variant="caption" className="text-green-600 dark:text-green-400 font-medium text-xs">
                                 QR Ready
@@ -141,8 +148,8 @@ export const MenuCard: React.FC<MenuCardProps> = ({
                         </FlexBox>
                     )}
                 </FlexBox>
-            </Box>
-        </Card>
+            </Box >
+        </Card >
     )
 }
 

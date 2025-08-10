@@ -1,9 +1,8 @@
-import { Paper } from '@/components/common/layout'
+import { Logo, Paper } from '@/components/common/layout'
 import { NavItem } from '@/components/common/navigation'
 import { NotificationPanel } from '@/features/notifications'
 import { BuildingStorefrontIcon, HomeIcon } from '@heroicons/react/24/outline'
 import React from 'react'
-import Logo from './Logo'
 import { ThemeToggleButton } from './ThemeToggleButton'
 import UserMenu from './UserMenu'
 import { FlexBox, Box } from '@/components/common'
@@ -41,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ actions }) => {
                 >
                     <FlexBox align="center" className='w-full' gap="sm" >
                         <Box className="flex-shrink-0">
-                            <Logo size="sm" />
+                            <Logo size="sm" className="" />
                         </Box>
 
                         <nav>

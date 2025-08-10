@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormInput, Typography, Box, FlexBox } from '@/components/common'
+import { Button, Checkbox, FormInput, Typography, FlexBox } from '@/components/common'
 import env from '@/config/env'
 import { useNotificationActions } from '@/features/notifications'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -64,7 +64,7 @@ const LoginForm: React.FC = () => {
 
     const footerContent = (
         <FlexBox direction="col" gap="sm">
-            <Typography variant="body2" color="muted" align="center">
+            <Typography variant="body" color="muted" align="center">
                 Don't have an account?{' '}
                 <Link
                     to="/register"
@@ -73,7 +73,7 @@ const LoginForm: React.FC = () => {
                     Sign up
                 </Link>
             </Typography>
-            <Typography variant="body2" color="muted" align="center">
+            <Typography variant="body" color="muted" align="center">
                 <Link
                     to="/forgot-password"
                     className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
@@ -128,22 +128,15 @@ const LoginForm: React.FC = () => {
                     Log In
                 </Button>
 
-                <Box pt="sm">
-                    <FlexBox direction="col" align="center" gap="sm">
-                        <Typography variant="body2" color="muted" align="center">
-                            or
-                        </Typography>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            fullWidth
-                            onClick={handleDemoLogin}
-                            disabled={isSubmitting || isLoading}
-                        >
-                            Demo Login
-                        </Button>
-                    </FlexBox>
-                </Box>
+                <Button
+                    type="button"
+                    variant="outline"
+                    fullWidth
+                    onClick={handleDemoLogin}
+                    disabled={isSubmitting || isLoading}
+                >
+                    Demo Login
+                </Button>
             </form>
         </AuthCard>
     )

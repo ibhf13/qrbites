@@ -1,174 +1,72 @@
 import React from 'react'
-import { Typography, Box } from '@/components/common'
-import { SpinnerIcon } from './Icon'
-import { getSpinnerSizes, type ColorVariant, type SizeVariant } from '@/utils/designTokenUtils'
+import { Typography, Box, Card } from '@/components/common'
+import { getSpinnerSizes } from '@/utils/designTokenUtils'
 import { cn } from '@/utils/cn'
 
 interface LoadingSpinnerProps {
-    size?: SizeVariant | '2xl'
-    color?: ColorVariant | 'white' | 'current'
-    className?: string
+    size?: 'sm' | 'md' | 'lg' | 'xl'
     label?: string
-    showLabel?: boolean
-    variant?: 'spinner' | 'dots' | 'pulse' | 'bars'
-    speed?: 'slow' | 'normal' | 'fast'
-    thickness?: 'thin' | 'normal' | 'thick'
+    subtitle?: string
+    className?: string
 }
 
-const spinnerSpeeds = {
-    slow: 'animate-spin [animation-duration:2s]',
-    normal: 'animate-spin',
-    fast: 'animate-spin [animation-duration:0.5s]'
-}
-
-const spinnerThickness = {
-    thin: { xs: '2', sm: '2', default: '2' },
-    normal: { xs: '2', sm: '2', default: '3' },
-    thick: { xs: '3', sm: '3', default: '4' }
-}
-
-const getSpinnerColorClass = (color: LoadingSpinnerProps['color']) => {
-    if (color === 'white') return 'text-white'
-    if (color === 'current') return 'text-current'
-
-    return `text-${color}-600 dark:text-${color}-400`
-}
-
-const SpinnerVariant: React.FC<{
-    size: string
-    color: string
-    speed: string
-    thickness: string
-}> = ({ size, color, speed, thickness }) => (
-    <SpinnerIcon
-        className={cn(speed, size, color)}
-        thickness={thickness}
-    />
-)
-
-const DotsVariant: React.FC<{
-    size: string
-    color: string
-    speed: string
-}> = ({ size, color, speed }) => (
-    <Box className={cn('flex space-x-1', size)}>
-        {[0, 1, 2].map((i) => (
-            <Box
-                key={i}
-                className={cn(
-                    'w-2 h-2 rounded-full animate-bounce',
-                    color.replace('text-', 'bg-')
-                )}
-                style={{
-                    animationDelay: `${i * 0.1}s`,
-                    animationDuration: speed === 'fast' ? '0.6s' : speed === 'slow' ? '1.4s' : '1s'
-                }}
-            />
-        ))}
-    </Box>
-)
-
-const PulseVariant: React.FC<{
-    size: string
-    color: string
-    speed: string
-}> = ({ size, color, speed }) => (
-    <Box className={cn(size, 'relative')}>
-        <Box
-            className={cn(
-                'absolute inset-0 rounded-full animate-ping opacity-75',
-                color.replace('text-', 'bg-')
-            )}
-            style={{
-                animationDuration: speed === 'fast' ? '0.5s' : speed === 'slow' ? '2s' : '1s'
-            }}
+const SpinnerIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg
+        className={cn('animate-spin', className)}
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+    >
+        <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="2"
         />
-        <Box className={cn('relative w-full h-full rounded-full', color.replace('text-', 'bg-'))} />
-    </Box>
-)
-
-const BarsVariant: React.FC<{
-    size: string
-    color: string
-    speed: string
-}> = ({ size, color, speed }) => (
-    <Box className={cn('flex items-end space-x-1', size)}>
-        {[0, 1, 2, 3].map((i) => (
-            <Box
-                key={i}
-                className={cn('w-1 animate-pulse', color.replace('text-', 'bg-'))}
-                style={{
-                    height: `${25 + (i % 2) * 50}%`,
-                    animationDelay: `${i * 0.1}s`,
-                    animationDuration: speed === 'fast' ? '0.6s' : speed === 'slow' ? '1.4s' : '1s'
-                }}
-            />
-        ))}
-    </Box>
+        <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        />
+    </svg>
 )
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-    size = 'md',
-    color = 'primary',
-    className,
-    label,
-    showLabel = true,
-    variant = 'spinner',
-    speed = 'normal',
-    thickness = 'normal',
+    size = 'lg',
+    label = 'Loading Menu',
+    subtitle = 'Preparing your digital menu experience...',
+    className
 }) => {
     const spinnerSizes = getSpinnerSizes(size)
-    const sizeClasses = variant === 'spinner' ? spinnerSizes.spinner : spinnerSizes.other
-    const colorClasses = getSpinnerColorClass(color)
-    const speedClasses = spinnerSpeeds[speed]
-    const isSmall = size === 'xs' || size === 'sm'
-    const thicknessValue = spinnerThickness[thickness][isSmall ? 'xs' : 'default']
-
-    const renderVariant = () => {
-        const props = {
-            size: sizeClasses,
-            color: colorClasses,
-            speed: speedClasses,
-            thickness: thicknessValue
-        }
-
-        switch (variant) {
-            case 'dots':
-                return <DotsVariant {...props} />
-            case 'pulse':
-                return <PulseVariant {...props} />
-            case 'bars':
-                return <BarsVariant {...props} />
-            case 'spinner':
-            default:
-                return <SpinnerVariant {...props} />
-        }
-    }
+    const spinnerClasses = spinnerSizes.spinner
 
     return (
-        <Box
-            className={cn('inline-flex flex-col items-center justify-center', className)}
-            role="status"
-            aria-live="polite"
-            aria-label={label || 'Loading...'}
-        >
-            {renderVariant()}
+        <Box className={cn('min-h-screen bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center p-4', className)}>
+            <Card
+                variant="elevated"
+                className="max-w-md w-full text-center"
+                contentPadding="sm"
+            >
+                <Box className="flex-1 space-y-2.5">
+                    <Box className="flex flex-col items-center gap-6">
+                        <Box className="relative">
+                            <SpinnerIcon className={cn(spinnerClasses, 'text-primary-600 dark:text-primary-400')} />
+                        </Box>
 
-            {label && showLabel && (
-                <Typography
-                    as="p"
-                    variant="body"
-                    color="muted"
-                    className="mt-3 text-center max-w-xs"
-                    aria-hidden="true"
-                >
-                    {label}
-                </Typography>
-            )}
-
-            <span className="sr-only">
-                {label || 'Loading content, please wait...'}
-            </span>
+                        <Box className="text-center space-y-2.5">
+                            <Typography variant="heading" className="font-semibold text-base text-neutral-900 dark:text-neutral-100">
+                                {label}
+                            </Typography>
+                            <Typography variant="body" className="text-sm text-slate-600 dark:text-slate-400">
+                                {subtitle}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Box>
+            </Card>
         </Box>
     )
 }

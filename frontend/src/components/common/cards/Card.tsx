@@ -21,7 +21,7 @@ import {
 
 export type { CardVariant, CardSize, ImageAspectRatio, ActionItem }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(({
     children,
     className,
     variant = 'default',
@@ -45,7 +45,7 @@ export const Card: React.FC<CardProps> = ({
     'aria-label': ariaLabel,
     role,
     ...rest
-}) => {
+}, ref) => {
     const hasHeader = title || subtitle || headerAction
     const hasImage = Boolean(image?.src || image?.placeholder)
     const hasActions = actions && actions.length > 0
@@ -97,6 +97,7 @@ export const Card: React.FC<CardProps> = ({
     if (hasHeader || footer) {
         return (
             <Box
+                ref={ref}
                 className={cardClasses}
                 aria-label={ariaLabel}
                 role={role}
@@ -123,6 +124,7 @@ export const Card: React.FC<CardProps> = ({
     if (hasImage) {
         return (
             <Box
+                ref={ref}
                 className={cardClasses}
                 aria-label={ariaLabel}
                 role={role}
@@ -141,6 +143,7 @@ export const Card: React.FC<CardProps> = ({
 
     return (
         <Box
+            ref={ref}
             className={cardClasses}
             aria-label={ariaLabel}
             role={role}
@@ -154,6 +157,8 @@ export const Card: React.FC<CardProps> = ({
             </CardContent>
         </Box>
     )
-}
+})
+
+Card.displayName = 'Card'
 
 export default Card

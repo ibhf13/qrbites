@@ -12,7 +12,7 @@ interface FullscreenImageModalProps {
     imageUrl: string
     alt: string
     title?: string
-    menuData?: PublicMenuData // For download functionality
+    menuData?: PublicMenuData
 }
 
 const FullscreenImageModal: React.FC<FullscreenImageModalProps> = ({
@@ -39,7 +39,6 @@ const FullscreenImageModal: React.FC<FullscreenImageModalProps> = ({
         getCursorClass
     } = useImageModal({ isOpen, onClose })
 
-    // Download functionality - always call the hook but handle undefined menuData inside
     const { downloadMenuImage, isDownloading, canDownload } = useMenuDownload(menuData)
 
     return (
@@ -118,7 +117,7 @@ const FullscreenImageModal: React.FC<FullscreenImageModalProps> = ({
                     >
                         {!imageState.isLoaded && !imageState.hasError && (
                             <Box className="absolute inset-0 flex items-center justify-center">
-                                <LoadingSpinner size="lg" className="text-white" />
+                                <LoadingSpinner />
                             </Box>
                         )}
 

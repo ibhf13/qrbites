@@ -1,8 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 
-/**
- * Custom hook for managing local storage with type safety and error handling
- */
 export const useLocalStorage = <T>(
     key: string,
     initialValue: T
@@ -53,13 +50,9 @@ export const useLocalStorage = <T>(
     return [storedValue, setValue, clearValue]
 }
 
-/**
- * Hook specifically for notification persistence
- * Handles cleanup of old notifications and storage limits
- */
 export const useNotificationStorage = (
     maxStoredNotifications: number = 50,
-    maxStorageAge: number = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+    maxStorageAge: number = 7 * 24 * 60 * 60 * 1000
 ) => {
     const STORAGE_KEY = 'qrbites_notifications'
 

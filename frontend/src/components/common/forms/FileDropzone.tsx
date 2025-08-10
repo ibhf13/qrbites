@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDropzone, DropzoneOptions } from 'react-dropzone'
 import { Card, Typography, Box, FlexBox } from '@/components/common'
 import { cn } from '@/utils/cn'
@@ -16,6 +16,8 @@ interface FileDropzoneProps {
     helpText?: string
     className?: string
     variant?: 'default' | 'compact'
+    initialPreview?: string
+    showPreview?: boolean
 }
 
 const FileDropzone: React.FC<FileDropzoneProps> = ({
@@ -35,12 +37,51 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     dragText = 'or drag and drop',
     helpText,
     className,
-    variant = 'default'
+    variant = 'default',
+    initialPreview,
+    showPreview = true
 }) => {
+    const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreview || null)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+    useEffect(() => {
+        return () => {
+            if (previewUrl && previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl)
+            }
+        }
+    }, [previewUrl])
+
     const onDrop = (acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
+            const file = acceptedFiles[0]
+
+            setSelectedFile(file)
+
+            if (showPreview && file.type.startsWith('image/')) {
+                if (previewUrl && previewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(previewUrl)
+                }
+
+                const newPreviewUrl = URL.createObjectURL(file)
+
+                setPreviewUrl(newPreviewUrl)
+            }
+
             onFileSelect(acceptedFiles)
         }
+    }
+
+    const handleRemoveFile = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setSelectedFile(null)
+        if (previewUrl && previewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl)
+        }
+
+        setPreviewUrl(null)
+
+        onFileSelect([])
     }
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -74,34 +115,87 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
         </svg>
     )
 
-    const renderContent = () => (
-        <Box className="text-center">
-            {renderIcon()}
-            <Box mt={variant === 'compact' ? 'sm' : 'md'}>
-                <Typography
-                    as="p"
-                    variant={variant === 'compact' ? 'caption' : 'body'}
-                    color="neutral"
-                    className="text-center"
+    const renderPreview = () => {
+        if (!showPreview || !previewUrl) return null
+
+        return (
+            <FlexBox direction="row" align="center" gap="sm" className="mb-2">
+                <Box className="relative">
+                    <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="w-6 h-6 object-cover rounded border border-neutral-200 dark:border-neutral-700"
+                    />
+                </Box>
+                <FlexBox direction="col" gap="xs" className="flex-1 min-w-0">
+                    <Typography variant="caption" color="neutral" className="truncate">
+                        {selectedFile?.name || 'Image preview'}
+                    </Typography>
+                    {selectedFile && (
+                        <Typography variant="caption" color="muted">
+                            {(selectedFile.size / 1024).toFixed(1)} KB
+                        </Typography>
+                    )}
+                </FlexBox>
+                <button
+                    onClick={handleRemoveFile}
+                    className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors"
+                    aria-label="Remove file"
                 >
-                    <span className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
-                        {uploadText}
-                    </span>
-                    <span className="text-neutral-600 dark:text-neutral-400 ml-1">{dragText}</span>
-                </Typography>
-                {helpText && (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </FlexBox>
+        )
+    }
+
+    const renderContent = () => {
+        if (showPreview && previewUrl) {
+            return (
+                <Box className="text-center">
+                    {renderPreview()}
                     <Typography
                         as="p"
                         variant="caption"
                         color="muted"
-                        className="mt-1 block"
+                        className="mt-2"
                     >
-                        {helpText}
+                        Click to change or drag a new file
                     </Typography>
-                )}
+                </Box>
+            )
+        }
+
+        return (
+            <Box className="text-center">
+                {renderIcon()}
+                <Box mt={variant === 'compact' ? 'sm' : 'md'}>
+                    <Typography
+                        as="p"
+                        variant={variant === 'compact' ? 'caption' : 'body'}
+                        color="neutral"
+                        className="text-center"
+                    >
+                        <span className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
+                            {uploadText}
+                        </span>
+                        <span className="text-neutral-600 dark:text-neutral-400 ml-1">{dragText}</span>
+                    </Typography>
+                    {helpText && (
+                        <Typography
+                            as="p"
+                            variant="caption"
+                            color="muted"
+                            className="mt-1 block"
+                        >
+                            {helpText}
+                        </Typography>
+                    )}
+                </Box>
             </Box>
-        </Box>
-    )
+        )
+    }
 
     if (variant === 'compact') {
         return (

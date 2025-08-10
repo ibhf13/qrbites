@@ -27,7 +27,7 @@ export const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
         <FormDialog
             isOpen={isOpen}
             onClose={onClose}
-            title={`QR Code for ${menuName}`}
+            title={`${menuName} QR Code`}
             maxWidth="xl"
             className='p-0'
             contentClassName='py-0 px-0'

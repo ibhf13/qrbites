@@ -14,7 +14,7 @@ const MenuLoading: React.FC = () => {
                 <Box className="flex-1 space-y-2.5">
                     <Box className="flex flex-col items-center gap-6">
                         <Box className="relative">
-                            <LoadingSpinner size="lg" />
+                            <LoadingSpinner />
                             <Box className="absolute inset-0 animate-pulse">
                                 <QrCodeIcon className={`${VIEWER_CONFIG.LOADING_ICON_SIZE} text-primary-300 dark:text-primary-700 opacity-30`} />
                             </Box>

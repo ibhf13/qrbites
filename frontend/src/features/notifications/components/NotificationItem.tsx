@@ -32,7 +32,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
             )}
             role={NOTIFICATION_A11Y.ROLE_LISTITEM}
         >
-            <FlexBox align="start" gap="xs" className="sm:gap-3 w-full">
+            <FlexBox align="center" gap="xs" className="sm:gap-3 w-full">
                 <NotificationIcon
                     type={notification.type}
                     size={compact ? 'sm' : 'md'}

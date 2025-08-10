@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FormProvider } from 'react-hook-form'
-import { Card, Button, ErrorDisplay, Box, ErrorBoundary, FlexBox, ConfirmationDialog } from '@/components/common'
+import { Button, ErrorDisplay, ErrorBoundary, FlexBox, ConfirmationDialog } from '@/components/common'
 import { RESTAURANT_FORM_STEPS } from '../constants/restaurant.const'
 import { useRestaurantForm } from '../hooks/useRestaurantForm'
 import { RestaurantFormData, RestaurantFormMode } from '../types/restaurant.types'
@@ -97,17 +97,18 @@ const BaseRestaurantForm: React.FC<RestaurantFormProps> = ({
 
     return (
         <ErrorBoundary>
-            <Box className="w-full max-w-none">
-                <FormProvider {...methods}>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            if (currentStep === RESTAURANT_FORM_STEPS.length - 1) {
-                                methods.handleSubmit(handleSubmit)(e)
-                            }
-                        }}
-                        className="space-y-2"
-                    >
+            <FormProvider {...methods}>
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        if (currentStep === RESTAURANT_FORM_STEPS.length - 1) {
+                            methods.handleSubmit(handleSubmit)(e)
+                        }
+                    }}
+                    className="space-y-4"
+                >
+                    <FlexBox direction="col" gap="md" className="pt-2">
+
                         <FormStepper
                             steps={[...RESTAURANT_FORM_STEPS]}
                             currentStep={currentStep}
@@ -122,91 +123,90 @@ const BaseRestaurantForm: React.FC<RestaurantFormProps> = ({
                             />
                         )}
 
-                        <Card variant="elevated" padding="xl" className="min-h-[500px]">
-                            <Box className="w-full">
-                                {renderStep()}
-                            </Box>
-                        </Card>
+                        {renderStep()}
+                    </FlexBox>
+                    <FlexBox
+                        gap="sm"
+                        className="order-2 flex flex-col sm:flex-row sm:justify-end sm:items-center w-full"
+                    >
+                        <Button
+                            type="button"
+                            onClick={prevStep}
+                            disabled={currentStep === 0}
+                            variant="info"
+                            size="md"
+                            className="flex-1 sm:flex-none"
+                        >
+                            Previous
+                        </Button>
 
-                        <FlexBox justify="between" align="center" className="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-                            <FlexBox gap="md">
-                                <Button
-                                    type="button"
-                                    onClick={prevStep}
-                                    disabled={currentStep === 0}
-                                    variant="secondary"
-                                    size="lg"
-                                >
-                                    Previous
-                                </Button>
+                        {currentStep < RESTAURANT_FORM_STEPS.length - 1 ? (
+                            <Button
+                                type="button"
+                                onClick={async (e) => {
+                                    e.preventDefault()
+                                    await nextStep()
+                                }}
+                                variant="primary"
+                                size="md"
+                                className="flex-1 sm:flex-none"
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                isLoading={isSubmitting}
+                                variant="primary"
+                                size="md"
+                                className="flex-1 sm:flex-none"
+                            >
+                                {mode === 'create' ? 'Create Restaurant' : 'Save Changes'}
+                            </Button>
+                        )}
 
-                                {onCancel && (
-                                    <Button
-                                        type="button"
-                                        onClick={handleCancelClick}
-                                        variant="ghost"
-                                        size="lg"
-                                        disabled={isSubmitting}
-                                    >
-                                        Cancel
-                                    </Button>
-                                )}
-                            </FlexBox>
+                        {onCancel && (
+                            <Button
+                                type="button"
+                                onClick={handleCancelClick}
+                                variant="warning"
+                                size="md"
+                                disabled={isSubmitting}
+                                className="flex-1 sm:flex-none w-full sm:w-auto"
+                            >
+                                Cancel
+                            </Button>
+                        )}
+                    </FlexBox>
 
-                            <FlexBox gap="md">
-                                {currentStep < RESTAURANT_FORM_STEPS.length - 1 ? (
-                                    <Button
-                                        type="button"
-                                        onClick={async (e) => {
-                                            e.preventDefault()
-                                            await nextStep()
-                                        }}
-                                        variant="primary"
-                                        size="lg"
-                                    >
-                                        Next
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        isLoading={isSubmitting}
-                                        variant="primary"
-                                        size="lg"
-                                    >
-                                        {mode === 'create' ? 'Create Restaurant' : 'Save Changes'}
-                                    </Button>
-                                )}
-                            </FlexBox>
-                        </FlexBox>
-                    </form>
-                </FormProvider>
+                </form>
+            </FormProvider>
 
-                <ConfirmationDialog
-                    isOpen={showCancelDialog}
-                    title="Cancel Form"
-                    message="You have unsaved changes. Are you sure you want to cancel? All changes will be lost."
-                    type="warning"
-                    confirmText="Yes, Cancel"
-                    cancelText="Keep Editing"
-                    onConfirm={handleConfirmCancel}
-                    onCancel={() => setShowCancelDialog(false)}
-                    isLoading={false}
-                />
+            <ConfirmationDialog
+                isOpen={showCancelDialog}
+                title="Cancel Form"
+                message="You have unsaved changes. Are you sure you want to cancel? All changes will be lost."
+                type="warning"
+                confirmText="Yes, Cancel"
+                cancelText="Keep Editing"
+                onConfirm={handleConfirmCancel}
+                onCancel={() => setShowCancelDialog(false)}
+                isLoading={false}
+            />
 
-                <ConfirmationDialog
-                    isOpen={showStepChangeDialog}
-                    title="Unsaved Changes"
-                    message="You have unsaved changes on this step. Are you sure you want to continue? Changes will be lost."
-                    type="warning"
-                    confirmText="Continue"
-                    cancelText="Stay Here"
-                    onConfirm={handleConfirmStepChange}
-                    onCancel={handleCancelStepChange}
-                    isLoading={false}
-                />
-            </Box>
-        </ErrorBoundary>
+            <ConfirmationDialog
+                isOpen={showStepChangeDialog}
+                title="Unsaved Changes"
+                message="You have unsaved changes on this step. Are you sure you want to continue? Changes will be lost."
+                type="warning"
+                confirmText="Continue"
+                cancelText="Stay Here"
+                onConfirm={handleConfirmStepChange}
+                onCancel={handleCancelStepChange}
+                isLoading={false}
+            />
+        </ErrorBoundary >
     )
 }
 

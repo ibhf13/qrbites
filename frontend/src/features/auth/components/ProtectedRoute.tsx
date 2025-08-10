@@ -19,11 +19,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (loading) {
         return (
             <FlexBox direction="row" align="center" justify="center" className="h-screen">
-                <LoadingSpinner
-                    size="lg"
-                    label="Checking authentication..."
-                    showLabel={true}
-                />
+                <LoadingSpinner label="Checking authentication..." />
             </FlexBox>
         )
     }

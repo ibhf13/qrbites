@@ -1,8 +1,4 @@
 // @ts-nocheck
-/**
- * Environment configuration
- * This file centralizes access to environment variables and provides defaults.
- */
 
 const env = {
     apiUrl: import.meta.env.VITE_API_URL,

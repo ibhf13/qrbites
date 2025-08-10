@@ -128,7 +128,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                         NOTIFICATION_CLASSES.HISTORY_PANEL,
                         'fixed z-[9999] shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-white dark:bg-neutral-900 rounded-lg',
                         'w-[280px] max-h-[360px]',
-                        'sm:w-[380px] sm:max-h-[480px]'
+                        'sm:w-[420px] sm:max-h-[480px]'
                     )}
                     style={{
                         top: `${panelPosition.top}px`,

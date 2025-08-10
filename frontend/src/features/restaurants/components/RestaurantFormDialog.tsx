@@ -26,7 +26,7 @@ const RestaurantFormDialog: React.FC<RestaurantFormDialogProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title={title}
-            maxWidth="5xl"
+            maxWidth="4xl"
         >
             {mode === 'edit' && restaurantData ? (
                 <RestaurantEditForm

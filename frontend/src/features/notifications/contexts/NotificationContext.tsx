@@ -41,7 +41,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     const [notifications, setNotifications] = useState<Notification[]>([])
     const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
-    // Load notifications from localStorage on mount
     useEffect(() => {
         if (!enableLocalStorage || typeof window === 'undefined') {
             return
@@ -65,7 +64,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         }
     }, [enableLocalStorage, maxNotifications])
 
-    // Save notifications to localStorage whenever notifications change
     useEffect(() => {
         if (!enableLocalStorage || typeof window === 'undefined') {
             return
@@ -79,7 +77,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         }
     }, [notifications, enableLocalStorage])
 
-    // Periodic cleanup of old notifications
     useEffect(() => {
         if (!enableLocalStorage) {
             return

@@ -32,7 +32,6 @@ export const CardActions: React.FC<CardActionsProps> = ({
 
     return (
         <>
-            {/* Desktop: Show individual action buttons */}
             <Box
                 className={cn(
                     'hidden sm:flex absolute z-20 transition-all duration-300',
@@ -60,14 +59,13 @@ export const CardActions: React.FC<CardActionsProps> = ({
                 </FlexBox>
             </Box>
 
-            {/* Mobile: Show 3-dot menu */}
             <Box
                 className={cn(
                     'sm:hidden absolute z-20 transition-all duration-300 opacity-100',
                     actionPositionClasses[actionPosition]
                 )}
             >
-                <div className="relative">
+                <Box className="relative">
                     <IconButton
                         icon={MenuIcon}
                         variant="ghost"
@@ -111,7 +109,7 @@ export const CardActions: React.FC<CardActionsProps> = ({
                             ))}
                         </Box>
                     )}
-                </div>
+                </Box>
             </Box>
         </>
     )

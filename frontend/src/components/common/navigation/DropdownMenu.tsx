@@ -177,10 +177,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
         return items.map((item, index) => (
             <React.Fragment key={item.id}>
                 {item.divider && index > 0 && (
-                    <Box
-                        my="xs"
-                        className="border-t border-neutral-200 dark:border-neutral-700"
-                    />
+                    <Box className="border-t border-neutral-200 dark:border-neutral-700 py-1" />
                 )}
 
                 <Button
@@ -189,20 +186,14 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
                     onClick={() => handleItemClick(item)}
                     disabled={item.disabled}
                     fullWidth
-                    className={cn(
-                        'justify-start h-auto py-1.5 px-2',
-                        'focus:ring-1 focus:ring-primary-500 focus:ring-inset',
-                        'min-h-0 text-xs',
-                        item.variant === 'danger' && 'text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20'
-                    )}
                     role="menuitem"
                     tabIndex={isOpen ? 0 : -1}
                 >
                     <FlexBox align="center" gap="xs" className="w-full">
                         {item.icon && (
-                            <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                            <item.icon className="w-4 h-4 flex-shrink-0" />
                         )}
-                        <Typography variant="caption" className="truncate text-left text-xs">
+                        <Typography variant="caption" className="truncate text-left text-sm">
                             {item.label}
                         </Typography>
                     </FlexBox>
@@ -254,7 +245,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
                     onKeyDown={handleMenuKeyDown}
                     tabIndex={-1}
                 >
-                    <FlexBox direction="col" className="space-y-0.5">
+                    <FlexBox direction="col" >
                         {renderMenuItems()}
                     </FlexBox>
                 </Box>

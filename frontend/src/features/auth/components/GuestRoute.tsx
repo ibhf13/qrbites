@@ -16,11 +16,7 @@ const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
     if (loading) {
         return (
             <FlexBox justify="center" align="center" className="h-screen">
-                <LoadingSpinner
-                    size="lg"
-                    label="Checking authentication..."
-                    showLabel={true}
-                />
+                <LoadingSpinner label="Checking authentication..." />
             </FlexBox>
         )
     }
@@ -29,7 +25,7 @@ const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
     const isAuth = isAuthFromContext && hasValidToken
 
     if (isAuth) {
-        const from = (location.state as any)?.from || '/'
+        const from = (location.state)?.from || '/'
 
         return <Navigate to={from} replace />
     }

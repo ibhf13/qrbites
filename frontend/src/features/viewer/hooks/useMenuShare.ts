@@ -13,7 +13,6 @@ export const useMenuShare = () => {
         console.log('Share failed:', error)
       }
     } else {
-      // Fallback to clipboard
       await navigator.clipboard.writeText(shareData.url)
       setIsShareNotificationOpen(true)
       setTimeout(() => {

@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
 
-/**
- * A hook for detecting window size and responsive breakpoints.
- * Provides window dimensions and convenient boolean flags for responsive design.
- */
-
 interface WindowSize {
     width: number
     height: number

@@ -70,7 +70,7 @@ const PdfViewer: React.FC<{ imageUrl: string; menuName: string }> = ({ imageUrl,
       />
       {!isLoaded && (
         <Box className="absolute inset-0 flex items-center justify-center bg-neutral-100 dark:bg-neutral-700">
-          <LoadingSpinner size="lg" />
+          <LoadingSpinner />
         </Box>
       )}
     </Box>
@@ -106,7 +106,7 @@ const ImageViewer: React.FC<{ imageUrl: string; menuName: string; menuData: Menu
         />
         {!isLoaded && !hasError && (
           <Box className={`absolute inset-0 flex items-center justify-center bg-neutral-100 dark:bg-neutral-700 min-h-[${VIEWER_CONFIG.MIN_IMAGE_HEIGHT}]`}>
-            <LoadingSpinner size="lg" />
+            <LoadingSpinner />
           </Box>
         )}
         {hasError && (

@@ -1,27 +1,22 @@
 export const VIEWER_CONFIG = {
-  // Query configuration
   RETRY_ATTEMPTS: 2,
   RETRY_DELAY: 1000,
-  STALE_TIME: 5 * 60 * 1000, // 5 minutes
-  GC_TIME: 10 * 60 * 1000, // 10 minutes
-  
-  // UI timing
+  STALE_TIME: 5 * 60 * 1000,
+  GC_TIME: 10 * 60 * 1000,
+
   SHARE_NOTIFICATION_DURATION: 2000,
-  
-  // Image constraints
+
   MAX_IMAGE_HEIGHT: '90vh',
   MIN_IFRAME_HEIGHT_SM: '600px',
   MIN_IFRAME_HEIGHT_LG: '800px',
   MIN_IMAGE_HEIGHT: '400px',
-  
-  // Icon sizes
+
   ICON_SIZE_SM: 'w-3.5 h-3.5',
   ICON_SIZE_MD: 'w-4 h-4',
   ICON_SIZE_LG: 'w-5 h-5',
   ICON_SIZE_XL: 'w-20 h-20',
   ICON_SIZE_2XL: 'w-24 h-24',
-  
-  // Loading spinner sizes
+
   LOADING_ICON_SIZE: 'w-16 h-16',
 } as const
 

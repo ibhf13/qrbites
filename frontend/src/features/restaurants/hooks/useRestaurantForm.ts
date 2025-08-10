@@ -54,7 +54,26 @@ export const useRestaurantForm = (
 
                 return true
             case 2:
-                return await methods.trigger(['hours'])
+                const hoursValid = await methods.trigger(['hours'])
+
+                if (!hoursValid) {
+                    const hoursErrors = methods.formState.errors.hours
+                    if (hoursErrors) {
+                        setFormError('Please fix the business hours validation errors before proceeding.')
+                        return false
+                    }
+                }
+
+                // Additional validation for business hours
+                const hoursData = formData.hours
+                const hasOpenDays = hoursData?.some(day => !day.closed)
+
+                if (!hasOpenDays) {
+                    setFormError('Your restaurant must be open at least one day of the week.')
+                    return false
+                }
+
+                return hoursValid
             default:
                 return true
         }

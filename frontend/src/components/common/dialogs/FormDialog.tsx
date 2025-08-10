@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { Dialog, DialogPanel } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { Box, FlexBox, Paper, IconButton } from '@/components/common'
 import { cn } from '@/utils/cn'
@@ -54,7 +54,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+            className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 p-1 md:p-2"
             aria-label="Close dialog"
         />
     ) : undefined
@@ -64,6 +64,7 @@ const FormDialog: React.FC<FormDialogProps> = ({
             open={isOpen}
             onClose={onClose}
             className="relative z-50"
+
         >
             <Box
                 className={cn(
@@ -73,44 +74,30 @@ const FormDialog: React.FC<FormDialogProps> = ({
                 aria-hidden="true"
             />
 
-            <FlexBox
-                className="fixed inset-0 p-4 overflow-y-auto scrollbar-hide"
-                justify="center"
-                align="center"
-            >
-                <DialogPanel className={cn('w-full', maxWidthClasses[maxWidth])}>
+            <FlexBox className="fixed inset-0 items-start justify-center p-2 md:p-4 overflow-y-auto scrollbar-hide">
+                <DialogPanel className={cn('w-full my-8', maxWidthClasses[maxWidth])}>
                     <Paper
                         title={title}
                         subtitle={subtitle}
                         actions={headerActions}
-                        variant="elevated"
+                        variant="outlined"
                         padding="none"
                         className={cn(
-                            'w-full max-h-[95vh] overflow-hidden shadow-2xl',
-                            'animate-in fade-in-0 zoom-in-95 duration-200',
+                            'w-full bg-white dark:bg-neutral-900',
                             className
                         )}
-                        headerClassName={headerClassName}
+                        headerClassName={cn('py-2 px-2 md:px-4', headerClassName)}
                     >
-                        <Box
-                            className={cn(
-                                'overflow-y-auto scrollbar-hide p-6',
-                                contentClassName
-                            )}
-                        >
-                            <DialogTitle className="sr-only">
-                                {title}
-                            </DialogTitle>
+                        <Box className={cn('py-2 px-2 md:px-4', contentClassName)}>
                             {children}
                         </Box>
 
                         {footer && (
                             <Box
                                 className={cn(
-                                    "border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50",
+                                    "border-t border-gray-200 dark:border-gray-700 p-2 md:p-4 bg-gray-50 dark:bg-gray-800/50",
                                     footerClassName
                                 )}
-                                bg="neutral"
                             >
                                 <FlexBox justify="end" gap="sm">
                                     {footer}

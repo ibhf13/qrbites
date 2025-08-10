@@ -21,25 +21,21 @@ interface DragState {
 }
 
 interface UseImageModalReturn {
-  // Image state
   imageState: ImageState
   setImageLoaded: () => void
   setImageError: () => void
-  
-  // Zoom functionality
+
   zoomState: ZoomState
   handleZoomIn: () => void
   handleZoomOut: () => void
   handleResetZoom: () => void
   handleWheel: (event: React.WheelEvent) => void
-  
-  // Drag functionality
+
   dragState: DragState
   handleMouseDown: (event: React.MouseEvent) => void
   handleMouseMove: (event: React.MouseEvent) => void
   handleMouseUp: () => void
-  
-  // Utility
+
   getZoomPercentage: () => number
   getCursorClass: () => string
 }
@@ -49,25 +45,21 @@ const MIN_SCALE = 0.5
 const MAX_SCALE = 5
 
 export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImageModalReturn => {
-  // Image loading state
   const [imageState, setImageState] = useState<ImageState>({
     isLoaded: false,
     hasError: false
   })
 
-  // Zoom state
   const [zoomState, setZoomState] = useState<ZoomState>({
     scale: 1,
     position: { x: 0, y: 0 }
   })
 
-  // Drag state
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     dragStart: { x: 0, y: 0 }
   })
 
-  // Reset all state when modal opens
   useEffect(() => {
     if (isOpen) {
       setImageState({ isLoaded: false, hasError: false })
@@ -76,7 +68,6 @@ export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImag
     }
   }, [isOpen])
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen) return
@@ -104,10 +95,9 @@ export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImag
     document.addEventListener('keydown', handleKeyDown)
 
     return () => document.removeEventListener('keydown', handleKeyDown)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, onClose])
 
-  // Image state handlers
   const setImageLoaded = useCallback(() => {
     setImageState(prev => ({ ...prev, isLoaded: true }))
   }, [])
@@ -116,7 +106,6 @@ export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImag
     setImageState(prev => ({ ...prev, hasError: true }))
   }, [])
 
-  // Zoom handlers
   const handleZoomIn = useCallback(() => {
     setZoomState(prev => ({
       ...prev,
@@ -145,7 +134,6 @@ export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImag
     }))
   }, [])
 
-  // Drag handlers
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     if (zoomState.scale > 1) {
       setDragState({
@@ -174,7 +162,6 @@ export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImag
     setDragState(prev => ({ ...prev, isDragging: false }))
   }, [])
 
-  // Utility functions
   const getZoomPercentage = useCallback(() => {
     return Math.round(zoomState.scale * 100)
   }, [zoomState.scale])
@@ -188,25 +175,21 @@ export const useImageModal = ({ isOpen, onClose }: UseImageModalParams): UseImag
   }, [zoomState.scale, dragState.isDragging])
 
   return {
-    // Image state
     imageState,
     setImageLoaded,
     setImageError,
-    
-    // Zoom functionality
+
     zoomState,
     handleZoomIn,
     handleZoomOut,
     handleResetZoom,
     handleWheel,
-    
-    // Drag functionality
+
     dragState,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    
-    // Utility
+
     getZoomPercentage,
     getCursorClass
   }

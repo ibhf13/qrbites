@@ -26,7 +26,6 @@ const PublicMenuPage: React.FC = () => {
   return (
     <ViewerProvider>
       <FlexBox direction='col' justify='between' className='h-screen'>
-        {/* <MenuHeader menuData={menuData} /> */}
         <MenuImage menuData={menuData} />
         <MenuFooter menuData={menuData} />
       </FlexBox>

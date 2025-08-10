@@ -31,7 +31,7 @@ export const VALIDATION_MESSAGES = {
     MIN_LENGTH: (min: number) => `Must be at least ${min} characters`,
     MAX_LENGTH: (max: number) => `Cannot exceed ${max} characters`,
     INVALID_EMAIL: 'Invalid email address',
-    INVALID_PHONE: 'Phone must start with + followed by digits',
+    INVALID_PHONE: 'Phone must start with + followed by 8 to 15 digits, first digit cannot be 0',
     INVALID_WEBSITE: 'Invalid website URL',
     INVALID_ZIP: 'Invalid zip code format',
     INVALID_TIME: 'Invalid time format (HH:MM)',

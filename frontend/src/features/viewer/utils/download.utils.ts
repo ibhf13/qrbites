@@ -1,6 +1,4 @@
-/**
- * Downloads an image from a URL as a blob and triggers download
- */
+
 export const downloadImageFromUrl = async (
     imageUrl: string,
     filename: string
@@ -21,9 +19,6 @@ export const downloadImageFromUrl = async (
     }
 }
 
-/**
- * Downloads a blob as a file
- */
 export const downloadBlob = (blob: Blob, filename: string): void => {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -36,28 +31,21 @@ export const downloadBlob = (blob: Blob, filename: string): void => {
     window.URL.revokeObjectURL(url)
 }
 
-/**
- * Generates a filename for a menu download
- */
 export const getMenuDownloadFilename = (
     menuName: string,
     restaurantName: string,
     imageUrl: string
 ): string => {
-    // Extract file extension from URL or default to jpg
     const urlParts = imageUrl.split('.')
     const extension = urlParts.length > 1 ? urlParts.pop()?.toLowerCase() || 'jpg' : 'jpg'
 
-    // Clean and format the names
     const cleanMenuName = menuName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
     const cleanRestaurantName = restaurantName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
 
     return `${cleanRestaurantName}-${cleanMenuName}-menu.${extension}`
 }
 
-/**
- * Checks if an image URL is accessible
- */
+
 export const checkImageAccess = async (imageUrl: string): Promise<boolean> => {
     try {
         const response = await fetch(imageUrl, { method: 'HEAD' })

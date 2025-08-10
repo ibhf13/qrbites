@@ -11,13 +11,12 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
 }) => {
     return (
         <Card
-            variant="default"
             hoverEffect="none"
             contentPadding="sm"
-            className="w-full h-full flex flex-col"
+            className="w-full h-full flex flex-col p-0"
         >
             <FlexBox direction="col" align="center" gap="md" className="flex-1 space-y-2.5">
-                <Box className="w-56 h-56 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-sm overflow-hidden">
+                <Box className="w-48 h-48 md:w-64 md:h-64 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-sm overflow-hidden">
                     <img
                         src={qrCodeUrl}
                         alt={`QR Code for ${menuName}`}
@@ -25,16 +24,9 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
                     />
                 </Box>
 
-                <Typography
-                    variant="heading"
-                    color="neutral"
-                    className="font-semibold text-center text-base"
-                >
-                    {menuName}
-                </Typography>
 
                 {targetUrl && (
-                    <FlexBox className="gap-2 bg-gray-50 dark:bg-gray-800 rounded-md px-2 py-1.5 mt-auto w-full">
+                    <FlexBox className="gap-2 bg-gray-50 dark:bg-gray-800 py-2 px-1 md:px-2  w-full">
                         <LinkIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0" />
                         <Box className="flex-1 min-w-0">
                             <Typography
@@ -45,7 +37,8 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
                             </Typography>
                             <Typography
                                 variant="caption"
-                                className="break-all font-mono text-xs text-slate-600 dark:text-slate-300 line-clamp-2"
+                                className="break-all font-mono cursor-pointer text-xs text-slate-600 dark:text-slate-300 line-clamp-2"
+                                onClick={() => window.open(targetUrl, '_blank')}
                             >
                                 {targetUrl}
                             </Typography>

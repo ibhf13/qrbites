@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { VALIDATION_MESSAGES } from '../constants/restaurant.const'
 
 export const contactSchema = z.object({
-    phone: z.string().regex(/^\+[1-9]\d{1,14}$/, VALIDATION_MESSAGES.INVALID_PHONE),
+    phone: z.string().regex(/^\+[1-9]\d{7,14}$/, VALIDATION_MESSAGES.INVALID_PHONE),
     email: z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL).optional(),
     website: z.string().regex(/^(http|https):\/\/[^ "]+$/, VALIDATION_MESSAGES.INVALID_WEBSITE).optional(),
 })
@@ -19,6 +19,24 @@ export const businessHoursSchema = z.object({
     open: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, VALIDATION_MESSAGES.INVALID_TIME).optional(),
     close: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, VALIDATION_MESSAGES.INVALID_TIME).optional(),
     closed: z.boolean(),
+}).refine((data) => {
+    if (!data.closed) {
+        return data.open && data.close
+    }
+
+    return true
+}, {
+    message: 'Open and close times are required when not closed',
+    path: ['open'],
+}).refine((data) => {
+    if (!data.closed) {
+        return data.open && data.close
+    }
+
+    return true
+}, {
+    message: 'Open and close times are required when not closed',
+    path: ['close'],
 })
 
 export const restaurantFormSchema = z.object({
