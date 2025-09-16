@@ -19,7 +19,8 @@ const dirs = {
     restaurant: path.join(uploadsDir, 'restaurants'),
     menu: path.join(uploadsDir, 'menus'),
     menuItem: path.join(uploadsDir, 'menu-items'),
-    qrcode: path.join(uploadsDir, 'qrcodes')
+    qrcode: path.join(uploadsDir, 'qrcodes'),
+    profile: path.join(uploadsDir, 'profiles')
 }
 
 Object.values(dirs).forEach(createDirectory)
@@ -36,6 +37,8 @@ const storage = multer.diskStorage({
             destination = dirs.menu
         } else if (req.originalUrl.includes('/qrcodes')) {
             destination = dirs.qrcode
+        } else if (req.originalUrl.includes('/profile')) {
+            destination = dirs.profile
         }
 
         cb(null, destination)

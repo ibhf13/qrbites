@@ -73,7 +73,7 @@ describe('File Upload Service', () => {
             })
 
             // Verify all directories were created
-            expect(fs.mkdirSync).toHaveBeenCalledTimes(5) // Base upload dir + 4 subdirs
+            expect(fs.mkdirSync).toHaveBeenCalledTimes(6) // Base upload dir + 5 subdirs
         })
     })
 
@@ -98,6 +98,11 @@ describe('File Upload Service', () => {
 
             // Restore environment variable
             process.env.BASE_URL = originalBaseUrl
+        })
+
+        it('should generate correct URL for profile files', () => {
+            const result = getFileUrl('profile-picture.jpg', 'profile')
+            expect(result).toBe('http://localhost:5000/uploads/profiles/profile-picture.jpg')
         })
     })
 
@@ -188,6 +193,16 @@ describe('File Upload Service', () => {
                 storageConfig.destination(req, file, cb)
 
                 expect(cb).toHaveBeenCalledWith(null, expect.stringContaining('menu-items'))
+            })
+
+            it('should set profile destination based on URL', () => {
+                const req = { originalUrl: '/api/profile/picture' }
+                const file = {}
+                const cb = jest.fn()
+
+                storageConfig.destination(req, file, cb)
+
+                expect(cb).toHaveBeenCalledWith(null, expect.stringContaining('profiles'))
             })
 
             it('should generate unique filename', () => {

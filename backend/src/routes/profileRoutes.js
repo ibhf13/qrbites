@@ -12,36 +12,9 @@ const {
 const { protect, restrictTo, optionalAuth } = require('@middlewares/authMiddleware')
 const { validateRequest } = require('@middlewares/validationMiddleware')
 const { updateProfileSchema, updateUserProfileSchema, privacySettingsSchema } = require('../validations/profileValidation')
-const multer = require('multer')
-const path = require('path')
+const { upload } = require('@services/fileUploadService')
 
 const router = express.Router()
-
-// Configure multer for profile picture uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/profiles/')
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
-    }
-})
-
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    },
-    fileFilter: function (req, file, cb) {
-        // Check file type
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true)
-        } else {
-            cb(new Error('Please upload only image files'), false)
-        }
-    }
-})
 
 /**
  * @route   GET /api/profile

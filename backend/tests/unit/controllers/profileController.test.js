@@ -3,6 +3,7 @@ jest.mock('@models/profile')
 jest.mock('@models/user')
 jest.mock('@utils/errorUtils')
 jest.mock('@utils/logger')
+jest.mock('@services/fileUploadService')
 
 // Mock asyncHandler to just return the function
 jest.mock('@utils/errorUtils', () => ({
@@ -20,6 +21,7 @@ const profileController = require('@controllers/profileController')
 const profileMock = require('@mocks/profileMock')
 const userMockEnhanced = require('@mocks/userMockEnhanced')
 const { badRequest, notFound, forbidden } = require('@utils/errorUtils')
+const { getFileUrl } = require('@services/fileUploadService')
 
 describe('Profile Controller Tests', () => {
     let req, res, next
@@ -63,6 +65,11 @@ describe('Profile Controller Tests', () => {
             const error = new Error(msg)
             error.statusCode = 403
             return error
+        })
+
+        // Mock getFileUrl 
+        getFileUrl.mockImplementation((filename, type) => {
+            return `http://localhost:5000/uploads/${type}s/${filename}`
         })
     })
 
@@ -484,7 +491,8 @@ describe('Profile Controller Tests', () => {
                 filename: 'test-image.jpg'
             }
 
-            const profilePictureUrl = `/uploads/profiles/${req.file.filename}`
+            const profilePictureUrl = 'http://localhost:5000/uploads/profiles/test-image.jpg'
+
             const existingProfile = { ...profileMock.validProfile }
             const updatedProfile = {
                 ...existingProfile,
@@ -514,7 +522,8 @@ describe('Profile Controller Tests', () => {
                 filename: 'test-image.jpg'
             }
 
-            const profilePictureUrl = `/uploads/profiles/${req.file.filename}`
+            const profilePictureUrl = 'http://localhost:5000/uploads/profiles/test-image.jpg'
+
             const newProfile = {
                 userId: req.user._id,
                 profilePicture: profilePictureUrl

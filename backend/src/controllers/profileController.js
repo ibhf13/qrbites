@@ -7,6 +7,7 @@ const {
     notFound,
     forbidden
 } = require('@utils/errorUtils')
+const { getFileUrl } = require('@services/fileUploadService')
 const logger = require('@utils/logger')
 
 /**
@@ -239,9 +240,8 @@ const uploadProfilePicture = asyncHandler(async (req, res) => {
         throw badRequest('Please upload an image')
     }
 
-    // You would implement file upload logic here
-    // For now, we'll assume the file URL is provided
-    const profilePictureUrl = `/uploads/profiles/${req.file.filename}`
+    // Generate absolute URL using the file upload service
+    const profilePictureUrl = getFileUrl(req.file.filename, 'profile')
 
     // Update profile with new picture
     let profile = await Profile.findOne({ userId })
