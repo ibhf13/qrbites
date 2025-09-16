@@ -78,7 +78,7 @@ describe('Restaurant Controller Tests', () => {
 
             await restaurantController.getRestaurants(req, res, next)
 
-            expect(Restaurant.find).toHaveBeenCalledWith({})
+            expect(Restaurant.find).toHaveBeenCalledWith({ userId: req.user._id })
             expect(findMock.select).toHaveBeenCalledWith('-__v')
             expect(findMock.sort).toHaveBeenCalledWith({ createdAt: -1 })
             expect(findMock.skip).toHaveBeenCalledWith(0)
@@ -112,7 +112,8 @@ describe('Restaurant Controller Tests', () => {
             await restaurantController.getRestaurants(req, res, next)
 
             expect(Restaurant.find).toHaveBeenCalledWith({
-                name: { $regex: 'Test', $options: 'i' }
+                name: { $regex: 'Test', $options: 'i' },
+                userId: req.user._id
             })
             expect(findMock.sort).toHaveBeenCalledWith({ name: 1 })
             expect(findMock.skip).toHaveBeenCalledWith(5) // (page-1) * limit

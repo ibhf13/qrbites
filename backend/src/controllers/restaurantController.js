@@ -68,7 +68,7 @@ const getRestaurants = asyncHandler(async (req, res) => {
 /**
  * Get restaurant by ID
  * @route GET /api/restaurants/:id
- * @access Public
+ * @access Private
  */
 const getRestaurantById = asyncHandler(async (req, res) => {
   const { id } = req.params

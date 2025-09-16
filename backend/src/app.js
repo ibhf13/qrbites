@@ -31,10 +31,17 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }))
 
+const ALLOWED_ORIGINS = ['http://localhost:3000']
+
 app.use(cors({
-  origin: ['http://localhost:3000', '*'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      return cb(null, true)
+    }
+    cb(new Error('Not allowed by CORS'))
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   exposedHeaders: ['Content-Length', 'X-Requested-With', 'Content-Type', 'Accept']
 }))
 

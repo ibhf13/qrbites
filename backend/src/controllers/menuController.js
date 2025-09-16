@@ -90,7 +90,7 @@ const getMenus = asyncHandler(async (req, res) => {
 /**
  * Get menu by ID
  * @route GET /api/menus/:id
- * @access Public
+ * @access Private
  */
 const getMenuById = asyncHandler(async (req, res) => {
     const { id } = req.params

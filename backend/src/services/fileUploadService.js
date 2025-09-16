@@ -12,8 +12,7 @@ const createDirectory = (dir) => {
     }
 }
 
-const uploadsDir = path.join(process.cwd(), 'uploads')
-const uploadsDir = process.env.UPLOADS_DIR || '/tmp/uploads'
+const uploadsDir = process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads')
 createDirectory(uploadsDir)
 
 const dirs = {
