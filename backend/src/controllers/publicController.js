@@ -80,16 +80,38 @@ const getPublicMenuItems = asyncHandler(async (req, res) => {
         ]
     }
 
-    // Pagination options
-    const options = {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        select: 'name description price imageUrl category dietary',
-        sort: { category: 1, name: 1 }
-    }
+    // Pagination setup
+    const pageNum = parseInt(page, 10)
+    const limitNum = parseInt(limit, 10)
+    const skip = (pageNum - 1) * limitNum
 
-    // Get menu items with pagination
-    const menuItems = await MenuItem.paginate(query, options)
+    // Get total count for pagination metadata
+    const totalDocs = await MenuItem.countDocuments(query)
+    const totalPages = Math.ceil(totalDocs / limitNum)
+    const hasNextPage = pageNum < totalPages
+    const hasPrevPage = pageNum > 1
+
+    // Get menu items with manual pagination
+    const docs = await MenuItem.find(query)
+        .select('name description price imageUrl category')
+        .sort({ category: 1, name: 1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean()
+
+    // Create pagination result object to match paginate plugin format
+    const menuItems = {
+        docs,
+        totalDocs,
+        limit: limitNum,
+        page: pageNum,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+        pagingCounter: skip + 1,
+        prevPage: hasPrevPage ? pageNum - 1 : null,
+        nextPage: hasNextPage ? pageNum + 1 : null
+    }
 
     // Get distinct categories for filtering UI
     const categories = await MenuItem.distinct('category', { menuId })

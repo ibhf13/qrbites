@@ -140,19 +140,23 @@ describe('Public Controller', () => {
     describe('getPublicMenuItems', () => {
         it('should get menu items with pagination and category filtering', async () => {
             const menuId = new mongoose.Types.ObjectId()
-            const mockMenuItems = {
-                docs: [
-                    { name: 'Item 1', price: 10, category: 'Appetizer' },
-                    { name: 'Item 2', price: 15, category: 'Main' }
-                ],
-                totalDocs: 2,
-                limit: 10,
-                page: 1,
-                totalPages: 1
+            const mockMenuItemDocs = [
+                { name: 'Item 1', price: 10, category: 'Appetizer' },
+                { name: 'Item 2', price: 15, category: 'Main' }
+            ]
+
+            // Mock the chainable find methods
+            const mockFindChain = {
+                select: jest.fn().mockReturnThis(),
+                sort: jest.fn().mockReturnThis(),
+                skip: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                lean: jest.fn().mockResolvedValue(mockMenuItemDocs)
             }
 
             Menu.exists.mockResolvedValue(true)
-            MenuItem.paginate.mockResolvedValue(mockMenuItems)
+            MenuItem.countDocuments.mockResolvedValue(2)
+            MenuItem.find.mockReturnValue(mockFindChain)
             MenuItem.distinct.mockResolvedValue(['Appetizer', 'Main'])
 
             req.params.menuId = menuId.toString()
@@ -161,12 +165,27 @@ describe('Public Controller', () => {
             await getPublicMenuItems(req, res)
 
             expect(Menu.exists).toHaveBeenCalledWith({ _id: menuId.toString() })
-            expect(MenuItem.paginate).toHaveBeenCalled()
+            expect(MenuItem.countDocuments).toHaveBeenCalledWith({ menuId: menuId.toString(), category: 'Main' })
+            expect(MenuItem.find).toHaveBeenCalledWith({ menuId: menuId.toString(), category: 'Main' })
+            expect(mockFindChain.select).toHaveBeenCalledWith('name description price imageUrl category')
+            expect(mockFindChain.sort).toHaveBeenCalledWith({ category: 1, name: 1 })
+            expect(mockFindChain.skip).toHaveBeenCalledWith(0)
+            expect(mockFindChain.limit).toHaveBeenCalledWith(10)
+            expect(mockFindChain.lean).toHaveBeenCalled()
             expect(MenuItem.distinct).toHaveBeenCalledWith('category', { menuId: menuId.toString() })
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
                 data: {
-                    ...mockMenuItems,
+                    docs: mockMenuItemDocs,
+                    totalDocs: 2,
+                    limit: 10,
+                    page: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPrevPage: false,
+                    pagingCounter: 1,
+                    prevPage: null,
+                    nextPage: null,
                     categories: ['Appetizer', 'Main']
                 }
             })

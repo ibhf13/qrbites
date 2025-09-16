@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const publicController = require('@controllers/publicController')
-const { validateRequest, validateParams } = require('@middlewares/validationMiddleware')
+const { validateRequest, validateParams, validateQuery } = require('@middlewares/validationMiddleware')
 const {
     menuIdSchema,
     restaurantIdSchema,
@@ -23,7 +23,7 @@ router.get(
 router.get(
     '/menus/:menuId/items',
     validateParams(menuIdSchema),
-    validateRequest(menuItemsQuerySchema, 'query'),
+    validateQuery(menuItemsQuerySchema),
     publicController.getPublicMenuItems
 )
 

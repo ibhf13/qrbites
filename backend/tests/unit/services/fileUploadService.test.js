@@ -104,6 +104,21 @@ describe('File Upload Service', () => {
             const result = getFileUrl('profile-picture.jpg', 'profile')
             expect(result).toBe('http://localhost:5000/uploads/profiles/profile-picture.jpg')
         })
+
+        it('should generate correct URL for menuItem files with hyphenated directory', () => {
+            const result = getFileUrl('menu-item-image.jpg', 'menuItem')
+            expect(result).toBe('http://localhost:5000/uploads/menu-items/menu-item-image.jpg')
+        })
+
+        it('should generate correct URL for restaurant files', () => {
+            const result = getFileUrl('restaurant-logo.jpg', 'restaurant')
+            expect(result).toBe('http://localhost:5000/uploads/restaurants/restaurant-logo.jpg')
+        })
+
+        it('should generate correct URL for qrcode files', () => {
+            const result = getFileUrl('qr-code.png', 'qrcode')
+            expect(result).toBe('http://localhost:5000/uploads/qrcodes/qr-code.png')
+        })
     })
 
     describe('multerErrorHandler', () => {

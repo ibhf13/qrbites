@@ -31,37 +31,90 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }))
 
-const ALLOWED_ORIGINS = ['http://localhost:3000']
+// Environment-based CORS configuration
+const getAllowedOrigins = () => {
+  const defaultOrigins = ['http://localhost:3000', 'http://localhost:5173']
+
+  if (process.env.NODE_ENV === 'production') {
+    // In production, use only explicitly defined origins
+    const prodOrigins = process.env.ALLOWED_ORIGINS ?
+      process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()) :
+      []
+
+    if (prodOrigins.length === 0) {
+      logger.warn('⚠️  PRODUCTION WARNING: No ALLOWED_ORIGINS defined. CORS will block all requests!')
+    }
+
+    return prodOrigins
+  }
+
+  // In development/test, allow localhost origins + any custom ones
+  const customOrigins = process.env.ALLOWED_ORIGINS ?
+    process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()) :
+    []
+
+  return [...defaultOrigins, ...customOrigins]
+}
+
+const ALLOWED_ORIGINS = getAllowedOrigins()
+
+logger.info(`🔒 CORS configured for origins: ${JSON.stringify(ALLOWED_ORIGINS)}`)
 
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) {
       return cb(null, true)
     }
-    cb(new Error('Not allowed by CORS'))
+
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return cb(null, true)
+    }
+
+    logger.warn(`🚫 CORS blocked request from origin: ${origin}`)
+    cb(new Error(`Origin ${origin} not allowed by CORS policy`))
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Length', 'X-Requested-With', 'Content-Type', 'Accept']
 }))
 
 app.use(morgan('dev'))
 app.use(loggerMiddleware)
 
+// Helper function to set CORS headers for static files
+const setStaticFileCorsHeaders = (req, res) => {
+  const origin = req.get('Origin')
+
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  } else if (!origin) {
+    // For requests without origin (direct file access), allow first allowed origin or none in production
+    const fallbackOrigin = process.env.NODE_ENV === 'production' ?
+      (ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS[0] : null) :
+      'http://localhost:3000'
+
+    if (fallbackOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', fallbackOrigin)
+    }
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+}
+
 // Add CORS headers for static files before serving them
 app.use('/uploads', (req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  setStaticFileCorsHeaders(req, res)
   next()
 })
 
 // Also handle potential /restaurants/ path for images
 app.use('/restaurants', (req, res, next) => {
   if (req.url.includes('.jpg') || req.url.includes('.png') || req.url.includes('.webp') || req.url.includes('.gif')) {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    setStaticFileCorsHeaders(req, res)
   }
   next()
 })

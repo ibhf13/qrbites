@@ -48,7 +48,7 @@ const getCompleteMenuData = async (menuId) => {
         }
 
         const menuItems = await MenuItem.find({ menuId })
-            .select('name description price imageUrl category dietary')
+            .select('name description price imageUrl category')
             .sort({ category: 1, name: 1 })
             .lean()
 

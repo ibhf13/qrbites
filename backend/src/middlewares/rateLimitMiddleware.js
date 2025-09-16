@@ -55,7 +55,7 @@ const apiLimiter = createRateLimiter({
  */
 const authLimiter = createRateLimiter({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 100, // 10 requests per IP
+    max: 10, // 10 requests per IP
     message: 'Too many authentication attempts, please try again after an hour'
 })
 
