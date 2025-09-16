@@ -34,14 +34,19 @@ const getMenus = asyncHandler(async (req, res) => {
 
     // SECURITY FIX: Filter by user's restaurants only (unless admin)
     if (req.user && req.user.role !== 'admin') {
-        // First, get all restaurants owned by the user
-        const userRestaurants = await Restaurant.find({ userId: req.user._id }).select('_id')
-        const userRestaurantIds = userRestaurants.map(r => r._id)
-
-        // Filter menus to only include those from user's restaurants
-        query.restaurantId = query.restaurantId
-            ? { $in: [restaurantId, ...userRestaurantIds] }
-            : { $in: userRestaurantIds }
+        // If user provided restaurantId and isn't admin, ensure ownership
+        if (restaurantId) {
+            const owns = await Restaurant.exists({ _id: restaurantId, userId: req.user._id })
+            if (!owns) {
+                throw forbidden('Not authorized for this restaurant')
+            }
+            query.restaurantId = restaurantId
+        } else {
+            // Get all restaurants owned by the user
+            const userRestaurants = await Restaurant.find({ userId: req.user._id }).select('_id')
+            const userRestaurantIds = userRestaurants.map(r => r._id)
+            query.restaurantId = { $in: userRestaurantIds }
+        }
     }
 
     // Build sort object

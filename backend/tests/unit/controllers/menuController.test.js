@@ -75,6 +75,15 @@ describe('Menu Controller Tests', () => {
 
     describe('getMenus', () => {
         it('should return menus with default pagination', async () => {
+            // Mock Restaurant.find to return user's restaurants with proper chaining
+            const userRestaurants = [
+                { _id: restaurantMock.validRestaurant._id }
+            ]
+            const restaurantFindMock = {
+                select: jest.fn().mockResolvedValue(userRestaurants)
+            }
+            Restaurant.find = jest.fn().mockReturnValue(restaurantFindMock)
+
             // Mock Menu.find and related methods
             const findMock = {
                 select: jest.fn().mockReturnThis(),
@@ -88,7 +97,11 @@ describe('Menu Controller Tests', () => {
 
             await menuController.getMenus(req, res, next)
 
-            expect(Menu.find).toHaveBeenCalledWith({})
+            expect(Restaurant.find).toHaveBeenCalledWith({ userId: req.user._id })
+            expect(restaurantFindMock.select).toHaveBeenCalledWith('_id')
+            expect(Menu.find).toHaveBeenCalledWith({
+                restaurantId: { $in: userRestaurants.map(r => r._id) }
+            })
             expect(findMock.select).toHaveBeenCalledWith('-__v')
             expect(findMock.sort).toHaveBeenCalledWith({ createdAt: -1 })
             expect(findMock.skip).toHaveBeenCalledWith(0)
@@ -113,6 +126,9 @@ describe('Menu Controller Tests', () => {
                 limit: 5
             }
 
+            // Mock Restaurant.exists to return true (user owns restaurant)
+            Restaurant.exists = jest.fn().mockResolvedValue(true)
+
             const findMock = {
                 select: jest.fn().mockReturnThis(),
                 sort: jest.fn().mockReturnThis(),
@@ -125,6 +141,10 @@ describe('Menu Controller Tests', () => {
 
             await menuController.getMenus(req, res, next)
 
+            expect(Restaurant.exists).toHaveBeenCalledWith({
+                _id: restaurantMock.validRestaurant._id.toString(),
+                userId: req.user._id
+            })
             expect(Menu.find).toHaveBeenCalledWith({
                 name: { $regex: 'Lunch', $options: 'i' },
                 restaurantId: restaurantMock.validRestaurant._id.toString()
@@ -135,6 +155,15 @@ describe('Menu Controller Tests', () => {
         })
 
         it('should handle database error during menu listing', async () => {
+            // Mock Restaurant.find to return user's restaurants with proper chaining
+            const userRestaurants = [
+                { _id: restaurantMock.validRestaurant._id }
+            ]
+            const restaurantFindMock = {
+                select: jest.fn().mockResolvedValue(userRestaurants)
+            }
+            Restaurant.find = jest.fn().mockReturnValue(restaurantFindMock)
+
             const error = new Error('Database error')
             Menu.find = jest.fn().mockImplementation(() => {
                 throw error
@@ -142,6 +171,114 @@ describe('Menu Controller Tests', () => {
 
             await menuController.getMenus(req, res, next)
             expect(next).toHaveBeenCalledWith(error)
+        })
+
+        it('should filter menus by user-owned restaurants only for non-admin users', async () => {
+            req.user = { ...userMock.regularUser, role: 'user' }
+            req.query = {}
+
+            // Mock Restaurant.find to return user's restaurants with proper chaining
+            const userRestaurants = [
+                { _id: restaurantMock.validRestaurant._id },
+                { _id: new mongoose.Types.ObjectId() }
+            ]
+            const restaurantFindMock = {
+                select: jest.fn().mockResolvedValue(userRestaurants)
+            }
+            Restaurant.find = jest.fn().mockReturnValue(restaurantFindMock)
+
+            const findMock = {
+                select: jest.fn().mockReturnThis(),
+                sort: jest.fn().mockReturnThis(),
+                skip: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                populate: jest.fn().mockResolvedValue(menuMock.menuList)
+            }
+            Menu.find = jest.fn().mockReturnValue(findMock)
+            Menu.countDocuments = jest.fn().mockResolvedValue(2)
+
+            await menuController.getMenus(req, res, next)
+
+            expect(Restaurant.find).toHaveBeenCalledWith({ userId: req.user._id })
+            expect(restaurantFindMock.select).toHaveBeenCalledWith('_id')
+            expect(Menu.find).toHaveBeenCalledWith({
+                restaurantId: { $in: userRestaurants.map(r => r._id) }
+            })
+            expect(res.json).toHaveBeenCalled()
+        })
+
+        it('should allow admin to access all menus', async () => {
+            req.user = { ...userMock.validUser, role: 'admin' }
+            req.query = { restaurantId: restaurantMock.validRestaurant._id.toString() }
+
+            // Admin should not trigger restaurant ownership check
+            Restaurant.find = jest.fn()
+            Restaurant.exists = jest.fn()
+
+            const findMock = {
+                select: jest.fn().mockReturnThis(),
+                sort: jest.fn().mockReturnThis(),
+                skip: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                populate: jest.fn().mockResolvedValue(menuMock.menuList)
+            }
+            Menu.find = jest.fn().mockReturnValue(findMock)
+            Menu.countDocuments = jest.fn().mockResolvedValue(2)
+
+            await menuController.getMenus(req, res, next)
+
+            expect(Restaurant.find).not.toHaveBeenCalled()
+            expect(Restaurant.exists).not.toHaveBeenCalled()
+            expect(Menu.find).toHaveBeenCalledWith({
+                restaurantId: restaurantMock.validRestaurant._id.toString()
+            })
+            expect(res.json).toHaveBeenCalled()
+        })
+
+        it('should reject access to restaurant user does not own', async () => {
+            req.user = { ...userMock.regularUser, role: 'user' }
+            req.query = { restaurantId: restaurantMock.validRestaurant._id.toString() }
+
+            // Mock Restaurant.exists to return false (user doesn't own restaurant)
+            Restaurant.exists = jest.fn().mockResolvedValue(false)
+
+            await menuController.getMenus(req, res, next)
+
+            expect(Restaurant.exists).toHaveBeenCalledWith({
+                _id: restaurantMock.validRestaurant._id.toString(),
+                userId: req.user._id
+            })
+            expect(next).toHaveBeenCalled()
+            expect(forbidden).toHaveBeenCalledWith('Not authorized for this restaurant')
+        })
+
+        it('should allow access to restaurant user owns', async () => {
+            req.user = { ...userMock.regularUser, role: 'user' }
+            req.query = { restaurantId: restaurantMock.validRestaurant._id.toString() }
+
+            // Mock Restaurant.exists to return true (user owns restaurant)
+            Restaurant.exists = jest.fn().mockResolvedValue(true)
+
+            const findMock = {
+                select: jest.fn().mockReturnThis(),
+                sort: jest.fn().mockReturnThis(),
+                skip: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                populate: jest.fn().mockResolvedValue(menuMock.menuList)
+            }
+            Menu.find = jest.fn().mockReturnValue(findMock)
+            Menu.countDocuments = jest.fn().mockResolvedValue(2)
+
+            await menuController.getMenus(req, res, next)
+
+            expect(Restaurant.exists).toHaveBeenCalledWith({
+                _id: restaurantMock.validRestaurant._id.toString(),
+                userId: req.user._id
+            })
+            expect(Menu.find).toHaveBeenCalledWith({
+                restaurantId: restaurantMock.validRestaurant._id.toString()
+            })
+            expect(res.json).toHaveBeenCalled()
         })
     })
 
