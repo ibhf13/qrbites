@@ -5,11 +5,13 @@ const {
     asyncHandler,
     notFound,
     badRequest,
-    forbidden
+    forbidden,
+    errorMessages
 } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
 const { logDatabaseError } = require('@services/errorLogService')
 const { getFileUrl } = require('@services/fileUploadService')
+const { createSafeRegexQuery } = require('@utils/sanitization')
 
 /**
  * Get all menu items with optional filtering
@@ -22,9 +24,12 @@ const getMenuItems = asyncHandler(async (req, res) => {
     // Build query
     const query = {}
 
-    // Add name filter if provided
+    // Add name filter if provided (with sanitization to prevent ReDoS attacks)
     if (name) {
-        query.name = { $regex: name, $options: 'i' }
+        const safeRegexQuery = createSafeRegexQuery(name)
+        if (safeRegexQuery) {
+            query.name = safeRegexQuery
+        }
     }
 
     // Add menu filter if provided
@@ -96,7 +101,7 @@ const getMenuItemById = asyncHandler(async (req, res) => {
             })
 
         if (!menuItem) {
-            throw notFound(`Menu item with id ${id} not found`)
+            throw notFound(errorMessages.notFound('Menu item', id))
         }
 
         res.json({
@@ -105,7 +110,7 @@ const getMenuItemById = asyncHandler(async (req, res) => {
         })
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu item ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu item'))
         }
         throw error
     }
@@ -120,24 +125,8 @@ const createMenuItem = asyncHandler(async (req, res) => {
     const { menuId } = req.body
 
     try {
-        // Check if menu exists
-        const menu = await Menu.findById(menuId)
-
-        if (!menu) {
-            throw notFound(`Menu with id ${menuId} not found`)
-        }
-
-        // Check restaurant ownership through menu
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        if (!restaurant) {
-            throw notFound(`Restaurant not found`)
-        }
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to create menu items for this menu')
-        }
+        // Menu, restaurant and ownership already validated by middleware
+        const menu = req.menu
 
         // Add image URL if file was uploaded
         if (req.file) {
@@ -168,31 +157,8 @@ const updateMenuItem = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        // Find menu item
-        const menuItem = await MenuItem.findById(id)
-
-        if (!menuItem) {
-            throw notFound(`Menu item with id ${id} not found`)
-        }
-
-        // Find menu to get restaurant
-        const menu = await Menu.findById(menuItem.menuId)
-
-        if (!menu) {
-            throw notFound(`Menu not found for this item`)
-        }
-
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        if (!restaurant) {
-            throw notFound(`Restaurant not found`)
-        }
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to update this menu item')
-        }
+        // Menu item, menu, restaurant and ownership already validated by middleware
+        const menuItem = req.menuItem
 
         // Add image URL if file was uploaded
         if (req.file) {
@@ -214,7 +180,7 @@ const updateMenuItem = asyncHandler(async (req, res) => {
         })
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu item ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu item'))
         }
         logDatabaseError(error, 'UPDATE', { collection: 'menuItems', id, document: req.body })
         throw error
@@ -230,31 +196,8 @@ const deleteMenuItem = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        // Find menu item
-        const menuItem = await MenuItem.findById(id)
-
-        if (!menuItem) {
-            throw notFound(`Menu item with id ${id} not found`)
-        }
-
-        // Find menu to get restaurant
-        const menu = await Menu.findById(menuItem.menuId)
-
-        if (!menu) {
-            throw notFound(`Menu not found for this item`)
-        }
-
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        if (!restaurant) {
-            throw notFound(`Restaurant not found`)
-        }
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to delete this menu item')
-        }
+        // Menu item, menu, restaurant and ownership already validated by middleware
+        const menuItem = req.menuItem
 
         // Delete menu item
         await menuItem.deleteOne()
@@ -264,7 +207,7 @@ const deleteMenuItem = asyncHandler(async (req, res) => {
         res.status(204).send()
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu item ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu item'))
         }
         logDatabaseError(error, 'DELETE', { collection: 'menuItems', id })
         throw error
@@ -280,35 +223,12 @@ const uploadImage = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        // Find menu item
-        const menuItem = await MenuItem.findById(id)
-
-        if (!menuItem) {
-            throw notFound(`Menu item with id ${id} not found`)
-        }
-
-        // Find menu to get restaurant
-        const menu = await Menu.findById(menuItem.menuId)
-
-        if (!menu) {
-            throw notFound(`Menu not found for this item`)
-        }
-
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        if (!restaurant) {
-            throw notFound(`Restaurant not found`)
-        }
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to update this menu item')
-        }
+        // Menu item, menu, restaurant and ownership already validated by middleware
+        const menuItem = req.menuItem
 
         // Check if file was uploaded
         if (!req.file) {
-            throw badRequest('Please upload an image')
+            throw badRequest(errorMessages.common.imageUploadRequired)
         }
 
         // Update menu item with new image URL
@@ -329,7 +249,7 @@ const uploadImage = asyncHandler(async (req, res) => {
         })
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu item ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu item'))
         }
         logDatabaseError(error, 'UPDATE', { collection: 'menuItems', id, field: 'imageUrl' })
         throw error

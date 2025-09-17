@@ -1,8 +1,9 @@
-const { asyncHandler, notFound, badRequest } = require('@utils/errorUtils')
+const { asyncHandler, notFound, badRequest, errorMessages } = require('@utils/errorUtils')
 const Menu = require('@models/menu')
 const Restaurant = require('@models/restaurant')
 const MenuItem = require('@models/menuItem')
 const { getCompleteMenuData, processMenuForPublic } = require('@services/menuDataService')
+const { createSafeSearchQuery } = require('@utils/sanitization')
 
 /**
  * Get public restaurant information
@@ -17,7 +18,7 @@ const getPublicRestaurant = asyncHandler(async (req, res) => {
         .select('name description logoUrl address contacts')
 
     if (!restaurant) {
-        throw notFound('Restaurant not found')
+        throw notFound(errorMessages.notFound('Restaurant'))
     }
 
     res.json({
@@ -40,7 +41,7 @@ const getPublicMenu = asyncHandler(async (req, res) => {
         .populate('restaurantId', 'name logoUrl')
 
     if (!menu) {
-        throw notFound('Menu not found')
+        throw notFound(errorMessages.notFound('Menu'))
     }
 
     res.json({
@@ -61,7 +62,7 @@ const getPublicMenuItems = asyncHandler(async (req, res) => {
     // Validate that menu exists
     const menuExists = await Menu.exists({ _id: menuId })
     if (!menuExists) {
-        throw notFound('Menu not found')
+        throw notFound(errorMessages.notFound('Menu'))
     }
 
     // Build query
@@ -72,12 +73,12 @@ const getPublicMenuItems = asyncHandler(async (req, res) => {
         query.category = category
     }
 
-    // Add search filter if provided
+    // Add search filter if provided (with sanitization to prevent ReDoS attacks)
     if (search) {
-        query.$or = [
-            { name: { $regex: search, $options: 'i' } },
-            { description: { $regex: search, $options: 'i' } }
-        ]
+        const safeSearchQueries = createSafeSearchQuery(search, ['name', 'description'])
+        if (safeSearchQueries.length > 0) {
+            query.$or = safeSearchQueries
+        }
     }
 
     // Pagination setup
@@ -154,7 +155,7 @@ const redirectToMenu = asyncHandler(async (req, res) => {
     // Check if menu exists
     const menu = await Menu.findById(menuId)
     if (!menu) {
-        throw notFound('Menu not found')
+        throw notFound(errorMessages.notFound('Menu'))
     }
 
     // If restaurant ID is not provided in query, get it from menu

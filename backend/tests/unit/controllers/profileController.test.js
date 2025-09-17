@@ -1,18 +1,28 @@
-// Mock dependencies before importing the controller
+// Mock dependencies at the very top
 jest.mock('@models/profile')
 jest.mock('@models/user')
-jest.mock('@utils/errorUtils')
 jest.mock('@utils/logger')
 jest.mock('@services/fileUploadService')
-
-// Mock asyncHandler to just return the function
-jest.mock('@utils/errorUtils', () => ({
-    asyncHandler: (fn) => fn,
-    badRequest: jest.fn(),
-    unauthorized: jest.fn(),
-    notFound: jest.fn(),
-    forbidden: jest.fn()
+jest.mock('@utils/sanitization', () => ({
+    createSafeSearchQuery: jest.fn()
 }))
+
+// Mock asyncHandler to ensure proper execution
+jest.mock('@utils/errorUtils', () => {
+    const originalModule = jest.requireActual('@utils/errorUtils')
+    return {
+        ...originalModule,
+        asyncHandler: (fn) => {
+            return async (req, res, next) => {
+                try {
+                    await fn(req, res, next)
+                } catch (error) {
+                    next(error)
+                }
+            }
+        }
+    }
+})
 
 const mongoose = require('mongoose')
 const Profile = require('@models/profile')
@@ -20,8 +30,8 @@ const User = require('@models/user')
 const profileController = require('@controllers/profileController')
 const profileMock = require('@mocks/profileMock')
 const userMockEnhanced = require('@mocks/userMockEnhanced')
-const { badRequest, notFound, forbidden } = require('@utils/errorUtils')
 const { getFileUrl } = require('@services/fileUploadService')
+const { createSafeSearchQuery } = require('@utils/sanitization')
 
 describe('Profile Controller Tests', () => {
     let req, res, next
@@ -49,23 +59,6 @@ describe('Profile Controller Tests', () => {
         }
 
         next = jest.fn()
-
-        // Mock error utils to throw actual errors
-        badRequest.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 400
-            return error
-        })
-        notFound.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 404
-            return error
-        })
-        forbidden.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 403
-            return error
-        })
 
         // Mock getFileUrl 
         getFileUrl.mockImplementation((filename, type) => {
@@ -106,11 +99,8 @@ describe('Profile Controller Tests', () => {
             const error = new Error('Database error')
             Profile.findOne = jest.fn().mockRejectedValue(error)
 
-            try {
-                await profileController.getMyProfile(req, res, next)
-            } catch (err) {
-                expect(err.message).toBe('Database error')
-            }
+            await profileController.getMyProfile(req, res, next)
+            expect(next).toHaveBeenCalledWith(error)
         })
     })
 
@@ -215,15 +205,16 @@ describe('Profile Controller Tests', () => {
             })
         })
 
-        it('should throw error for invalid isPublic value', async () => {
+        it('should return error for invalid isPublic value', async () => {
             req.body = { isPublic: 'not-boolean' }
 
-            try {
-                await profileController.updatePrivacySettings(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('isPublic must be a boolean value')
-                expect(error.statusCode).toBe(400)
-            }
+            await profileController.updatePrivacySettings(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('isPublic must be a boolean value')
+            expect(calledError.statusCode).toBe(400)
         })
     })
 
@@ -262,12 +253,13 @@ describe('Profile Controller Tests', () => {
 
             Profile.findOne = jest.fn().mockReturnValue(mockQuery)
 
-            try {
-                await profileController.getUserProfile(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Profile not found')
-                expect(error.statusCode).toBe(404)
-            }
+            await profileController.getUserProfile(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Profile not found')
+            expect(calledError.statusCode).toBe(404)
         })
 
         it('should deny access to private profile for non-authenticated user', async () => {
@@ -286,12 +278,13 @@ describe('Profile Controller Tests', () => {
 
             Profile.findOne = jest.fn().mockReturnValue(mockQuery)
 
-            try {
-                await profileController.getUserProfile(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('This profile is private')
-                expect(error.statusCode).toBe(403)
-            }
+            await profileController.getUserProfile(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('This profile is private')
+            expect(calledError.statusCode).toBe(403)
         })
     })
 
@@ -340,15 +333,19 @@ describe('Profile Controller Tests', () => {
                 language: 'en'
             }
 
+            // Mock the sanitization function
+            const expectedSearchQueries = [
+                { firstName: { $regex: 'john', $options: 'i' } },
+                { lastName: { $regex: 'john', $options: 'i' } },
+                { displayName: { $regex: 'john', $options: 'i' } }
+            ]
+            createSafeSearchQuery.mockReturnValue(expectedSearchQueries)
+
             const expectedQuery = {
                 isPublic: true,
                 isVerified: false,
                 'preferences.language': 'en',
-                $or: [
-                    { firstName: { $regex: 'john', $options: 'i' } },
-                    { lastName: { $regex: 'john', $options: 'i' } },
-                    { displayName: { $regex: 'john', $options: 'i' } }
-                ]
+                $or: expectedSearchQueries
             }
 
             const mockProfiles = [profileMock.validProfile]
@@ -364,6 +361,7 @@ describe('Profile Controller Tests', () => {
 
             await profileController.getAllProfiles(req, res, next)
 
+            expect(createSafeSearchQuery).toHaveBeenCalledWith('john', ['firstName', 'lastName', 'displayName'])
             expect(Profile.find).toHaveBeenCalledWith(expectedQuery)
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
@@ -439,12 +437,13 @@ describe('Profile Controller Tests', () => {
 
             User.findById = jest.fn().mockResolvedValue(null)
 
-            try {
-                await profileController.updateUserProfile(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('User not found')
-                expect(error.statusCode).toBe(404)
-            }
+            await profileController.updateUserProfile(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('User not found')
+            expect(calledError.statusCode).toBe(404)
         })
     })
 
@@ -476,12 +475,13 @@ describe('Profile Controller Tests', () => {
 
             Profile.findOne = jest.fn().mockResolvedValue(null)
 
-            try {
-                await profileController.deleteUserProfile(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Profile not found')
-                expect(error.statusCode).toBe(404)
-            }
+            await profileController.deleteUserProfile(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Profile not found')
+            expect(calledError.statusCode).toBe(404)
         })
     })
 
@@ -549,12 +549,13 @@ describe('Profile Controller Tests', () => {
         it('should return error if no file uploaded', async () => {
             req.file = null
 
-            try {
-                await profileController.uploadProfilePicture(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Please upload an image')
-                expect(error.statusCode).toBe(400)
-            }
+            await profileController.uploadProfilePicture(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Please upload an image')
+            expect(calledError.statusCode).toBe(400)
         })
     })
 }) 

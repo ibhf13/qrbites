@@ -3,11 +3,13 @@ const {
   asyncHandler,
   notFound,
   badRequest,
-  forbidden
+  forbidden,
+  errorMessages
 } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
 const { logDatabaseError } = require('@services/errorLogService')
 const { getFileUrl } = require('@services/fileUploadService')
+const { createSafeRegexQuery } = require('@utils/sanitization')
 
 /**
  * Get all restaurants
@@ -20,9 +22,12 @@ const getRestaurants = asyncHandler(async (req, res) => {
   // Build query
   const query = {}
 
-  // Add name filter if provided
+  // Add name filter if provided (with sanitization to prevent ReDoS attacks)
   if (name) {
-    query.name = { $regex: name, $options: 'i' }
+    const safeRegexQuery = createSafeRegexQuery(name)
+    if (safeRegexQuery) {
+      query.name = safeRegexQuery
+    }
   }
 
   // SECURITY FIX: Filter by user ownership (unless admin)
@@ -79,7 +84,7 @@ const getRestaurantById = asyncHandler(async (req, res) => {
       .populate('userId', 'email')
 
     if (!restaurant) {
-      throw notFound(`Restaurant with id ${id} not found`)
+      throw notFound(errorMessages.notFound('Restaurant', id))
     }
 
     res.json({
@@ -88,7 +93,7 @@ const getRestaurantById = asyncHandler(async (req, res) => {
     })
   } catch (error) {
     if (error.name === 'CastError') {
-      throw badRequest('Invalid restaurant ID format')
+      throw badRequest(errorMessages.common.invalidIdFormat('Restaurant'))
     }
     throw error
   }
@@ -133,17 +138,8 @@ const updateRestaurant = asyncHandler(async (req, res) => {
   const { id } = req.params
 
   try {
-    // Find restaurant
-    const restaurant = await Restaurant.findById(id)
-
-    if (!restaurant) {
-      throw notFound(`Restaurant with id ${id} not found`)
-    }
-
-    // Check ownership
-    if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-      throw forbidden('Not authorized to update this restaurant')
-    }
+    // Restaurant and ownership already validated by middleware
+    const restaurant = req.restaurant
 
     // Add logo URL if file was uploaded
     if (req.file) {
@@ -165,7 +161,7 @@ const updateRestaurant = asyncHandler(async (req, res) => {
     })
   } catch (error) {
     if (error.name === 'CastError') {
-      throw badRequest('Invalid restaurant ID format')
+      throw badRequest(errorMessages.common.invalidIdFormat('Restaurant'))
     }
     logDatabaseError(error, 'UPDATE', { collection: 'restaurants', id, document: req.body })
     throw error
@@ -181,17 +177,8 @@ const deleteRestaurant = asyncHandler(async (req, res) => {
   const { id } = req.params
 
   try {
-    // Find restaurant
-    const restaurant = await Restaurant.findById(id)
-
-    if (!restaurant) {
-      throw notFound(`Restaurant with id ${id} not found`)
-    }
-
-    // Check ownership
-    if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-      throw forbidden('Not authorized to delete this restaurant')
-    }
+    // Restaurant and ownership already validated by middleware
+    const restaurant = req.restaurant
 
     // Delete restaurant
     await restaurant.deleteOne()
@@ -201,7 +188,7 @@ const deleteRestaurant = asyncHandler(async (req, res) => {
     res.status(204).send()
   } catch (error) {
     if (error.name === 'CastError') {
-      throw badRequest('Invalid restaurant ID format')
+      throw badRequest(errorMessages.common.invalidIdFormat('Restaurant'))
     }
     logDatabaseError(error, 'DELETE', { collection: 'restaurants', id })
     throw error
@@ -217,21 +204,12 @@ const uploadLogo = asyncHandler(async (req, res) => {
   const { id } = req.params
 
   try {
-    // Find restaurant
-    const restaurant = await Restaurant.findById(id)
-
-    if (!restaurant) {
-      throw notFound(`Restaurant with id ${id} not found`)
-    }
-
-    // Check ownership
-    if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-      throw forbidden('Not authorized to update this restaurant')
-    }
+    // Restaurant and ownership already validated by middleware
+    const restaurant = req.restaurant
 
     // Check if file was uploaded
     if (!req.file) {
-      throw badRequest('Please upload a logo image')
+      throw badRequest(errorMessages.common.imageUploadRequired)
     }
 
     // Update restaurant with new logo URL
@@ -252,7 +230,7 @@ const uploadLogo = asyncHandler(async (req, res) => {
     })
   } catch (error) {
     if (error.name === 'CastError') {
-      throw badRequest('Invalid restaurant ID format')
+      throw badRequest(errorMessages.common.invalidIdFormat('Restaurant'))
     }
     logDatabaseError(error, 'UPDATE', { collection: 'restaurants', id, field: 'logoUrl' })
     throw error

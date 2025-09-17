@@ -5,7 +5,8 @@ const {
   asyncHandler,
   badRequest,
   unauthorized,
-  notFound
+  notFound,
+  errorMessages
 } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
 
@@ -130,7 +131,7 @@ const changePassword = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
 
   if (!user) {
-    throw notFound('User not found')
+    throw notFound(errorMessages.notFound('User'))
   }
 
   // Check current password

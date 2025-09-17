@@ -4,6 +4,7 @@ const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
 const logger = require('@utils/logger')
 const { badRequest } = require('@utils/errorUtils')
+const crypto = require('crypto')
 
 const createDirectory = (dir) => {
     if (!fs.existsSync(dir)) {
@@ -106,7 +107,47 @@ const getFileUrl = (filename, type) => {
 }
 
 /**
- * Write memory files to disk after validation
+ * Generate a unique filename with collision resistance
+ * @param {string} originalName - Original filename
+ * @returns {string} - Unique filename
+ */
+const generateUniqueFilename = (originalName) => {
+    const fileExt = path.extname(originalName)
+    const timestamp = Date.now()
+    const randomBytes = crypto.randomBytes(8).toString('hex')
+    const uuid = uuidv4()
+    return `${timestamp}-${randomBytes}-${uuid}${fileExt}`
+}
+
+/**
+ * Atomically write file to disk using temporary file and rename
+ * @param {string} finalPath - Final destination path
+ * @param {Buffer} buffer - File buffer
+ * @returns {Promise<void>}
+ */
+const atomicWriteFile = async (finalPath, buffer) => {
+    const tempPath = `${finalPath}.tmp.${crypto.randomBytes(4).toString('hex')}`
+
+    try {
+        // Write to temporary file first
+        await fs.promises.writeFile(tempPath, buffer, { flag: 'wx' }) // 'wx' fails if file exists
+
+        // Atomically rename temporary file to final destination
+        await fs.promises.rename(tempPath, finalPath)
+
+    } catch (error) {
+        // Clean up temporary file if it exists
+        try {
+            await fs.promises.unlink(tempPath)
+        } catch (cleanupError) {
+            // Ignore cleanup errors for non-existent files
+        }
+        throw error
+    }
+}
+
+/**
+ * Write memory files to disk after validation with race condition protection
  * @param {Array|Object} files - File or array of files from memory upload
  * @param {string} type - Type of upload (menu, menuItem, restaurant, etc.)
  * @returns {Array|Object} - File info with filename and path
@@ -116,10 +157,12 @@ const writeMemoryFilesToDisk = async (files, type) => {
 
     const fileArray = Array.isArray(files) ? files : [files]
     const writtenFiles = []
+    const maxRetries = 3
 
     for (const file of fileArray) {
-        const fileExt = path.extname(file.originalname)
-        const fileName = `${uuidv4()}${fileExt}`
+        let fileName, filePath
+        let retries = 0
+        let success = false
 
         // Determine destination directory
         let destination = uploadsDir
@@ -129,25 +172,60 @@ const writeMemoryFilesToDisk = async (files, type) => {
         else if (type === 'qrcode') destination = dirs.qrcode
         else if (type === 'profile') destination = dirs.profile
 
-        const filePath = path.join(destination, fileName)
-
+        // Ensure destination directory exists with proper error handling
         try {
-            // Write buffer to file
-            await fs.promises.writeFile(filePath, file.buffer)
-            logger.info(`File written to disk: ${filePath}`)
-
-            writtenFiles.push({
-                filename: fileName,
-                path: filePath,
-                originalname: file.originalname,
-                mimetype: file.mimetype,
-                size: file.size
-            })
+            await fs.promises.mkdir(destination, { recursive: true })
         } catch (error) {
-            logger.error(`Error writing file to disk: ${error.message}`)
-            // Clean up any files already written
-            await cleanupFiles(writtenFiles.map(f => f.path))
-            throw new Error(`Failed to write file to disk: ${error.message}`)
+            if (error.code !== 'EEXIST') {
+                logger.error(`Error creating directory ${destination}: ${error.message}`)
+                throw new Error(`Failed to create upload directory: ${error.message}`)
+            }
+        }
+
+        // Retry logic for filename collision handling
+        while (!success && retries < maxRetries) {
+            try {
+                fileName = generateUniqueFilename(file.originalname)
+                filePath = path.join(destination, fileName)
+
+                // Check if file already exists (extra safety)
+                try {
+                    await fs.promises.access(filePath)
+                    // File exists, generate new filename
+                    retries++
+                    continue
+                } catch (accessError) {
+                    // File doesn't exist, we can proceed
+                }
+
+                // Atomically write file to disk
+                await atomicWriteFile(filePath, file.buffer)
+
+                logger.info(`File written to disk: ${filePath}`)
+                success = true
+
+                writtenFiles.push({
+                    filename: fileName,
+                    path: filePath,
+                    originalname: file.originalname,
+                    mimetype: file.mimetype,
+                    size: file.size
+                })
+
+            } catch (error) {
+                retries++
+                logger.warn(`File write attempt ${retries} failed for ${file.originalname}: ${error.message}`)
+
+                if (retries >= maxRetries) {
+                    logger.error(`Error writing file to disk after ${maxRetries} retries: ${error.message}`)
+                    // Clean up any files already written
+                    await cleanupFiles(writtenFiles.map(f => f.path))
+                    throw new Error(`Failed to write file to disk after ${maxRetries} retries: ${error.message}`)
+                }
+
+                // Wait a small random amount before retrying to avoid thundering herd
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50))
+            }
         }
     }
 

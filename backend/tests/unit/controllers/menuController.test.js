@@ -249,7 +249,7 @@ describe('Menu Controller Tests', () => {
                 userId: req.user._id
             })
             expect(next).toHaveBeenCalled()
-            expect(forbidden).toHaveBeenCalledWith('Not authorized for this restaurant')
+            expect(forbidden).toHaveBeenCalledWith('Not authorized to access this restaurant')
         })
 
         it('should allow access to restaurant user owns', async () => {
@@ -339,7 +339,8 @@ describe('Menu Controller Tests', () => {
         })
 
         it('should create a new menu when user is authorized', async () => {
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
+            // Set up middleware properties that would be set by checkRestaurantOwnership
+            req.restaurant = restaurantMock.validRestaurant
 
             // Mock menu.create with a menu object that has save method
             const mockMenu = {
@@ -351,7 +352,6 @@ describe('Menu Controller Tests', () => {
 
             await menuController.createMenu(req, res, next)
 
-            expect(Restaurant.findById).toHaveBeenCalledWith(req.body.restaurantId)
             expect(Menu.create).toHaveBeenCalledWith(req.body)
             expect(mockMenu.save).toHaveBeenCalled()
             expect(res.status).toHaveBeenCalledWith(201)
@@ -361,28 +361,21 @@ describe('Menu Controller Tests', () => {
             })
         })
 
-        it('should return 404 if restaurant not found', async () => {
-            Restaurant.findById = jest.fn().mockResolvedValue(null)
+        it('should handle database error during menu creation', async () => {
+            // Set up middleware properties
+            req.restaurant = restaurantMock.validRestaurant
+
+            const error = new Error('Database error')
+            Menu.create = jest.fn().mockRejectedValue(error)
 
             await menuController.createMenu(req, res, next)
-            expect(next).toHaveBeenCalled()
-            expect(notFound).toHaveBeenCalled()
-            expect(Menu.create).not.toHaveBeenCalled()
-        })
-
-        it('should return 403 if user is not authorized', async () => {
-            req.user = { ...userMock.regularUser } // Different user
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
-
-            await menuController.createMenu(req, res, next)
-            expect(next).toHaveBeenCalled()
-            expect(forbidden).toHaveBeenCalled()
-            expect(Menu.create).not.toHaveBeenCalled()
+            expect(next).toHaveBeenCalledWith(error)
         })
 
         it('should allow admin to create menu for any restaurant', async () => {
             req.user = { ...userMock.adminUser }
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
+            // Set up middleware properties (middleware would set this even for admin)
+            req.restaurant = restaurantMock.validRestaurant
 
             // Mock menu.create with a menu object that has save method
             const mockMenu = {
@@ -394,7 +387,6 @@ describe('Menu Controller Tests', () => {
 
             await menuController.createMenu(req, res, next)
 
-            expect(Restaurant.findById).toHaveBeenCalledWith(req.body.restaurantId)
             expect(Menu.create).toHaveBeenCalledWith(req.body)
             expect(res.status).toHaveBeenCalledWith(201)
             expect(res.json).toHaveBeenCalledWith({
@@ -417,8 +409,9 @@ describe('Menu Controller Tests', () => {
                 restaurantId: restaurantMock.validRestaurant._id
             }
 
-            Menu.findById = jest.fn().mockResolvedValue(mockMenu)
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
+            // Set up middleware properties that would be set by checkMenuOwnership
+            req.menu = mockMenu
+
             Menu.findByIdAndUpdate = jest.fn().mockResolvedValue({
                 ...mockMenu,
                 ...req.body
@@ -426,8 +419,6 @@ describe('Menu Controller Tests', () => {
 
             await menuController.updateMenu(req, res, next)
 
-            expect(Menu.findById).toHaveBeenCalledWith(req.params.id)
-            expect(Restaurant.findById).toHaveBeenCalledWith(mockMenu.restaurantId)
             expect(Menu.findByIdAndUpdate).toHaveBeenCalledWith(
                 req.params.id,
                 req.body,
@@ -441,43 +432,42 @@ describe('Menu Controller Tests', () => {
             })
         })
 
-        it('should return 404 if menu not found', async () => {
-            Menu.findById = jest.fn().mockResolvedValue(null)
-
-            await menuController.updateMenu(req, res, next)
-            expect(next).toHaveBeenCalled()
-            expect(notFound).toHaveBeenCalled()
-            expect(Menu.findByIdAndUpdate).not.toHaveBeenCalled()
-        })
-
-        it('should return 403 if user is not authorized', async () => {
+        it('should handle database error during update', async () => {
             const mockMenu = {
                 ...menuMock.menuList[0],
                 restaurantId: restaurantMock.validRestaurant._id
             }
 
-            req.user = { ...userMock.regularUser } // Different user
-            Menu.findById = jest.fn().mockResolvedValue(mockMenu)
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
+            // Set up middleware properties
+            req.menu = mockMenu
+
+            const error = new Error('Database error')
+            Menu.findByIdAndUpdate = jest.fn().mockRejectedValue(error)
 
             await menuController.updateMenu(req, res, next)
-            expect(next).toHaveBeenCalled()
-            expect(forbidden).toHaveBeenCalled()
-            expect(Menu.findByIdAndUpdate).not.toHaveBeenCalled()
+            expect(next).toHaveBeenCalledWith(error)
         })
 
         it('should handle invalid ID format', async () => {
             req.params.id = 'invalid-id'
+            const mockMenu = {
+                ...menuMock.menuList[0],
+                restaurantId: restaurantMock.validRestaurant._id
+            }
+
+            // Set up middleware properties
+            req.menu = mockMenu
+
             const error = new Error('Cast Error')
             error.name = 'CastError'
 
-            Menu.findById = jest.fn().mockImplementation(() => {
+            Menu.findByIdAndUpdate = jest.fn().mockImplementation(() => {
                 throw error
             })
 
             await menuController.updateMenu(req, res, next)
             expect(next).toHaveBeenCalled()
-            expect(badRequest).toHaveBeenCalled()
+            expect(badRequest).toHaveBeenCalledWith('Invalid menu ID format')
         })
     })
 
@@ -491,56 +481,92 @@ describe('Menu Controller Tests', () => {
             const mockMenu = {
                 ...menuMock.menuList[0],
                 restaurantId: restaurantMock.validRestaurant._id,
-                deleteOne: jest.fn().mockResolvedValue({})
+                name: 'Test Menu'
             }
 
-            Menu.findById = jest.fn().mockResolvedValue(mockMenu)
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
+            // Set up middleware properties
+            req.menu = mockMenu
+
+            // Mock mongoose session
+            const mockSession = {
+                withTransaction: jest.fn().mockImplementation(async (callback) => {
+                    await callback()
+                }),
+                endSession: jest.fn().mockResolvedValue()
+            }
+            mongoose.startSession = jest.fn().mockResolvedValue(mockSession)
+
+            // Mock MenuItem and Menu operations
+            const MenuItem = require('@models/menuItem')
+            MenuItem.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 5 })
+            Menu.findByIdAndDelete = jest.fn().mockResolvedValue(mockMenu)
 
             await menuController.deleteMenu(req, res, next)
 
-            expect(Menu.findById).toHaveBeenCalledWith(req.params.id)
-            expect(Restaurant.findById).toHaveBeenCalledWith(mockMenu.restaurantId)
-            expect(mockMenu.deleteOne).toHaveBeenCalled()
+            expect(mongoose.startSession).toHaveBeenCalled()
+            expect(mockSession.withTransaction).toHaveBeenCalled()
+            expect(MenuItem.deleteMany).toHaveBeenCalledWith(
+                { menuId: req.params.id },
+                { session: mockSession }
+            )
+            expect(Menu.findByIdAndDelete).toHaveBeenCalledWith(
+                req.params.id,
+                { session: mockSession }
+            )
             expect(res.status).toHaveBeenCalledWith(204)
             expect(res.send).toHaveBeenCalled()
+            expect(mockSession.endSession).toHaveBeenCalled()
         })
 
-        it('should return 404 if menu not found', async () => {
-            Menu.findById = jest.fn().mockResolvedValue(null)
-
-            await menuController.deleteMenu(req, res, next)
-            expect(next).toHaveBeenCalled()
-            expect(notFound).toHaveBeenCalled()
-        })
-
-        it('should return 403 if user is not authorized', async () => {
+        it('should handle database error during deletion', async () => {
             const mockMenu = {
                 ...menuMock.menuList[0],
-                restaurantId: restaurantMock.validRestaurant._id
+                restaurantId: restaurantMock.validRestaurant._id,
+                name: 'Test Menu'
             }
 
-            req.user = { ...userMock.regularUser } // Different user
-            Menu.findById = jest.fn().mockResolvedValue(mockMenu)
-            Restaurant.findById = jest.fn().mockResolvedValue(restaurantMock.validRestaurant)
+            // Set up middleware properties
+            req.menu = mockMenu
+
+            const error = new Error('Database error')
+
+            // Mock mongoose session
+            const mockSession = {
+                withTransaction: jest.fn().mockRejectedValue(error),
+                endSession: jest.fn().mockResolvedValue()
+            }
+            mongoose.startSession = jest.fn().mockResolvedValue(mockSession)
 
             await menuController.deleteMenu(req, res, next)
-            expect(next).toHaveBeenCalled()
-            expect(forbidden).toHaveBeenCalled()
+            expect(next).toHaveBeenCalledWith(error)
+            expect(mockSession.endSession).toHaveBeenCalled()
         })
 
         it('should handle invalid ID format', async () => {
             req.params.id = 'invalid-id'
+            const mockMenu = {
+                ...menuMock.menuList[0],
+                restaurantId: restaurantMock.validRestaurant._id,
+                name: 'Test Menu'
+            }
+
+            // Set up middleware properties
+            req.menu = mockMenu
+
             const error = new Error('Cast Error')
             error.name = 'CastError'
 
-            Menu.findById = jest.fn().mockImplementation(() => {
-                throw error
-            })
+            // Mock mongoose session
+            const mockSession = {
+                withTransaction: jest.fn().mockRejectedValue(error),
+                endSession: jest.fn().mockResolvedValue()
+            }
+            mongoose.startSession = jest.fn().mockResolvedValue(mockSession)
 
             await menuController.deleteMenu(req, res, next)
             expect(next).toHaveBeenCalled()
-            expect(badRequest).toHaveBeenCalled()
+            expect(badRequest).toHaveBeenCalledWith('Invalid menu ID format')
+            expect(mockSession.endSession).toHaveBeenCalled()
         })
     })
 

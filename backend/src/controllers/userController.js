@@ -4,9 +4,11 @@ const {
     badRequest,
     unauthorized,
     notFound,
-    forbidden
+    forbidden,
+    errorMessages
 } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
+const { createSafeSearchQuery } = require('@utils/sanitization')
 
 /**
  * Get all users (Admin only)
@@ -30,9 +32,10 @@ const getUsers = asyncHandler(async (req, res) => {
     }
 
     if (req.query.search) {
-        query.$or = [
-            { email: { $regex: req.query.search, $options: 'i' } }
-        ]
+        const safeSearchQueries = createSafeSearchQuery(req.query.search, ['email'])
+        if (safeSearchQueries.length > 0) {
+            query.$or = safeSearchQueries
+        }
     }
 
     const users = await User.find(query)
@@ -73,7 +76,7 @@ const getUserById = asyncHandler(async (req, res) => {
     const user = await User.findById(id).select('-password')
 
     if (!user) {
-        throw notFound(`User with id ${id} not found`)
+        throw notFound(errorMessages.notFound('User', id))
     }
 
     logger.info(`User profile accessed: ${id} by ${req.user._id}`)
@@ -108,7 +111,7 @@ const updateUser = asyncHandler(async (req, res) => {
     const user = await User.findById(id)
 
     if (!user) {
-        throw notFound(`User with id ${id} not found`)
+        throw notFound(errorMessages.notFound('User', id))
     }
 
     // Check if email is being changed and if it already exists
@@ -159,7 +162,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     const user = await User.findById(id)
 
     if (!user) {
-        throw notFound(`User with id ${id} not found`)
+        throw notFound(errorMessages.notFound('User', id))
     }
 
     await user.deleteOne()

@@ -1,23 +1,33 @@
 // Mock dependencies before importing the controller
 jest.mock('@models/user')
-jest.mock('@utils/errorUtils')
 jest.mock('@utils/logger')
-
-// Mock asyncHandler to just return the function
-jest.mock('@utils/errorUtils', () => ({
-    asyncHandler: (fn) => fn,
-    badRequest: jest.fn(),
-    unauthorized: jest.fn(),
-    notFound: jest.fn(),
-    forbidden: jest.fn()
+jest.mock('@utils/sanitization', () => ({
+    createSafeSearchQuery: jest.fn()
 }))
+
+// Mock asyncHandler to ensure proper execution
+jest.mock('@utils/errorUtils', () => {
+    const originalModule = jest.requireActual('@utils/errorUtils')
+    return {
+        ...originalModule,
+        asyncHandler: (fn) => {
+            return async (req, res, next) => {
+                try {
+                    await fn(req, res, next)
+                } catch (error) {
+                    next(error)
+                }
+            }
+        }
+    }
+})
 
 const mongoose = require('mongoose')
 const User = require('@models/user')
 const userController = require('@controllers/userController')
 const userMock = require('@mocks/userMock')
 const userMockEnhanced = require('@mocks/userMockEnhanced')
-const { badRequest, unauthorized, notFound, forbidden } = require('@utils/errorUtils')
+const { createSafeSearchQuery } = require('@utils/sanitization')
 
 describe('User Controller Tests', () => {
     let req, res, next
@@ -45,28 +55,6 @@ describe('User Controller Tests', () => {
         }
 
         next = jest.fn()
-
-        // Mock error utils to throw actual errors
-        badRequest.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 400
-            return error
-        })
-        unauthorized.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 401
-            return error
-        })
-        notFound.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 404
-            return error
-        })
-        forbidden.mockImplementation(msg => {
-            const error = new Error(msg)
-            error.statusCode = 403
-            return error
-        })
     })
 
     describe('getUsers', () => {
@@ -183,17 +171,22 @@ describe('User Controller Tests', () => {
                 limit: jest.fn().mockResolvedValue(mockUsers)
             }
 
+            // Mock the sanitization function
+            const expectedSearchQueries = [
+                { email: { $regex: 'john', $options: 'i' } }
+            ]
+            createSafeSearchQuery.mockReturnValue(expectedSearchQueries)
+
             User.find = jest.fn().mockReturnValue(mockQuery)
             User.countDocuments = jest.fn().mockResolvedValue(1)
 
             const expectedQuery = {
-                $or: [
-                    { email: { $regex: 'john', $options: 'i' } }
-                ]
+                $or: expectedSearchQueries
             }
 
             await userController.getUsers(req, res, next)
 
+            expect(createSafeSearchQuery).toHaveBeenCalledWith('john', ['email'])
             expect(User.find).toHaveBeenCalledWith(expectedQuery)
             expect(User.countDocuments).toHaveBeenCalledWith(expectedQuery)
         })
@@ -204,11 +197,8 @@ describe('User Controller Tests', () => {
                 throw error
             })
 
-            try {
-                await userController.getUsers(req, res, next)
-            } catch (err) {
-                expect(err.message).toBe('Database error')
-            }
+            await userController.getUsers(req, res, next)
+            expect(next).toHaveBeenCalledWith(error)
         })
     })
 
@@ -252,18 +242,19 @@ describe('User Controller Tests', () => {
             })
         })
 
-        it('should throw forbidden error for unauthorized access', async () => {
+        it('should return forbidden error for unauthorized access', async () => {
             req.params.id = 'differentUserId'
 
-            try {
-                await userController.getUserById(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Not authorized to access this user profile')
-                expect(error.statusCode).toBe(403)
-            }
+            await userController.getUserById(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Not authorized to access this user profile')
+            expect(calledError.statusCode).toBe(403)
         })
 
-        it('should throw not found error when user does not exist', async () => {
+        it('should return not found error when user does not exist', async () => {
             req.params.id = req.user._id.toString()
 
             const mockQuery = {
@@ -271,12 +262,13 @@ describe('User Controller Tests', () => {
             }
             User.findById = jest.fn().mockReturnValue(mockQuery)
 
-            try {
-                await userController.getUserById(req, res, next)
-            } catch (error) {
-                expect(error.message).toContain('not found')
-                expect(error.statusCode).toBe(404)
-            }
+            await userController.getUserById(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toContain('not found')
+            expect(calledError.statusCode).toBe(404)
         })
     })
 
@@ -320,12 +312,13 @@ describe('User Controller Tests', () => {
             req.params.id = userId
             req.body = { role: 'admin' }
 
-            try {
-                await userController.updateUser(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Not authorized to update role or account status')
-                expect(error.statusCode).toBe(403)
-            }
+            await userController.updateUser(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Not authorized to update role or account status')
+            expect(calledError.statusCode).toBe(403)
         })
 
         it('should allow admin to update user role', async () => {
@@ -357,37 +350,39 @@ describe('User Controller Tests', () => {
             })
         })
 
-        it('should throw error for email conflict', async () => {
+        it('should return error for email conflict', async () => {
             const userId = req.user._id.toString()
             req.params.id = userId
             req.body = { email: 'existing@test.com' }
 
-            const existingUser = { ...userMock.userList[0], _id: userId }
+            const existingUser = { ...userMock.userList[0], _id: userId, email: 'old@test.com' }
             const conflictUser = { _id: 'different-id', email: 'existing@test.com' }
 
             User.findById = jest.fn().mockResolvedValue(existingUser)
             User.findOne = jest.fn().mockResolvedValue(conflictUser)
 
-            try {
-                await userController.updateUser(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Email already exists')
-                expect(error.statusCode).toBe(400)
-            }
+            await userController.updateUser(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Email already exists')
+            expect(calledError.statusCode).toBe(400)
         })
 
-        it('should throw not found error when user does not exist', async () => {
+        it('should return not found error when user does not exist', async () => {
             req.params.id = req.user._id.toString()
             req.body = { email: 'updated@test.com' }
 
             User.findById = jest.fn().mockResolvedValue(null)
 
-            try {
-                await userController.updateUser(req, res, next)
-            } catch (error) {
-                expect(error.message).toContain('not found')
-                expect(error.statusCode).toBe(404)
-            }
+            await userController.updateUser(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toContain('not found')
+            expect(calledError.statusCode).toBe(404)
         })
     })
 
@@ -414,40 +409,43 @@ describe('User Controller Tests', () => {
             expect(res.send).toHaveBeenCalled()
         })
 
-        it('should throw forbidden error for non-admin', async () => {
+        it('should return forbidden error for non-admin', async () => {
             req.user.role = 'user'
             req.params.id = 'someUserId'
 
-            try {
-                await userController.deleteUser(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Not authorized to delete user accounts')
-                expect(error.statusCode).toBe(403)
-            }
+            await userController.deleteUser(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Not authorized to delete user accounts')
+            expect(calledError.statusCode).toBe(403)
         })
 
         it('should prevent admin from deleting own account', async () => {
             req.params.id = req.user._id.toString()
 
-            try {
-                await userController.deleteUser(req, res, next)
-            } catch (error) {
-                expect(error.message).toBe('Cannot delete your own admin account')
-                expect(error.statusCode).toBe(400)
-            }
+            await userController.deleteUser(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toBe('Cannot delete your own admin account')
+            expect(calledError.statusCode).toBe(400)
         })
 
-        it('should throw not found error when user does not exist', async () => {
+        it('should return not found error when user does not exist', async () => {
             req.params.id = 'nonExistentUser'
 
             User.findById = jest.fn().mockResolvedValue(null)
 
-            try {
-                await userController.deleteUser(req, res, next)
-            } catch (error) {
-                expect(error.message).toContain('not found')
-                expect(error.statusCode).toBe(404)
-            }
+            await userController.deleteUser(req, res, next)
+
+            expect(next).toHaveBeenCalled()
+            const calledError = next.mock.calls[0][0]
+            expect(calledError).toBeInstanceOf(Error)
+            expect(calledError.message).toContain('not found')
+            expect(calledError.statusCode).toBe(404)
         })
     })
 
@@ -470,11 +468,8 @@ describe('User Controller Tests', () => {
             const error = new Error('Database error')
             User.findByIdAndUpdate = jest.fn().mockRejectedValue(error)
 
-            try {
-                await userController.deactivateAccount(req, res, next)
-            } catch (err) {
-                expect(err.message).toBe('Database error')
-            }
+            await userController.deactivateAccount(req, res, next)
+            expect(next).toHaveBeenCalledWith(error)
         })
     })
 }) 

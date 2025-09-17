@@ -1,15 +1,19 @@
 const Menu = require('@models/menu')
+const MenuItem = require('@models/menuItem')
 const Restaurant = require('@models/restaurant')
+const mongoose = require('mongoose')
 const {
     asyncHandler,
     notFound,
     badRequest,
-    forbidden
+    forbidden,
+    errorMessages
 } = require('@utils/errorUtils')
 const logger = require('@utils/logger')
 const { logDatabaseError } = require('@services/errorLogService')
 const { getFileUrl } = require('@services/fileUploadService')
 const { generateMenuQRCode } = require('@services/qrCodeService')
+const { createSafeRegexQuery } = require('@utils/sanitization')
 
 /**
  * Get all menus with optional filtering
@@ -22,23 +26,20 @@ const getMenus = asyncHandler(async (req, res) => {
     // Build query
     const query = {}
 
-    // Add name filter if provided
+    // Add name filter if provided (with sanitization to prevent ReDoS attacks)
     if (name) {
-        query.name = { $regex: name, $options: 'i' }
+        const safeRegexQuery = createSafeRegexQuery(name)
+        if (safeRegexQuery) {
+            query.name = safeRegexQuery
+        }
     }
 
-    // Add restaurant filter if provided
-    if (restaurantId) {
-        query.restaurantId = restaurantId
-    }
-
-    // SECURITY FIX: Filter by user's restaurants only (unless admin)
     if (req.user && req.user.role !== 'admin') {
-        // If user provided restaurantId and isn't admin, ensure ownership
         if (restaurantId) {
+            // Validate restaurant ownership
             const owns = await Restaurant.exists({ _id: restaurantId, userId: req.user._id })
             if (!owns) {
-                throw forbidden('Not authorized for this restaurant')
+                throw forbidden(errorMessages.forbidden('access', 'restaurant'))
             }
             query.restaurantId = restaurantId
         } else {
@@ -47,6 +48,9 @@ const getMenus = asyncHandler(async (req, res) => {
             const userRestaurantIds = userRestaurants.map(r => r._id)
             query.restaurantId = { $in: userRestaurantIds }
         }
+    } else if (restaurantId) {
+        // Admin can access any restaurant
+        query.restaurantId = restaurantId
     }
 
     // Build sort object
@@ -96,6 +100,7 @@ const getMenuById = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
+        // Menu and ownership already validated by middleware, but we need to populate menuItems
         const menu = await Menu.findById(id)
             .select('-__v')
             .populate({
@@ -108,7 +113,7 @@ const getMenuById = asyncHandler(async (req, res) => {
             })
 
         if (!menu) {
-            throw notFound(`Menu with id ${id} not found`)
+            throw notFound(errorMessages.notFound('Menu', id))
         }
 
         res.json({
@@ -117,7 +122,7 @@ const getMenuById = asyncHandler(async (req, res) => {
         })
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu'))
         }
         throw error
     }
@@ -132,17 +137,8 @@ const createMenu = asyncHandler(async (req, res) => {
     const { restaurantId } = req.body
 
     try {
-        // Check if restaurant exists and user owns it
-        const restaurant = await Restaurant.findById(restaurantId)
-
-        if (!restaurant) {
-            throw notFound(`Restaurant with id ${restaurantId} not found`)
-        }
-
-        // Check restaurant ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to create menu for this restaurant')
-        }
+        // Restaurant ownership already validated by middleware
+        const restaurant = req.restaurant
 
         // Add image URLs if files were uploaded
         if (req.files && req.files.length > 0) {
@@ -184,20 +180,8 @@ const updateMenu = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        // Find menu
-        const menu = await Menu.findById(id)
-
-        if (!menu) {
-            throw notFound(`Menu with id ${id} not found`)
-        }
-
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to update this menu')
-        }
+        // Menu, restaurant and ownership already validated by middleware
+        const menu = req.menu
 
         // Add image URLs if files were uploaded
         if (req.files && req.files.length > 0) {
@@ -223,7 +207,7 @@ const updateMenu = asyncHandler(async (req, res) => {
         })
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu'))
         }
         logDatabaseError(error, 'UPDATE', { collection: 'menus', id, document: req.body })
         throw error
@@ -231,41 +215,66 @@ const updateMenu = asyncHandler(async (req, res) => {
 })
 
 /**
- * Delete menu
+ * Delete menu with related menu items atomically
  * @route DELETE /api/menus/:id
  * @access Private
  */
 const deleteMenu = asyncHandler(async (req, res) => {
     const { id } = req.params
 
+    // Start a MongoDB session for transaction
+    const session = await mongoose.startSession()
+
     try {
-        // Find menu
-        const menu = await Menu.findById(id)
+        // Menu, restaurant and ownership already validated by middleware
+        const menu = req.menu
 
-        if (!menu) {
-            throw notFound(`Menu with id ${id} not found`)
-        }
+        // Execute deletion in a transaction to ensure atomicity
+        await session.withTransaction(async () => {
+            try {
+                // First, delete all menu items associated with this menu
+                const deleteResult = await MenuItem.deleteMany({ menuId: id }, { session })
+                logger.info(`Deleted ${deleteResult.deletedCount} menu items for menu ${menu.name}`)
 
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
+                // Then delete the menu itself
+                await Menu.findByIdAndDelete(id, { session })
 
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to delete this menu')
-        }
+                logger.warn(`Menu deleted: ${menu.name} (${deleteResult.deletedCount} menu items) by user ${req.user._id}`)
 
-        // Delete menu
-        await menu.deleteOne()
-
-        logger.warn(`Menu deleted: ${menu.name} by user ${req.user._id}`)
+            } catch (transactionError) {
+                logger.error(`Error in menu deletion transaction: ${transactionError.message}`)
+                throw transactionError
+            }
+        }, {
+            // Transaction options
+            readConcern: { level: 'majority' },
+            writeConcern: { w: 'majority' },
+            maxCommitTimeMS: 10000 // 10 seconds timeout
+        })
 
         res.status(204).send()
+
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu'))
         }
-        logDatabaseError(error, 'DELETE', { collection: 'menus', id })
+
+        logger.error(`Error deleting menu ${id}: ${error.message}`)
+        logDatabaseError(error, 'DELETE', {
+            collection: 'menus',
+            id,
+            operation: 'transactional_delete_with_items'
+        })
+
+        // Re-throw with more context for transaction failures
+        if (error.name === 'MongoTransactionError' || error.name === 'MongoServerError') {
+            throw new Error(`Failed to delete menu and associated items: ${error.message}`)
+        }
+
         throw error
+    } finally {
+        // Always end the session
+        await session.endSession()
     }
 })
 
@@ -278,24 +287,12 @@ const uploadImage = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        // Find menu
-        const menu = await Menu.findById(id)
-
-        if (!menu) {
-            throw notFound(`Menu with id ${id} not found`)
-        }
-
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to update this menu')
-        }
+        // Menu, restaurant and ownership already validated by middleware
+        const menu = req.menu
 
         // Check if file was uploaded
         if (!req.file) {
-            throw badRequest('Please upload an image')
+            throw badRequest(errorMessages.common.imageUploadRequired)
         }
 
         // Update menu with new image URL
@@ -316,7 +313,7 @@ const uploadImage = asyncHandler(async (req, res) => {
         })
     } catch (error) {
         if (error.name === 'CastError') {
-            throw badRequest('Invalid menu ID format')
+            throw badRequest(errorMessages.common.invalidIdFormat('Menu'))
         }
         logDatabaseError(error, 'UPDATE', { collection: 'menus', id, field: 'imageUrl' })
         throw error
@@ -332,27 +329,12 @@ const generateQRCode = asyncHandler(async (req, res) => {
     const { id } = req.params
 
     try {
-        // Find menu
-        const menu = await Menu.findById(id)
-
-        if (!menu) {
-            throw notFound(`Menu with id ${id} not found`)
-        }
-
-        // Find restaurant to check ownership
-        const restaurant = await Restaurant.findById(menu.restaurantId)
-
-        if (!restaurant) {
-            throw notFound(`Restaurant with id ${menu.restaurantId} not found for menu ${id}`)
-        }
+        // Menu, restaurant and ownership already validated by middleware
+        const menu = req.menu
+        const restaurant = req.restaurant
 
         if (!restaurant.userId) {
             throw badRequest(`Restaurant with id ${menu.restaurantId} has no associated user`)
-        }
-
-        // Check ownership
-        if (req.user.role !== 'admin' && restaurant.userId.toString() !== req.user._id.toString()) {
-            throw forbidden('Not authorized to generate QR code for this menu')
         }
 
         // Generate new QR code

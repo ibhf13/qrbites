@@ -5,10 +5,12 @@ const {
     badRequest,
     unauthorized,
     notFound,
-    forbidden
+    forbidden,
+    errorMessages
 } = require('@utils/errorUtils')
 const { getFileUrl } = require('@services/fileUploadService')
 const logger = require('@utils/logger')
+const { createSafeSearchQuery } = require('@utils/sanitization')
 
 /**
  * Get current user's profile
@@ -79,7 +81,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
     const profile = await Profile.findOne({ userId }).populate('userId', 'email role isActive')
 
     if (!profile) {
-        throw notFound('Profile not found')
+        throw notFound(errorMessages.notFound('Profile'))
     }
 
     // Check if profile is public or if user is admin or viewing own profile
@@ -137,11 +139,10 @@ const getAllProfiles = asyncHandler(async (req, res) => {
     }
 
     if (req.query.search) {
-        query.$or = [
-            { firstName: { $regex: req.query.search, $options: 'i' } },
-            { lastName: { $regex: req.query.search, $options: 'i' } },
-            { displayName: { $regex: req.query.search, $options: 'i' } }
-        ]
+        const safeSearchQueries = createSafeSearchQuery(req.query.search, ['firstName', 'lastName', 'displayName'])
+        if (safeSearchQueries.length > 0) {
+            query.$or = safeSearchQueries
+        }
     }
 
     const profiles = await Profile.find(query)
@@ -177,7 +178,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     // Check if user exists
     const user = await User.findById(userId)
     if (!user) {
-        throw notFound('User not found')
+        throw notFound(errorMessages.notFound('User'))
     }
 
     // Find or create profile
@@ -218,7 +219,7 @@ const deleteUserProfile = asyncHandler(async (req, res) => {
     const profile = await Profile.findOne({ userId })
 
     if (!profile) {
-        throw notFound('Profile not found')
+        throw notFound(errorMessages.notFound('Profile'))
     }
 
     await profile.deleteOne()
@@ -237,7 +238,7 @@ const uploadProfilePicture = asyncHandler(async (req, res) => {
     const userId = req.user._id
 
     if (!req.file) {
-        throw badRequest('Please upload an image')
+        throw badRequest(errorMessages.common.imageUploadRequired)
     }
 
     // Generate absolute URL using the file upload service

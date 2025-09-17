@@ -4,6 +4,7 @@ const restaurantController = require('@controllers/restaurantController')
 const restaurantMock = require('@mocks/restaurantMockEnhanced')
 const userMock = require('@mocks/userMockEnhanced')
 const { notFound, forbidden, badRequest } = require('@utils/errorUtils')
+const { createSafeRegexQuery } = require('@utils/sanitization')
 
 // Mock dependencies
 jest.mock('@models/restaurant')
@@ -20,24 +21,41 @@ jest.mock('@utils/logger', () => ({
     error: jest.fn(),
     debug: jest.fn()
 }))
+jest.mock('@utils/sanitization', () => ({
+    createSafeRegexQuery: jest.fn()
+}))
 
-// Mock the asyncHandler to make testing easier
-jest.mock('@utils/errorUtils', () => {
-    const originalModule = jest.requireActual('@utils/errorUtils')
-    return {
-        ...originalModule,
-        asyncHandler: fn => async (req, res, next) => {
-            try {
-                return await fn(req, res, next)
-            } catch (error) {
-                next(error)
-            }
-        },
-        notFound: jest.fn(msg => new Error(msg)),
-        badRequest: jest.fn(msg => new Error(msg)),
-        forbidden: jest.fn(msg => new Error(msg))
+// Mock the asyncHandler and error functions
+jest.mock('@utils/errorUtils', () => ({
+    asyncHandler: fn => async (req, res, next) => {
+        try {
+            return await fn(req, res, next)
+        } catch (error) {
+            next(error)
+        }
+    },
+    notFound: jest.fn(msg => {
+        const error = new Error(msg)
+        error.statusCode = 404
+        return error
+    }),
+    badRequest: jest.fn(msg => {
+        const error = new Error(msg)
+        error.statusCode = 400
+        return error
+    }),
+    forbidden: jest.fn(msg => {
+        const error = new Error(msg)
+        error.statusCode = 403
+        return error
+    }),
+    errorMessages: {
+        notFound: (resource, id) => `${resource} with id ${id} not found`,
+        common: {
+            invalidIdFormat: (resource) => `Invalid ${resource.toLowerCase()} ID format`
+        }
     }
-})
+}))
 
 describe('Restaurant Controller Tests', () => {
     let req, res, next
@@ -99,6 +117,10 @@ describe('Restaurant Controller Tests', () => {
         it('should handle filtering by name', async () => {
             req.query = { name: 'Test', page: 2, limit: 5, sortBy: 'name', order: 'asc' }
 
+            // Mock the sanitization function
+            const expectedRegexQuery = { $regex: 'Test', $options: 'i' }
+            createSafeRegexQuery.mockReturnValue(expectedRegexQuery)
+
             const findMock = {
                 select: jest.fn().mockReturnThis(),
                 sort: jest.fn().mockReturnThis(),
@@ -111,8 +133,9 @@ describe('Restaurant Controller Tests', () => {
 
             await restaurantController.getRestaurants(req, res, next)
 
+            expect(createSafeRegexQuery).toHaveBeenCalledWith('Test')
             expect(Restaurant.find).toHaveBeenCalledWith({
-                name: { $regex: 'Test', $options: 'i' },
+                name: expectedRegexQuery,
                 userId: req.user._id
             })
             expect(findMock.sort).toHaveBeenCalledWith({ name: 1 })
@@ -316,12 +339,13 @@ describe('Restaurant Controller Tests', () => {
                 description: 'Updated description'
             }
 
-            Restaurant.findById = jest.fn().mockResolvedValue(existingRestaurant)
+            // Set up middleware properties that would be set by restaurant ownership middleware
+            req.restaurant = existingRestaurant
+
             Restaurant.findByIdAndUpdate = jest.fn().mockResolvedValue(updatedRestaurant)
 
             await restaurantController.updateRestaurant(req, res, next)
 
-            expect(Restaurant.findById).toHaveBeenCalledWith(restaurantId)
             expect(Restaurant.findByIdAndUpdate).toHaveBeenCalledWith(
                 restaurantId,
                 req.body,
@@ -354,7 +378,9 @@ describe('Restaurant Controller Tests', () => {
                 name: 'Admin Updated Restaurant'
             }
 
-            Restaurant.findById = jest.fn().mockResolvedValue(existingRestaurant)
+            // Set up middleware properties (middleware would set this even for admin)
+            req.restaurant = existingRestaurant
+
             Restaurant.findByIdAndUpdate = jest.fn().mockResolvedValue(updatedRestaurant)
 
             await restaurantController.updateRestaurant(req, res, next)
@@ -363,40 +389,30 @@ describe('Restaurant Controller Tests', () => {
             expect(res.json).toHaveBeenCalled()
         })
 
-        it('should return 403 if user is not authorized to update restaurant', async () => {
-            const restaurantId = restaurantMock.secondRestaurant._id.toString()
+        it('should handle database error during update', async () => {
+            const restaurantId = restaurantMock.validRestaurant._id.toString()
             req.params.id = restaurantId
-            req.body = { name: 'Unauthorized Update' }
+            req.body = { name: 'Updated Name' }
             req.user = {
-                _id: userMock.validUser._id, // Different user
+                _id: restaurantMock.validRestaurant.userId,
                 role: 'user'
             }
 
             const existingRestaurant = {
-                ...restaurantMock.secondRestaurant,
+                ...restaurantMock.validRestaurant,
                 userId: {
-                    toString: () => restaurantMock.secondRestaurant.userId.toString()
+                    toString: () => restaurantMock.validRestaurant.userId.toString()
                 }
             }
 
-            Restaurant.findById = jest.fn().mockResolvedValue(existingRestaurant)
+            // Set up middleware properties
+            req.restaurant = existingRestaurant
+
+            const error = new Error('Database error')
+            Restaurant.findByIdAndUpdate = jest.fn().mockRejectedValue(error)
 
             await restaurantController.updateRestaurant(req, res, next)
-
-            expect(forbidden).toHaveBeenCalledWith('Not authorized to update this restaurant')
-            expect(next).toHaveBeenCalled()
-            expect(Restaurant.findByIdAndUpdate).not.toHaveBeenCalled()
-        })
-
-        it('should return 404 if restaurant not found', async () => {
-            req.params.id = new mongoose.Types.ObjectId().toString()
-            req.user = { _id: userMock.validUser._id }
-
-            Restaurant.findById = jest.fn().mockResolvedValue(null)
-
-            await restaurantController.updateRestaurant(req, res, next)
-            expect(notFound).toHaveBeenCalled()
-            expect(next).toHaveBeenCalled()
+            expect(next).toHaveBeenCalledWith(error)
         })
 
         it('should add logo URL if file was uploaded during update', async () => {
@@ -462,11 +478,11 @@ describe('Restaurant Controller Tests', () => {
                 deleteOne: jest.fn().mockResolvedValue({ acknowledged: true, deletedCount: 1 })
             }
 
-            Restaurant.findById = jest.fn().mockResolvedValue(existingRestaurant)
+            // Set up middleware properties that would be set by restaurant ownership middleware
+            req.restaurant = existingRestaurant
 
             await restaurantController.deleteRestaurant(req, res, next)
 
-            expect(Restaurant.findById).toHaveBeenCalledWith(restaurantId)
             expect(existingRestaurant.deleteOne).toHaveBeenCalled()
             expect(res.status).toHaveBeenCalledWith(204)
             expect(res.send).toHaveBeenCalled()
@@ -488,7 +504,8 @@ describe('Restaurant Controller Tests', () => {
                 deleteOne: jest.fn().mockResolvedValue({ acknowledged: true, deletedCount: 1 })
             }
 
-            Restaurant.findById = jest.fn().mockResolvedValue(existingRestaurant)
+            // Set up middleware properties (middleware would set this even for admin)
+            req.restaurant = existingRestaurant
 
             await restaurantController.deleteRestaurant(req, res, next)
 
@@ -496,40 +513,25 @@ describe('Restaurant Controller Tests', () => {
             expect(res.status).toHaveBeenCalledWith(204)
         })
 
-        it('should return 403 if user is not authorized to delete restaurant', async () => {
-            const restaurantId = restaurantMock.secondRestaurant._id.toString()
+        it('should handle database error during deletion', async () => {
+            const restaurantId = restaurantMock.validRestaurant._id.toString()
             req.params.id = restaurantId
             req.user = {
-                _id: userMock.validUser._id, // Different user
+                _id: restaurantMock.validRestaurant.userId,
                 role: 'user'
             }
 
+            const error = new Error('Database error')
             const existingRestaurant = {
-                ...restaurantMock.secondRestaurant,
-                userId: {
-                    toString: () => restaurantMock.secondRestaurant.userId.toString()
-                },
-                deleteOne: jest.fn()
+                ...restaurantMock.validRestaurant,
+                deleteOne: jest.fn().mockRejectedValue(error)
             }
 
-            Restaurant.findById = jest.fn().mockResolvedValue(existingRestaurant)
+            // Set up middleware properties
+            req.restaurant = existingRestaurant
 
             await restaurantController.deleteRestaurant(req, res, next)
-
-            expect(forbidden).toHaveBeenCalledWith('Not authorized to delete this restaurant')
-            expect(next).toHaveBeenCalled()
-            expect(existingRestaurant.deleteOne).not.toHaveBeenCalled()
-        })
-
-        it('should return 404 if restaurant not found', async () => {
-            req.params.id = new mongoose.Types.ObjectId().toString()
-            req.user = { _id: userMock.validUser._id }
-
-            Restaurant.findById = jest.fn().mockResolvedValue(null)
-
-            await restaurantController.deleteRestaurant(req, res, next)
-            expect(notFound).toHaveBeenCalled()
-            expect(next).toHaveBeenCalled()
+            expect(next).toHaveBeenCalledWith(error)
         })
     })
 }) 

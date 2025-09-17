@@ -172,6 +172,163 @@ const checkRestaurantOwnership = (paramName = 'restaurantId') => {
 }
 
 /**
+ * Middleware to check if a menu belongs to the authenticated user through restaurant ownership
+ * @param {string} paramName - Name of the parameter containing menu ID (default: 'id')
+ * @returns {Function} Express middleware
+ */
+const checkMenuOwnership = (paramName = 'id') => {
+    return async (req, res, next) => {
+        try {
+            // Skip for admin users
+            if (req.user.role === 'admin') {
+                return next()
+            }
+
+            const menuId = req.params[paramName]
+
+            if (!menuId) {
+                return next(badRequest('Menu ID is required'))
+            }
+
+            const Menu = require('@models/menu')
+            const menu = await Menu.findById(menuId)
+
+            if (!menu) {
+                return next(notFound('Menu not found'))
+            }
+
+            const Restaurant = require('@models/restaurant')
+            const restaurant = await Restaurant.findById(menu.restaurantId)
+
+            if (!restaurant) {
+                return next(notFound('Restaurant not found'))
+            }
+
+            const isOwner = restaurant.userId.toString() === req.user._id.toString()
+
+            if (!isOwner) {
+                logger.warn(`User ${req.user._id} attempted to access menu ${menuId} they don't own`)
+                return next(forbidden('Not authorized to access this menu'))
+            }
+
+            // Store menu and restaurant in request for use in controllers
+            req.menu = menu
+            req.restaurant = restaurant
+            next()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
+
+/**
+ * Middleware to check if a menu item belongs to the authenticated user through menu and restaurant ownership
+ * @param {string} paramName - Name of the parameter containing menu item ID (default: 'id')
+ * @returns {Function} Express middleware
+ */
+const checkMenuItemOwnership = (paramName = 'id') => {
+    return async (req, res, next) => {
+        try {
+            // Skip for admin users
+            if (req.user.role === 'admin') {
+                return next()
+            }
+
+            const menuItemId = req.params[paramName]
+
+            if (!menuItemId) {
+                return next(badRequest('Menu item ID is required'))
+            }
+
+            const MenuItem = require('@models/menuItem')
+            const menuItem = await MenuItem.findById(menuItemId)
+
+            if (!menuItem) {
+                return next(notFound('Menu item not found'))
+            }
+
+            const Menu = require('@models/menu')
+            const menu = await Menu.findById(menuItem.menuId)
+
+            if (!menu) {
+                return next(notFound('Menu not found'))
+            }
+
+            const Restaurant = require('@models/restaurant')
+            const restaurant = await Restaurant.findById(menu.restaurantId)
+
+            if (!restaurant) {
+                return next(notFound('Restaurant not found'))
+            }
+
+            const isOwner = restaurant.userId.toString() === req.user._id.toString()
+
+            if (!isOwner) {
+                logger.warn(`User ${req.user._id} attempted to access menu item ${menuItemId} they don't own`)
+                return next(forbidden('Not authorized to access this menu item'))
+            }
+
+            // Store menu item, menu and restaurant in request for use in controllers
+            req.menuItem = menuItem
+            req.menu = menu
+            req.restaurant = restaurant
+            next()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
+
+/**
+ * Middleware to check menu ownership for menu item creation (checks menuId from body)
+ * @returns {Function} Express middleware
+ */
+const checkMenuOwnershipForCreation = () => {
+    return async (req, res, next) => {
+        try {
+            // Skip for admin users
+            if (req.user.role === 'admin') {
+                return next()
+            }
+
+            const menuId = req.body.menuId
+
+            if (!menuId) {
+                return next(badRequest('Menu ID is required'))
+            }
+
+            const Menu = require('@models/menu')
+            const menu = await Menu.findById(menuId)
+
+            if (!menu) {
+                return next(notFound('Menu not found'))
+            }
+
+            const Restaurant = require('@models/restaurant')
+            const restaurant = await Restaurant.findById(menu.restaurantId)
+
+            if (!restaurant) {
+                return next(notFound('Restaurant not found'))
+            }
+
+            const isOwner = restaurant.userId.toString() === req.user._id.toString()
+
+            if (!isOwner) {
+                logger.warn(`User ${req.user._id} attempted to create menu item for menu ${menuId} they don't own`)
+                return next(forbidden('Not authorized to create menu items for this menu'))
+            }
+
+            // Store menu and restaurant in request for use in controllers
+            req.menu = menu
+            req.restaurant = restaurant
+            next()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
+
+/**
  * Optional authentication middleware - sets req.user if token is provided but doesn't fail if not
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -216,5 +373,8 @@ module.exports = {
     checkOwnership,
     addUserRestaurants,
     checkRestaurantOwnership,
+    checkMenuOwnership,
+    checkMenuItemOwnership,
+    checkMenuOwnershipForCreation,
     optionalAuth
 } 

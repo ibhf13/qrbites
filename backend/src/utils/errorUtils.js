@@ -75,6 +75,40 @@ const validation = (message = 'Validation Error', details = {}) => {
 }
 
 /**
+ * Standard error messages for consistent API responses
+ */
+const errorMessages = {
+    /**
+     * Generate standardized not found message
+     * @param {string} resource - Resource type (e.g., 'Restaurant', 'Menu', 'User')
+     * @param {string} [id] - Optional ID to include in message
+     * @returns {string} Standardized error message
+     */
+    notFound: (resource, id = null) => {
+        return id ? `${resource} with id ${id} not found` : `${resource} not found`
+    },
+
+    /**
+     * Generate standardized forbidden message for resource access
+     * @param {string} action - Action being attempted (e.g., 'access', 'update', 'delete')
+     * @param {string} resource - Resource type
+     * @returns {string} Standardized error message
+     */
+    forbidden: (action, resource) => {
+        return `Not authorized to ${action} this ${resource.toLowerCase()}`
+    },
+
+    /**
+     * Common error messages
+     */
+    common: {
+        invalidIdFormat: (resource) => `Invalid ${resource.toLowerCase()} ID format`,
+        fileUploadRequired: 'Please upload a file',
+        imageUploadRequired: 'Please upload an image'
+    }
+}
+
+/**
  * Create a 500 Internal Server Error
  * @param {string} message - Error message
  * @param {Object} details - Additional error details
@@ -145,5 +179,6 @@ module.exports = {
     serverError,
     tooManyRequests,
     formatMongooseErrors,
-    asyncHandler
+    asyncHandler,
+    errorMessages
 } 
