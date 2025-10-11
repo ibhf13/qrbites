@@ -1,30 +1,47 @@
-require('module-alias/register')
+require('module-alias')
 require('../aliases')
-require('dotenv').config()
-const mongoose = require('mongoose')
+
+const { config, connect, createIndexes } = require('@config')
+const logger = require('@commonUtils/logger')
+
 const app = require('./app')
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI)
-    console.log('MongoDB connected successfully')
-  } catch (error) {
-    console.error('MongoDB connection error:', error)
-    process.exit(1)
-  }
-}
-
-const PORT = process.env.PORT || 5000
+/**
+ * Start server (local development only)
+ */
 const startServer = async () => {
   try {
-    await connectDB()
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`)
+    logger.info('🚀 Starting QrBites API Server...')
+
+    // Connect to database
+    await connect()
+    await createIndexes()
+
+    // Start server
+    const server = app.listen(config.PORT, config.HOST, () => {
+      logger.success(`✅ Server running on ${config.HOST}:${config.PORT}`)
+      logger.info(`📊 Environment: ${config.NODE_ENV}`)
+      logger.info(`🌐 API URL: ${config.API_URL}`)
     })
+
+    // Graceful shutdown
+    const shutdown = async (signal) => {
+      logger.info(`📡 ${signal} received. Shutting down...`)
+      server.close(() => {
+        logger.success('✅ Server closed')
+        process.exit(0)
+      })
+    }
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'))
+    process.on('SIGINT', () => shutdown('SIGINT'))
   } catch (error) {
-    console.error('Server startup error:', error)
+    logger.error('❌ Server startup error:', error)
     process.exit(1)
   }
 }
 
-startServer() 
+// Only start server if not in Vercel
+if (!process.env.VERCEL) {
+  startServer()
+}

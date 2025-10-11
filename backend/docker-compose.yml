@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # QrBites API Service
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qrbites-api:latest
+    container_name: qrbites-api-local
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_URL=http://localhost:5000
+      - BASE_URL=http://localhost:5000
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+      - USE_S3=false
+      - LOG_LEVEL=debug
+    volumes:
+      # Mount uploads directory for local development
+      - ./uploads:/app/uploads
+      # Mount source code for development (comment out for production testing)
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+    networks:
+      - qrbites-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Redis (for rate limiting - optional)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: qrbites-redis-local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - qrbites-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  qrbites-network:
+    driver: bridge
+    name: qrbites-network
+
+volumes:
+  redis-data:
+    name: qrbites-redis-data

@@ -43,3 +43,4 @@ pids
 # Uploads folder
 uploads/*
 !uploads/.gitkeep 
+.vercel

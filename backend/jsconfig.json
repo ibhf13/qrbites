@@ -2,18 +2,36 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"],
-      "@models/*": ["src/models/*"],
-      "@controllers/*": ["src/controllers/*"],
-      "@routes/*": ["src/routes/*"],
-      "@middlewares/*": ["src/middlewares/*"],
-      "@utils/*": ["src/utils/*"],
-      "@config/*": ["src/config/*"],
-      "@validations/*": ["src/validations/*"],
-      "@tests/*": ["tests/*"],
-      "@seeders/*": ["tests/seeders/*"],
-      "@mocks/*": ["tests/fixtures/mocks/*"],
-      "@services/*": ["src/services/*"]
+      "@src/*": [
+        "src/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@errors/*": [
+        "src/common/errors/*"
+      ],
+      "@commonMiddlewares/*": [
+        "src/common/middlewares/*"
+      ],
+      "@commonServices/*": [
+        "src/common/services/*"
+      ],
+      "@commonUtils/*": [
+        "src/common/utils/*"
+      ],
+      "@commonValidation/*": [
+        "src/common/validation/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@tests/*": [
+        "tests/*"
+      ]
     },
     "module": "CommonJS",
     "target": "ES2020",
@@ -23,6 +41,13 @@
     "allowSyntheticDefaultImports": true,
     "checkJs": false
   },
-  "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "dist"]
-} 
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "api/index.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
