@@ -1,6 +1,4 @@
 export { default as Badge } from './Badge'
-export { default as ErrorBoundary } from './ErrorBoundary'
-export { default as ErrorDisplay } from './ErrorDisplay'
 export { default as LoadingSpinner } from './LoadingSpinner'
 export { calculatePasswordStrength, getValidationRules, default as PasswordStrengthIndicator } from './PasswordStrengthIndicator'
 export type { PasswordStrengthIndicatorProps, StrengthResult, ValidationRule } from './PasswordStrengthIndicator'

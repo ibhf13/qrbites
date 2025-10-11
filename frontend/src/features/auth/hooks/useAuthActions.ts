@@ -1,76 +1,90 @@
-import { useNotificationContext } from '@/features/notifications/contexts/NotificationContext'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useNotificationActions } from '@/features/notifications'
 import { useAuthContext } from '../contexts/AuthContext'
-import { AuthOperationResult, LoginRequest, RegisterRequest } from '../types/auth.types'
+import { AuthOperationResult, LoginRequest, RegisterRequest, ChangePasswordRequest } from '../types/auth.types'
 
 export const useLoginAction = () => {
-    const [isLoading, setIsLoading] = useState(false)
-    const { login, error, clearError } = useAuthContext()
-    const { showError } = useNotificationContext()
+    const { login, loading, error, clearError } = useAuthContext()
+    const { showSuccess, showError } = useNotificationActions()
 
-    const handleLogin = async (userData: LoginRequest): Promise<AuthOperationResult> => {
-        setIsLoading(true)
+    const handleLogin = async (userData: LoginRequest & { rememberMe?: boolean }): Promise<AuthOperationResult> => {
+        const result = await login(userData)
 
-        try {
-            await login(userData)
+        if (!result.success) {
+            showError(result.error ?? 'An unexpected error occurred')
 
-            return { success: true }
-        } catch (err: any) {
-            const errorMessage = err?.error?.message || 'An unexpected error occurred during login'
-
-            showError(errorMessage)
-
-            return { success: false, error: errorMessage }
-        } finally {
-            setIsLoading(false)
+            return { success: false, error: result.error ?? 'An unexpected error occurred' }
         }
+
+        showSuccess('Login successful!')
+
+        return { success: true }
     }
 
     return {
         login: handleLogin,
-        isLoading,
+        isLoading: loading,
         error,
         clearError
     }
 }
 
 export const useRegisterAction = () => {
-    const [isLoading, setIsLoading] = useState(false)
-    const { register, error, clearError } = useAuthContext()
-    const { showError } = useNotificationContext()
+    const { register, loading, error, clearError } = useAuthContext()
+    const { showSuccess, showError } = useNotificationActions()
 
     const handleRegister = async (userData: RegisterRequest): Promise<AuthOperationResult> => {
-        setIsLoading(true)
+        const result = await register(userData)
 
-        try {
-            await register(userData)
+        if (!result.success) {
+            showError(result.error ?? 'An unexpected error occurred')
 
-            return { success: true }
-        } catch (err: any) {
-            const errorMessage = err?.error?.message || 'An unexpected error occurred during registration'
-
-            showError(errorMessage)
-
-            return { success: false, error: errorMessage }
-        } finally {
-            setIsLoading(false)
+            return { success: false, error: result.error ?? 'An unexpected error occurred' }
         }
+
+        showSuccess('Registration successful! You can now log in.')
+
+        return { success: true }
     }
 
     return {
         register: handleRegister,
-        isLoading,
+        isLoading: loading,
         error,
         clearError
     }
 }
 
+export const useChangePasswordAction = () => {
+    const { changePassword, loading, error, clearError } = useAuthContext()
+    const { showSuccess, showError } = useNotificationActions()
+
+    const handleChangePassword = async (data: ChangePasswordRequest): Promise<AuthOperationResult> => {
+        const result = await changePassword(data)
+
+        if (!result.success) {
+            showError(result.error ?? 'An unexpected error occurred')
+
+            return { success: false, error: result.error ?? 'An unexpected error occurred' }
+        }
+
+        showSuccess('Password changed successfully!')
+
+        return { success: true }
+    }
+
+    return {
+        changePassword: handleChangePassword,
+        isLoading: loading,
+        error,
+        clearError
+    }
+}
 
 export const useLogoutAction = () => {
     const { logout } = useAuthContext()
+    const { showSuccess } = useNotificationActions()
     const navigate = useNavigate()
-    const { showSuccess } = useNotificationContext()
 
     const handleLogout = () => {
         logout()
@@ -78,7 +92,5 @@ export const useLogoutAction = () => {
         navigate('/login')
     }
 
-    return {
-        logout: handleLogout
-    }
-} 
+    return { logout: handleLogout }
+}

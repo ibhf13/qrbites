@@ -1,5 +1,5 @@
+import { ErrorDisplay } from '@/features/errorHandling/components'
 import React from 'react'
-import ErrorDisplay from '../feedback/ErrorDisplay'
 
 interface ValidationErrors {
     [fieldName: string]: string[]

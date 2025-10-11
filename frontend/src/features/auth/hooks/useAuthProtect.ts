@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../contexts/AuthContext'
 import { AuthProtectionConfig, AuthProtectionState } from '../types/auth.types'
 
-
 export const useAuthProtection = (config: AuthProtectionConfig = {}): AuthProtectionState => {
     const { protectionLevel = 'none', redirectPath = '/login' } = config
     const { isAuthenticated, user, loading } = useAuthContext()
@@ -27,6 +26,7 @@ export const useAuthProtection = (config: AuthProtectionConfig = {}): AuthProtec
                 authorized = isAuthenticated && user?.role === 'admin'
                 break
             case 'none':
+            default:
                 authorized = true
                 break
         }
@@ -34,17 +34,11 @@ export const useAuthProtection = (config: AuthProtectionConfig = {}): AuthProtec
         setIsAuthorized(authorized)
 
         if (!authorized && protectionLevel !== 'none') {
-            const currentPath = location.pathname
+            const from = location.pathname + location.search
 
-            navigate(redirectPath, {
-                replace: true,
-                state: { from: currentPath }
-            })
+            navigate(redirectPath, { replace: true, state: { from } })
         }
-    }, [isAuthenticated, user, loading, protectionLevel, navigate, redirectPath, location.pathname])
+    }, [isAuthenticated, user, loading, protectionLevel, navigate, redirectPath, location.pathname, location.search])
 
-    return {
-        isAuthorized,
-        isLoading: loading
-    }
-} 
+    return { isAuthorized, isLoading: loading }
+}

@@ -20,10 +20,6 @@ export interface BusinessHours {
     closed: boolean
 }
 
-export interface RestaurantStats {
-    menuCount: number
-}
-
 export interface Restaurant {
     _id: string
     name: string
@@ -33,12 +29,10 @@ export interface Restaurant {
     location: Location
     hours: BusinessHours[]
     logoUrl?: string
-    bannerImage?: string
     isActive: boolean
     createdAt: string
     updatedAt: string
     menus?: Menu[]
-    stats?: RestaurantStats
 }
 
 export interface RestaurantFormData {
@@ -50,15 +44,7 @@ export interface RestaurantFormData {
     hours: BusinessHours[]
     logo?: File
     logoUrl?: string
-    bannerImage?: File
     isActive?: boolean
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface ApiResponse<T = any> {
-    success: boolean
-    data?: T
-    error?: string
 }
 
 export type RestaurantFormMode = 'create' | 'edit'

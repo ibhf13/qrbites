@@ -16,8 +16,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
     const { isMobile } = useWindowSize()
 
     return (
-        <FlexBox className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 lg:p-8">
-            <Card variant="earth" className="w-full max-w-7xl mx-auto overflow-hidden" padding="none">
+        <FlexBox className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 h-full dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 lg:p-8">
+            <Card variant="earth" className="w-full h-full max-w-7xl mx-auto overflow-hidden" padding="none">
                 <FlexBox className="min-h-[600px] lg:min-h-[700px]">
                     <FlexBox
                         direction="col"
@@ -52,6 +52,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
                                     </Typography>
                                 </FlexBox>
                                 <FlexBox align="center" gap="sm" className="text-white/80">
+                                    <div className="w-2 h-2 bg-white rounded-full" />
                                     <Typography variant="body" className="text-white/90">
                                         Manage multiple restaurants
                                     </Typography>

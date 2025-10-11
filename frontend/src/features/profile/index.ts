@@ -1,7 +1,0 @@
-export * from './api/profile.api'
-export * from './components'
-export * from './hooks'
-export * from './types/profile.types'
-export * from './utils/errorHandling'
-export * from './utils/storage'
-export * from './validations/profileValidation'

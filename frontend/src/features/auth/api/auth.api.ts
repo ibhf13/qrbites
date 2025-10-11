@@ -1,39 +1,44 @@
-import { apiRequest, ApiResponse } from '@/config/api'
-import {
-    LoginRequest,
-    RegisterRequest,
-    User
-} from '../types/auth.types'
+import { apiRequest, ApiResponse } from "@/config/api"
+import { AuthTokenResponse, AuthUser, ChangePasswordRequest, LoginRequest, RegisterRequest } from "../types/auth.types"
+import { withErrorHandling } from "@/utils/apiUtils"
 
-interface ApiLoginResponse {
-    _id: string
-    email: string
-    role: string
-    token: string
-}
+export const authApi = {
+    register: (data: RegisterRequest): Promise<ApiResponse<AuthTokenResponse>> => {
+        return withErrorHandling(async () => {
+            return apiRequest<AuthTokenResponse>({
+                method: 'POST',
+                url: '/api/auth/register',
+                data
+            })
+        }, 'Failed to register user')
+    },
 
-interface ApiRegisterResponse {
-    _id: string
-    email: string
-    role: string
-    token: string
-}
+    login: (data: LoginRequest): Promise<ApiResponse<AuthTokenResponse>> => {
+        return withErrorHandling(async () => {
+            return apiRequest<AuthTokenResponse>({
+                method: 'POST',
+                url: '/api/auth/login',
+                data
+            })
+        }, 'Failed to login')
+    },
 
-export const registerUser = async (userData: RegisterRequest): Promise<ApiResponse<ApiRegisterResponse>> => {
-    return apiRequest<ApiRegisterResponse>({
-        method: 'POST',
-        url: '/api/auth/register',
-        data: userData
-    })
-}
+    getCurrentUser: (): Promise<ApiResponse<AuthUser>> => {
+        return withErrorHandling(async () => {
+            return apiRequest<AuthUser>({
+                method: 'GET',
+                url: '/api/auth/me'
+            })
+        }, 'Failed to fetch current user')
+    },
 
-export const loginUser = async (userData: LoginRequest): Promise<ApiResponse<ApiLoginResponse>> => {
-    return apiRequest<ApiLoginResponse>({
-        method: 'POST',
-        url: '/api/auth/login',
-        data: {
-            email: userData.email,
-            password: userData.password
-        }
-    })
+    changePassword: (data: ChangePasswordRequest): Promise<ApiResponse<Record<string, unknown>>> => {
+        return withErrorHandling(async () => {
+            return apiRequest<Record<string, unknown>>({
+                method: 'PUT',
+                url: '/api/auth/password',
+                data
+            })
+        }, 'Failed to change password')
+    }
 }

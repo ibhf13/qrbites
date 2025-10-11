@@ -10,7 +10,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
 }
 
-
 export const useAuthContext = (): AuthContextType => {
     const context = useContext(AuthContext)
 

@@ -129,7 +129,7 @@ export const useMenuForm = ({
                 closeForm()
                 onSuccess?.()
             } else if (mode === 'edit' && menuId) {
-                const { restaurantId: _, image, ...updateData } = formData
+                const { image, ...updateData } = formData
                 const finalUpdateData = image ? { ...updateData, image } : updateData
 
                 console.log('🚀 Updating menu with data:', finalUpdateData)
@@ -143,6 +143,7 @@ export const useMenuForm = ({
             } else {
                 throw new Error('Menu ID is required for edit mode')
             }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error(`❌ Menu ${mode} error:`, error)
             console.error('Error details:', {

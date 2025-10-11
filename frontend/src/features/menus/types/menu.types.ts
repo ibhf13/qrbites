@@ -1,11 +1,14 @@
+
 export interface Menu {
     _id: string
     name: string
     description?: string
     imageUrl?: string
-    restaurantId: { id: string; name: string }
+    imageUrls?: string[]
+    restaurantId: string
     isActive: boolean
     qrCodeUrl?: string
+    categories?: string[]
     createdAt: string
     updatedAt: string
 }
@@ -14,13 +17,13 @@ export interface MenuFormData {
     name: string
     description?: string
     image?: File
+    images?: File[]
     restaurantId: string
     isActive: boolean
+    categories?: string[]
 }
 
-export interface MenuUpdateData extends Partial<Omit<MenuFormData, 'restaurantId'>> {
-    imageUrl?: string
-}
+
 
 export interface MenuFilters {
     search?: string

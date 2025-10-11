@@ -1,14 +1,18 @@
 import React from 'react'
 import { Box, FlexBox, Typography } from '@/components/common'
 import { QrCodeIcon } from '@heroicons/react/24/outline'
-import { MenuComponentProps } from '../types/viewer.types'
+import { PublicMenu } from '../types/viewer.types'
 import { VIEWER_CONFIG } from '../constants/viewer.constants'
 import { useViewer } from '../contexts'
 
-const SocialLinks: React.FC<MenuComponentProps> = ({ menuData }) => {
-  const { restaurant } = menuData.menu
+type MenuFooterProps = {
+  menuData: PublicMenu
+}
 
-  if (!restaurant.website && !restaurant.socialMedia) {
+const SocialLinks: React.FC<MenuFooterProps> = ({ menuData }) => {
+  const { restaurant } = menuData
+
+  if (!restaurant?.website && !restaurant?.socialMedia) {
     return null
   }
 
@@ -57,11 +61,11 @@ const SocialLinks: React.FC<MenuComponentProps> = ({ menuData }) => {
   )
 }
 
-const MenuFooter: React.FC<MenuComponentProps> = ({ menuData }) => {
+const MenuFooter: React.FC<MenuFooterProps> = ({ menuData }) => {
   const { scanTime } = useViewer()
 
   return (
-    <Box className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 mt-8">
+    <Box className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 mt-0">
       <Box className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-2">
         <FlexBox direction="col" gap="md" className="sm:flex-row sm:items-center sm:justify-between space-y-2.5 sm:space-y-0">
           <FlexBox direction="col" gap="xs" className="sm:flex-row sm:items-center sm:gap-md space-y-2.5 sm:space-y-0">
@@ -70,7 +74,6 @@ const MenuFooter: React.FC<MenuComponentProps> = ({ menuData }) => {
               <span className="font-semibold text-primary-600 dark:text-primary-400">
                 QrBites
               </span>
-              {' '}Digital Menu Solutions
             </Typography>
             <Typography variant="caption" className="text-xs text-slate-500 dark:text-slate-500">
               Transforming dining experiences

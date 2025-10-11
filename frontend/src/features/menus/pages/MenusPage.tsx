@@ -1,27 +1,20 @@
 import { useParams } from 'react-router-dom'
-import { PageContainer, Paper, Typography } from '@/components/common/layout'
-import { ErrorDisplay } from '@/components/common/feedback'
+import { PageContainer, Paper, Typography, IconButton } from '@/components/common'
 import { QRCodeViewer } from '@/features/qr/components/QRCodeViewer'
 import { useMenuList, useMenuForm, useMenuActions } from '../hooks'
 import { MenuListContainer, MenuFormDialog } from '../components'
-import { IconButton } from '@/components/common'
 import { PlusIcon } from '@heroicons/react/24/outline'
+import { ErrorDisplay } from '@/features/errorHandling/components'
 
 const MenusPage = () => {
     const { restaurantId } = useParams<{ restaurantId: string }>()
 
-    const { menus, isLoading, refreshList } = useMenuList({
-        restaurantId: restaurantId || ''
-    })
+    const { menus, isLoading, refreshList } = useMenuList({ restaurantId: restaurantId ?? '' })
+    const menuActions = useMenuActions({ menus, refreshList })
 
     const menuForm = useMenuForm({
         restaurantId: restaurantId || '',
         onSuccess: refreshList
-    })
-
-    const menuActions = useMenuActions({
-        menus,
-        refreshList
     })
 
     if (!restaurantId) {

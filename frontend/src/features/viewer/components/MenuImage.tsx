@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
 import { Box, Card, FlexBox, LoadingSpinner, Typography } from '@/components/common'
 import { QrCodeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline'
-import { MenuComponentProps } from '../types/viewer.types'
+import { PublicMenu } from '../types/viewer.types'
 import { VIEWER_CONFIG, FILE_TYPES } from '../constants/viewer.constants'
 import { FullscreenImageModal } from '.'
 
-const MenuImagePlaceholder: React.FC<MenuComponentProps> = ({ menuData }) => (
+type MenuImageProps = {
+  readonly menuData: PublicMenu
+}
+
+const MenuImagePlaceholder: React.FC<MenuImageProps> = ({ menuData }) => (
   <Box className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <Card
       variant="outlined"
@@ -29,22 +33,22 @@ const MenuImagePlaceholder: React.FC<MenuComponentProps> = ({ menuData }) => (
               Please contact the restaurant directly for menu information.
             </Typography>
           </Box>
-          {(menuData.menu.restaurant.phone || menuData.menu.restaurant.address) && (
+          {(menuData.restaurant.phone || menuData.restaurant.address) && (
             <FlexBox className="gap-2 bg-gray-50 dark:bg-gray-800 rounded-md px-2 py-1.5 mt-auto w-full">
               <Box className="flex-1 min-w-0 space-y-2.5">
-                {menuData.menu.restaurant.phone && (
+                {menuData.restaurant.phone && (
                   <FlexBox align="center" gap="sm">
                     <PhoneIcon className={`${VIEWER_CONFIG.ICON_SIZE_SM} text-slate-500 dark:text-slate-400 flex-shrink-0`} />
                     <Typography variant="caption" className="text-slate-600 dark:text-slate-300 text-xs">
-                      {menuData.menu.restaurant.phone}
+                      {menuData.restaurant.phone}
                     </Typography>
                   </FlexBox>
                 )}
-                {menuData.menu.restaurant.address && (
+                {menuData.restaurant.address && (
                   <FlexBox align="center" gap="sm">
                     <MapPinIcon className={`${VIEWER_CONFIG.ICON_SIZE_SM} text-slate-500 dark:text-slate-400 flex-shrink-0`} />
                     <Typography variant="caption" className="text-slate-600 dark:text-slate-300 text-xs line-clamp-2">
-                      {menuData.menu.restaurant.address}
+                      {menuData.restaurant.address}
                     </Typography>
                   </FlexBox>
                 )}
@@ -77,7 +81,7 @@ const PdfViewer: React.FC<{ imageUrl: string; menuName: string }> = ({ imageUrl,
   )
 }
 
-const ImageViewer: React.FC<{ imageUrl: string; menuName: string; menuData: MenuComponentProps['menuData'] }> = ({ imageUrl, menuName, menuData }) => {
+const ImageViewer: React.FC<{ imageUrl: string; menuName: string; menuData: PublicMenu }> = ({ imageUrl, menuName, menuData }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
@@ -130,24 +134,26 @@ const ImageViewer: React.FC<{ imageUrl: string; menuName: string; menuData: Menu
   )
 }
 
-const MenuImage: React.FC<MenuComponentProps> = ({ menuData }) => {
-  if (!menuData.menu.imageUrl) {
+const MenuImage: React.FC<MenuImageProps> = ({ menuData }) => {
+  if (!menuData.imageUrl) {
     return <MenuImagePlaceholder menuData={menuData} />
   }
 
-  const isPdf = menuData.menu.imageUrl.toLowerCase().includes(FILE_TYPES.PDF_EXTENSION)
+  const isPdf = menuData.imageUrl.toLowerCase().includes(FILE_TYPES.PDF_EXTENSION)
+
+  const menuName = menuData.name || 'Menu'
 
   return (
-    <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <Box className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 py-6">
       <Card
         variant="elevated"
         className="overflow-hidden bg-white dark:bg-neutral-900 shadow-xl dark:shadow-2xl"
         contentPadding="none"
       >
         {isPdf ? (
-          <PdfViewer imageUrl={menuData.menu.imageUrl} menuName={menuData.menu.name} />
+          <PdfViewer imageUrl={menuData.imageUrl} menuName={menuName} />
         ) : (
-          <ImageViewer imageUrl={menuData.menu.imageUrl} menuName={menuData.menu.name} menuData={menuData} />
+          <ImageViewer imageUrl={menuData.imageUrl} menuName={menuName} menuData={menuData} />
         )}
       </Card>
     </Box>

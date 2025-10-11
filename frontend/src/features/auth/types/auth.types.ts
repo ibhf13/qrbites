@@ -1,69 +1,81 @@
 import { ReactNode } from 'react'
 
-export interface User {
+export interface DBProps {
+    isActive?: boolean
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface AuthUser extends DBProps {
     _id: string
     email: string
+    name: string
     role: string
+    displayName?: string
 }
 
 export interface LoginRequest {
     email: string
     password: string
-    rememberMe?: boolean
 }
 
 export interface RegisterRequest {
     email: string
     password: string
+    name: string
 }
 
-export type LoginFormData = LoginRequest
-export type RegisterFormData = RegisterRequest
+export interface ChangePasswordRequest {
+    currentPassword: string
+    newPassword: string
+    confirmPassword: string
+}
 
-export interface ApiLoginResponseData {
+export interface AuthTokenResponse {
     _id: string
     email: string
+    name: string
+    displayName: string
     role: string
     token: string
 }
 
-export interface ApiRegisterResponseData {
-    _id: string
-    email: string
-    role: string
+export interface StoredAuthData {
     token: string
+    user: AuthUser
 }
 
-export interface LoginResponse {
-    success: boolean
-    data: ApiLoginResponseData
+export type StorageType = 'localStorage' | 'sessionStorage'
+
+export interface LoginFormData {
+    email: string
+    password: string
+    rememberMe?: boolean
 }
 
-export interface RegisterResponse {
-    success: boolean
-    data: ApiRegisterResponseData
+export interface RegisterFormData {
+    email: string
+    password: string
+    name: string
 }
 
-export interface ErrorResponse {
-    success: false
-    error: {
-        message: string
-        code?: string
-        stack?: string
-    }
+export interface ChangePasswordFormData {
+    currentPassword: string
+    newPassword: string
+    confirmPassword: string
 }
-
-export type AuthResponse = RegisterResponse | LoginResponse | ErrorResponse
 
 export interface AuthContextType {
     isAuthenticated: boolean
-    user: User | null
+    user: AuthUser | null
     loading: boolean
     error: string | null
-    login: (data: LoginRequest) => Promise<void>
-    register: (data: RegisterRequest) => Promise<void>
+    login: (data: LoginRequest & { rememberMe?: boolean }) => Promise<AuthOperationResult>
+    register: (data: RegisterRequest) => Promise<AuthOperationResult>
+    changePassword: (data: ChangePasswordRequest) => Promise<AuthOperationResult>
     logout: () => void
     clearError: () => void
+    refreshUser: () => Promise<void>
 }
 
 export interface AuthProviderProps {
@@ -87,9 +99,20 @@ export interface AuthProtectionState {
     isLoading: boolean
 }
 
-export interface StoredAuthData {
-    token: string
-    user: User
+export interface AuthError extends Error {
+    code?: 'INVALID_CREDENTIALS' | 'RATE_LIMITED' | 'NETWORK_ERROR' | 'TOKEN_EXPIRED' | 'VALIDATION_ERROR'
+    details?: Record<string, string>
+    status?: number
 }
 
-export type StorageType = 'localStorage' | 'sessionStorage' 
+export interface JWTPayload {
+    exp: number
+    iat: number
+    id: string
+    email: string
+}
+
+export interface ProfileUpdateResult {
+    success: boolean
+    error?: string
+}

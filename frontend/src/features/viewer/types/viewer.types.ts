@@ -21,18 +21,14 @@ export interface MenuCategory {
 
 export interface PublicMenu {
   id: string
-  name: string
+  name?: string
   description?: string
   imageUrl?: string
   restaurant: Restaurant
   isActive?: boolean
   viewCount?: number
   lastUpdated?: string
-  categories?: MenuCategory[]
-}
-
-export interface PublicMenuData {
-  menu: PublicMenu
+  categories?: string[]
 }
 
 export interface MenuShareData {
@@ -44,8 +40,4 @@ export interface MenuShareData {
 export interface MenuErrorProps {
   onRetry?: () => void
   error?: Error
-}
-
-export interface MenuComponentProps {
-  menuData: PublicMenuData
 }

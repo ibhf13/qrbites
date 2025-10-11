@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useNotificationContext } from '@/features/notifications'
 import { downloadImageFromUrl, getMenuDownloadFilename, checkImageAccess } from '../utils'
-import { PublicMenuData } from '../types/viewer.types'
+import { PublicMenu } from '../types/viewer.types'
 
 interface UseMenuDownloadReturn {
     downloadMenuImage: () => Promise<void>
@@ -9,14 +9,14 @@ interface UseMenuDownloadReturn {
     canDownload: boolean
 }
 
-export const useMenuDownload = (menuData?: PublicMenuData): UseMenuDownloadReturn => {
+export const useMenuDownload = (menuData?: PublicMenu): UseMenuDownloadReturn => {
     const [isDownloading, setIsDownloading] = useState(false)
     const { showSuccess, showError } = useNotificationContext()
 
-    const canDownload = Boolean(menuData?.menu.imageUrl)
+    const canDownload = Boolean(menuData?.imageUrl)
 
     const downloadMenuImage = useCallback(async () => {
-        if (!menuData?.menu.imageUrl) {
+        if (!menuData?.imageUrl) {
             showError('Menu image is not available for download')
 
             return
@@ -25,19 +25,19 @@ export const useMenuDownload = (menuData?: PublicMenuData): UseMenuDownloadRetur
         setIsDownloading(true)
 
         try {
-            const isAccessible = await checkImageAccess(menuData.menu.imageUrl)
+            const isAccessible = await checkImageAccess(menuData.imageUrl)
 
             if (!isAccessible) {
                 throw new Error('Image is not accessible')
             }
 
             const filename = getMenuDownloadFilename(
-                menuData.menu.name,
-                menuData.menu.restaurant.name,
-                menuData.menu.imageUrl
+                menuData.name || '',
+                menuData.restaurant.name,
+                menuData.imageUrl
             )
 
-            await downloadImageFromUrl(menuData.menu.imageUrl, filename)
+            await downloadImageFromUrl(menuData.imageUrl, filename)
 
             showSuccess('Menu downloaded successfully!')
         } catch (error) {

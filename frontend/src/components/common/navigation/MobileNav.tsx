@@ -1,7 +1,7 @@
 import { IconButton } from '../buttons'
 import { Badge } from '../feedback'
 import { FlexBox, Box, Typography } from '../layout'
-import { useAuthContext } from '@/features/auth'
+import { useAuthContext } from '@/features/auth/contexts/AuthContext'
 import {
     Bars3Icon,
     BuildingStorefrontIcon,

@@ -1,44 +1,54 @@
-import { StorageType, StoredAuthData, User } from '../types/auth.types'
+import { AuthUser, StorageType, StoredAuthData, JWTPayload } from "../types/auth.types"
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const USER_DATA_KEY = 'user'
 
+export const storeAuthData = (token: string, user: AuthUser, storageType: StorageType): void => {
+    const storage = storageType === 'localStorage' ? localStorage : sessionStorage
 
-export const storeAuthData = (token: string, user: User, storageType: StorageType): void => {
-    try {
-        const storage = storageType === 'localStorage' ? localStorage : sessionStorage
+    if (storageType === 'localStorage') {
+        sessionStorage.removeItem(AUTH_TOKEN_KEY)
+        sessionStorage.removeItem(USER_DATA_KEY)
+    } else {
+        localStorage.removeItem(AUTH_TOKEN_KEY)
+        localStorage.removeItem(USER_DATA_KEY)
+    }
 
-        storage.setItem(AUTH_TOKEN_KEY, token)
-        storage.setItem(USER_DATA_KEY, JSON.stringify(user))
+    storage.setItem(AUTH_TOKEN_KEY, token)
+    storage.setItem(USER_DATA_KEY, JSON.stringify(user))
 
-        console.log(`📝 Auth data stored in ${storageType}`)
-    } catch (error) {
-        console.error('Failed to store auth data:', error)
-        throw new Error('Failed to store authentication data')
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`🔐 Auth data stored in ${storageType}`)
     }
 }
 
-
 export const getAuthData = (): StoredAuthData | null => {
+    let token = localStorage.getItem(AUTH_TOKEN_KEY)
+    let userData = localStorage.getItem(USER_DATA_KEY)
+
+    if (!token || !userData) {
+        token = sessionStorage.getItem(AUTH_TOKEN_KEY)
+        userData = sessionStorage.getItem(USER_DATA_KEY)
+    }
+
+    if (!token) return null
+    if (!userData || userData === 'undefined' || userData.trim() === '') {
+        cleanupCorruptedAuthData()
+
+        return null
+    }
+
     try {
-        const token = localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY)
-        const userData = localStorage.getItem(USER_DATA_KEY) || sessionStorage.getItem(USER_DATA_KEY)
+        const user = JSON.parse(userData) as AuthUser
 
-        if (!token) {
-            return null
-        }
-
-        if (!userData || userData === 'undefined' || userData.trim() === '') {
-            console.warn('Token found but no valid user data - cleaning up corrupted auth state')
+        if (!user || typeof user !== 'object') {
             cleanupCorruptedAuthData()
 
             return null
         }
 
-        const user = JSON.parse(userData)
-
-        if (!user || typeof user !== 'object') {
-            console.warn('Invalid user data format - cleaning up corrupted auth state')
+        if (!user._id || !user.email) {
+            console.warn('⚠️ Missing essential user fields, clearing auth data')
             cleanupCorruptedAuthData()
 
             return null
@@ -46,70 +56,94 @@ export const getAuthData = (): StoredAuthData | null => {
 
         return { token, user }
     } catch (error) {
-        console.error('Failed to retrieve auth data:', error)
+        console.error('Error parsing stored user data:', error)
         cleanupCorruptedAuthData()
 
         return null
     }
 }
 
-
 export const getAuthToken = (): string | null => {
     return localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY)
 }
 
+export const getUserData = (): AuthUser | null => {
+    const userData = localStorage.getItem(USER_DATA_KEY) || sessionStorage.getItem(USER_DATA_KEY)
 
-export const getUserData = (): User | null => {
+    if (!userData || userData === 'undefined' || userData.trim() === '') {
+        return null
+    }
+
     try {
-        const userData = localStorage.getItem(USER_DATA_KEY) || sessionStorage.getItem(USER_DATA_KEY)
-
-        if (!userData || userData === 'undefined' || userData.trim() === '') {
-            return null
-        }
-
-        const user = JSON.parse(userData)
+        const user = JSON.parse(userData) as AuthUser
 
         return user && typeof user === 'object' ? user : null
-    } catch (error) {
-        console.error('Failed to parse user data:', error)
-
+    } catch {
         return null
     }
 }
 
-
 export const clearAuthData = (): void => {
-    try {
-        localStorage.removeItem(AUTH_TOKEN_KEY)
-        localStorage.removeItem(USER_DATA_KEY)
-        sessionStorage.removeItem(AUTH_TOKEN_KEY)
-        sessionStorage.removeItem(USER_DATA_KEY)
+    localStorage.removeItem(AUTH_TOKEN_KEY)
+    localStorage.removeItem(USER_DATA_KEY)
+    sessionStorage.removeItem(AUTH_TOKEN_KEY)
+    sessionStorage.removeItem(USER_DATA_KEY)
 
+    if (process.env.NODE_ENV === 'development') {
         console.log('🧹 Auth data cleared from storage')
-    } catch (error) {
-        console.error('Failed to clear auth data:', error)
     }
 }
-
 
 export const isUserAuthenticated = (): boolean => {
-    return !!getAuthToken()
+    const token = getAuthToken()
+
+    if (!token) return false
+
+    return !isTokenExpired(token)
 }
 
-
 export const cleanupCorruptedAuthData = (): void => {
-    try {
-        const token = getAuthToken()
+    const token = getAuthToken()
 
-        if (token) {
-            localStorage.removeItem(USER_DATA_KEY)
-            sessionStorage.removeItem(USER_DATA_KEY)
-            console.log('🧹 Cleaned up corrupted user data, kept token')
-        } else {
-            clearAuthData()
-        }
-    } catch (error) {
-        console.error('Failed to cleanup corrupted auth data:', error)
+    if (token) {
+        localStorage.removeItem(USER_DATA_KEY)
+        sessionStorage.removeItem(USER_DATA_KEY)
+    } else {
         clearAuthData()
     }
-} 
+}
+
+export const isTokenExpired = (token: string): boolean => {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1])) as JWTPayload
+
+        return Date.now() >= (payload.exp * 1000)
+    } catch {
+        return true
+    }
+}
+
+export const getCurrentStorageType = (): StorageType | null => {
+    const hasLocalStorage = !!localStorage.getItem(AUTH_TOKEN_KEY)
+    const hasSessionStorage = !!sessionStorage.getItem(AUTH_TOKEN_KEY)
+
+    if (hasLocalStorage) return 'localStorage'
+    if (hasSessionStorage) return 'sessionStorage'
+
+    return null
+}
+
+export const isValidTokenFormat = (token: string): boolean => {
+    if (!token || typeof token !== 'string') return false
+    const parts = token.split('.')
+
+    if (parts.length !== 3) return false
+
+    try {
+        const payload = JSON.parse(atob(parts[1])) as JWTPayload
+
+        return !!(payload.exp && payload.id)
+    } catch {
+        return false
+    }
+}

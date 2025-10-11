@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
     IconButton,
-    ErrorDisplay,
     Pagination,
     PageContainer,
     Paper,
@@ -16,6 +15,7 @@ import { Restaurant } from '../types/restaurant.types'
 import { RestaurantCard, RestaurantFormDialog } from '../components'
 import RestaurantListSkeleton from '../components/RestaurantListSkeleton'
 import { PlusIcon } from '@heroicons/react/24/outline'
+import { ErrorDisplay } from '@/features/errorHandling/components'
 
 const RestaurantsPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)

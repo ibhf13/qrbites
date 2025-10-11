@@ -25,8 +25,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     accept = {
         'image/jpeg': [],
         'image/png': [],
-        'image/gif': [],
-        'image/webp': []
+        'image/jpg': []
     },
     maxSize = 2 * 1024 * 1024,
     multiple = false,

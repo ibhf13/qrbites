@@ -4,6 +4,11 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from 'typescript-eslint'
 import tailwindcss from 'eslint-plugin-tailwindcss'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export default [
     {
@@ -25,7 +30,7 @@ export default [
                     jsx: true,
                 },
                 project: './tsconfig.json',
-                tsconfigRootDir: '.',
+                tsconfigRootDir: __dirname,
             },
         },
         settings: {

@@ -32,7 +32,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
     onView,
     loading = false
 }) => {
-    const { _id, name, description, imageUrl, qrCodeUrl, updatedAt, isActive } = menu
+    const { _id, name, description, imageUrl, qrCodeUrl, updatedAt, isActive, categories } = menu
 
     const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation()
@@ -138,6 +138,24 @@ export const MenuCard: React.FC<MenuCardProps> = ({
                 >
                     {description || 'No description provided'}
                 </Typography>
+
+                {categories && categories.length > 0 && (
+                    <FlexBox className="gap-1 flex-wrap">
+                        {categories.slice(0, 3).map((category, index) => (
+                            <span
+                                key={index}
+                                className="px-2 py-0.5 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs rounded-full"
+                            >
+                                {category}
+                            </span>
+                        ))}
+                        {categories.length > 3 && (
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                                +{categories.length - 3} more
+                            </span>
+                        )}
+                    </FlexBox>
+                )}
 
                 <FlexBox className="gap-2 bg-gray-50 dark:bg-gray-800 rounded-md px-2 py-1.5 mt-auto">
                     <CalendarIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0" />

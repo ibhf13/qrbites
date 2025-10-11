@@ -4,7 +4,7 @@ import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowDown
 import { Box, IconButton, LoadingSpinner, Typography } from '@/components/common'
 import { cn } from '@/utils/cn'
 import { useImageModal, useMenuDownload } from '../hooks'
-import { PublicMenuData } from '../types/viewer.types'
+import { PublicMenu } from '../types/viewer.types'
 
 interface FullscreenImageModalProps {
     isOpen: boolean
@@ -12,7 +12,7 @@ interface FullscreenImageModalProps {
     imageUrl: string
     alt: string
     title?: string
-    menuData?: PublicMenuData
+    menuData?: PublicMenu
 }
 
 const FullscreenImageModal: React.FC<FullscreenImageModalProps> = ({

@@ -10,25 +10,11 @@ import {
 import { RestaurantFormData } from '../types/restaurant.types'
 import { useNotificationContext } from '@/features/notifications/contexts/NotificationContext'
 
-
-interface GetRestaurantsParams {
-    page?: number
-    limit?: number
-    search?: string
-    filters?: {
-        city?: string
-        state?: string
-        isActive?: boolean
-    }
-    sortBy?: string
-    sortOrder?: string
-}
-
-export const useRestaurants = (params: GetRestaurantsParams = {}) => {
+export const useRestaurants = () => {
 
     return useQuery({
-        queryKey: ['restaurants', JSON.stringify(params)],
-        queryFn: () => getRestaurants(params),
+        queryKey: ['restaurants'],
+        queryFn: () => getRestaurants(),
         select: (data) => ({
             restaurants: data.success ? data.data : [],
             total: data.success ? data.total : 0,

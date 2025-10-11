@@ -12,4 +12,4 @@ export const loginSchema = z.object({
         .boolean()
         .optional()
         .default(false)
-}) 
+})

@@ -9,6 +9,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --report-unused-disable-directives --max-warnings 0 --fix",
     "format": "prettier --write .",
+    "clean": "rm -rf dist coverage  node_modules .vercel && rm package-lock.json",
     "preview": "vite preview",
     "type-check": "tsc --noEmit"
   },

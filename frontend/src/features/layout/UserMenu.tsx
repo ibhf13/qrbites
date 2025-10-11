@@ -1,5 +1,5 @@
 import { DropdownMenu, type DropdownMenuItem } from '@/components/common/navigation'
-import { useAuthContext, useLogoutAction } from '@/features/auth'
+import { useLogoutAction, useAuthContext, } from '@/features/auth'
 import {
     ArrowRightOnRectangleIcon,
     UserIcon

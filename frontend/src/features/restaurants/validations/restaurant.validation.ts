@@ -3,15 +3,15 @@ import { VALIDATION_MESSAGES } from '../constants/restaurant.const'
 
 export const contactSchema = z.object({
     phone: z.string().regex(/^\+[1-9]\d{7,14}$/, VALIDATION_MESSAGES.INVALID_PHONE),
-    email: z.string().email(VALIDATION_MESSAGES.INVALID_EMAIL).optional(),
-    website: z.string().regex(/^(http|https):\/\/[^ "]+$/, VALIDATION_MESSAGES.INVALID_WEBSITE).optional(),
+    email: z.string().regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, VALIDATION_MESSAGES.INVALID_EMAIL).optional(),
+    website: z.string().url(VALIDATION_MESSAGES.INVALID_WEBSITE).optional(),
 })
 
 export const locationSchema = z.object({
-    street: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
-    houseNumber: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
-    city: z.string().min(1, VALIDATION_MESSAGES.REQUIRED),
-    zipCode: z.string().regex(/^[0-9]{5}$/, VALIDATION_MESSAGES.INVALID_ZIP),
+    street: z.string().min(1, VALIDATION_MESSAGES.REQUIRED).max(100, VALIDATION_MESSAGES.MAX_LENGTH(100)),
+    houseNumber: z.string().min(1, VALIDATION_MESSAGES.REQUIRED).max(5, VALIDATION_MESSAGES.MAX_LENGTH(5)),
+    city: z.string().min(1, VALIDATION_MESSAGES.REQUIRED).max(50, VALIDATION_MESSAGES.MAX_LENGTH(50)),
+    zipCode: z.string().regex(/^\d{5}$/, VALIDATION_MESSAGES.INVALID_ZIP),
 })
 
 export const businessHoursSchema = z.object({
@@ -57,8 +57,8 @@ export const restaurantFormSchema = z.object({
 export const validateLogoFile = (file: File | null) => {
     if (!file) return true
 
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        throw new Error('Invalid file type. Please upload a JPEG, PNG, or WebP image.')
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+        throw new Error('Invalid file type. Please upload a JPEG, PNG, or JPG image.')
     }
 
     if (file.size > 5 * 1024 * 1024) {

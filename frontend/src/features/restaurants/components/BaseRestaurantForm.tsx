@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FormProvider } from 'react-hook-form'
-import { Button, ErrorDisplay, ErrorBoundary, FlexBox, ConfirmationDialog } from '@/components/common'
+import { Button, FlexBox, ConfirmationDialog } from '@/components/common'
+import { ErrorDisplay, ErrorBoundary } from '@/features/errorHandling/components'
 import { RESTAURANT_FORM_STEPS } from '../constants/restaurant.const'
 import { useRestaurantForm } from '../hooks/useRestaurantForm'
 import { RestaurantFormData, RestaurantFormMode } from '../types/restaurant.types'

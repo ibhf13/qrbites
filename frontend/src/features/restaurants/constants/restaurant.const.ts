@@ -21,7 +21,9 @@ export const FORM_DEFAULT_VALUES = {
     },
     hours: Array(7).fill(null).map((_, index) => ({
         day: index,
-        closed: true,
+        open: '09:00',
+        close: '18:00',
+        closed: false,
     })),
     isActive: true,
 } as const
@@ -39,5 +41,5 @@ export const VALIDATION_MESSAGES = {
 
 export const FILE_CONSTRAINTS = {
     MAX_SIZE: 5 * 1024 * 1024,
-    ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
+    ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/jpg'],
 } as const 

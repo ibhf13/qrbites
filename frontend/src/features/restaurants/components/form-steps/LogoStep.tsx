@@ -27,8 +27,7 @@ const LogoStep: React.FC<LogoStepProps> = ({ onLogoChange, existingLogoUrl }) =>
                     accept={{
                         'image/jpeg': [],
                         'image/png': [],
-                        'image/gif': [],
-                        'image/webp': []
+                        'image/jpg': []
                     }}
                     maxSize={2 * 1024 * 1024}
                     multiple={false}

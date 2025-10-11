@@ -4,11 +4,11 @@ import RestaurantCreationForm from '@/features/restaurants/components/Restaurant
 import { lazy } from 'react'
 import { Outlet, RouteObject } from 'react-router-dom'
 
-const HomePage = lazy(() => import('@/features/home/pages/HomePage'))
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage'))
+const ProfilePage = lazy(() => import('@/features/auth/pages/ProfilePage'))
+const HomePage = lazy(() => import('@/features/home/pages/HomePage'))
 const NotFoundPage = lazy(() => import('@/features/layout/NotFoundPage'))
-const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const RestaurantsPage = lazy(() => import('@/features/restaurants/pages/RestaurantsPage'))
 const MenusPage = lazy(() => import('@/features/menus/pages/MenusPage'))
 const PublicMenuPage = lazy(() => import('@/features/viewer/pages/PublicMenuPage'))

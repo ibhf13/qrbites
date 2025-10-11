@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { FlexBox } from '@/components/common'
 import { MenuLoading, MenuError, MenuImage, MenuFooter } from '../components'
 import { usePublicMenu } from '../hooks'
@@ -7,13 +7,8 @@ import { ViewerProvider } from '../contexts'
 
 const PublicMenuPage: React.FC = () => {
   const { menuId } = useParams<{ menuId: string }>()
-  const [searchParams] = useSearchParams()
-  const restaurantId = searchParams.get('restaurant')
 
-  const { data: menuData, isLoading, error, refetch } = usePublicMenu({
-    menuId,
-    restaurantId: restaurantId || undefined
-  })
+  const { data: menuData, isLoading, error, refetch } = usePublicMenu(menuId ?? "")
 
   if (isLoading) {
     return <MenuLoading />

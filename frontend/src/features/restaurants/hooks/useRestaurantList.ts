@@ -30,13 +30,7 @@ export const useRestaurantList = (options: UseRestaurantListOptions = {}): UseRe
     const [currentPage, setCurrentPage] = useState(options.initialPage || 1)
     const [limit] = useState(options.initialLimit || 10)
 
-    const queryParams = {
-        page: currentPage,
-        limit,
-        filters: options.filters,
-    }
-    
-    const { data, isLoading, error, refetch } = useRestaurants(queryParams)
+    const { data, isLoading, error, refetch } = useRestaurants()
 
     const deleteMutation = useDeleteRestaurant()
 

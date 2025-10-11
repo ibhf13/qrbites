@@ -1,34 +1,23 @@
 import { apiRequest, ApiResponse } from '@/config/api'
 import { Restaurant, RestaurantFormData } from '../types/restaurant.types'
+import { withErrorHandling } from '@/utils/apiUtils'
 
-interface GetRestaurantsParams {
-    page?: number
-    limit?: number
-}
-
-interface DeleteRestaurantResponse {
-    message: string
-}
-
-export const getRestaurants = async (params: GetRestaurantsParams = {}): Promise<ApiResponse<Restaurant[]>> => {
-
-    const queryParams = new URLSearchParams({
-        page: (params.page || 1).toString(),
-        limit: (params.limit || 10).toString(),
-    })
-
-    return apiRequest<Restaurant[]>({
-        method: 'GET',
-        url: `/api/restaurants?${queryParams.toString()}`
-
-    })
+export const getRestaurants = async (): Promise<ApiResponse<Restaurant[]>> => {
+    return withErrorHandling(async () => {
+        return apiRequest<Restaurant[]>({
+            method: 'GET',
+            url: '/api/restaurants'
+        })
+    }, 'Failed to fetch restaurants')
 }
 
 export const getRestaurant = async (id: string): Promise<ApiResponse<Restaurant>> => {
-    return apiRequest<Restaurant>({
-        method: 'GET',
-        url: `/api/restaurants/${id}`
-    })
+    return withErrorHandling(async () => {
+        return apiRequest<Restaurant>({
+            method: 'GET',
+            url: `/api/restaurants/${id}`
+        })
+    }, `Failed to fetch restaurant with id: ${id}`)
 }
 
 const processFormDataForSubmission = (data: RestaurantFormData): FormData => {
@@ -78,49 +67,57 @@ const processFormDataForSubmission = (data: RestaurantFormData): FormData => {
 }
 
 export const createRestaurant = async (data: RestaurantFormData): Promise<ApiResponse<Restaurant>> => {
-    const formData = processFormDataForSubmission(data)
+    return withErrorHandling(async () => {
+        const formData = processFormDataForSubmission(data)
 
-    return apiRequest<Restaurant>({
-        method: 'POST',
-        url: '/api/restaurants',
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+        return apiRequest<Restaurant>({
+            method: 'POST',
+            url: '/api/restaurants',
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    }, 'Failed to create restaurant')
 }
 
 export const updateRestaurant = async (id: string, data: RestaurantFormData): Promise<ApiResponse<Restaurant>> => {
-    const formData = processFormDataForSubmission(data)
+    return withErrorHandling(async () => {
+        const formData = processFormDataForSubmission(data)
 
-    return apiRequest<Restaurant>({
-        method: 'PUT',
-        url: `/api/restaurants/${id}`,
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+        return apiRequest<Restaurant>({
+            method: 'PUT',
+            url: `/api/restaurants/${id}`,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    }, `Failed to update restaurant with id: ${id}`)
 }
 
-export const deleteRestaurant = async (id: string): Promise<ApiResponse<DeleteRestaurantResponse>> => {
-    return apiRequest<DeleteRestaurantResponse>({
-        method: 'DELETE',
-        url: `/api/restaurants/${id}`
-    })
+export const deleteRestaurant = async (id: string): Promise<ApiResponse<{ message: string }>> => {
+    return withErrorHandling(async () => {
+        return apiRequest<{ message: string }>({
+            method: 'DELETE',
+            url: `/api/restaurants/${id}`
+        })
+    }, `Failed to delete restaurant with id: ${id}`)
 }
 
 export const uploadRestaurantLogo = async (id: string, logo: File): Promise<ApiResponse<Restaurant>> => {
-    const formData = new FormData()
+    return withErrorHandling(async () => {
+        const formData = new FormData()
 
-    formData.append('logo', logo)
+        formData.append('logo', logo)
 
-    return apiRequest<Restaurant>({
-        method: 'POST',
-        url: `/api/restaurants/${id}/logo`,
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+        return apiRequest<Restaurant>({
+            method: 'POST',
+            url: `/api/restaurants/${id}/logo`,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    }, `Failed to upload logo for restaurant with id: ${id}`)
 } 

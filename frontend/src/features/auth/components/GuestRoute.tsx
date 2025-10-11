@@ -2,16 +2,14 @@ import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { LoadingSpinner, FlexBox } from '@/components/common'
 import { useAuthContext } from '../contexts/AuthContext'
-import { isUserAuthenticated } from '../utils/authStorage'
 
-interface GuestRouteProps {
+interface Props {
     children: React.ReactNode
 }
 
-
-const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
+const GuestRoute: React.FC<Props> = ({ children }) => {
     const location = useLocation()
-    const { isAuthenticated: isAuthFromContext, loading } = useAuthContext()
+    const { isAuthenticated, loading } = useAuthContext()
 
     if (loading) {
         return (
@@ -21,10 +19,7 @@ const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
         )
     }
 
-    const hasValidToken = isUserAuthenticated()
-    const isAuth = isAuthFromContext && hasValidToken
-
-    if (isAuth) {
+    if (isAuthenticated) {
         const from = (location.state)?.from || '/'
 
         return <Navigate to={from} replace />
@@ -33,4 +28,4 @@ const GuestRoute: React.FC<GuestRouteProps> = ({ children }) => {
     return <>{children}</>
 }
 
-export default GuestRoute 
+export default GuestRoute

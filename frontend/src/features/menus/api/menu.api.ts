@@ -1,5 +1,6 @@
 import { apiRequest, ApiResponse } from '@/config/api'
 import { Menu, MenuListResponse, MenuFormData } from '../types/menu.types'
+import { buildQueryString, buildFormData, withErrorHandling } from '@/utils/apiUtils'
 
 interface GetMenusParams {
     restaurantId: string
@@ -13,103 +14,103 @@ interface DeleteMenuResponse {
 }
 
 export const getMenus = async (params: GetMenusParams): Promise<MenuListResponse> => {
-    const queryParams = new URLSearchParams({
-        restaurantId: params.restaurantId,
-        page: (params.page || 1).toString(),
-        limit: (params.limit || 10).toString(),
-    })
+    return withErrorHandling(async () => {
+        const queryString = buildQueryString({
+            restaurantId: params.restaurantId,
+            page: params.page || 1,
+            limit: params.limit || 10,
+            name: params.name
+        })
 
-    if (params.name) {
-        queryParams.append('name', params.name)
-    }
+        const response = await apiRequest<Menu[]>({
+            method: 'GET',
+            url: `/api/menus?${queryString}`
+        })
 
-    const response = await apiRequest<Menu[]>({
-        method: 'GET',
-        url: `/api/menus?${queryParams.toString()}`
-    })
-
-    if (response.success) {
-        return {
-            success: true,
-            data: response.data,
-            pagination: {
-                page: response.page || 1,
-                limit: response.limit || 10,
-                total: response.total || 0,
-                pages: Math.ceil((response.total || 0) / (response.limit || 10))
+        if (response.success) {
+            return {
+                success: true,
+                data: response.data,
+                pagination: {
+                    page: response.page || 1,
+                    limit: response.limit || 10,
+                    total: response.total || 0,
+                    pages: Math.ceil((response.total || 0) / (response.limit || 10))
+                }
             }
         }
-    }
 
-    return {
-        success: false,
-        data: [],
-        pagination: {
-            page: 1,
-            limit: 10,
-            total: 0,
-            pages: 0
+        return {
+            success: false,
+            data: [],
+            pagination: {
+                page: 1,
+                limit: 10,
+                total: 0,
+                pages: 0
+            }
         }
-    }
+    }, 'Failed to fetch menus')
 }
 
 export const getMenu = async (id: string): Promise<ApiResponse<Menu>> => {
-    return apiRequest<Menu>({
-        method: 'GET',
-        url: `/api/menus/${id}`
-    })
+    return withErrorHandling(async () => {
+        return apiRequest<Menu>({
+            method: 'GET',
+            url: `/api/menus/${id}`
+        })
+    }, `Failed to fetch menu with id: ${id}`)
 }
 
 export const createMenu = async (data: MenuFormData): Promise<ApiResponse<Menu>> => {
-    const formData = new FormData()
+    return withErrorHandling(async () => {
+        const formData = buildFormData({
+            name: data.name,
+            restaurantId: data.restaurantId,
+            isActive: data.isActive,
+            description: data.description,
+            categories: data.categories,
+            images: data.image
+        })
 
-    formData.append('name', data.name)
-    formData.append('restaurantId', data.restaurantId)
-    formData.append('isActive', data.isActive.toString())
-
-    if (data.description) {
-        formData.append('description', data.description)
-    }
-
-    if (data.image) {
-        formData.append('images', data.image)
-    }
-
-    return apiRequest<Menu>({
-        method: 'POST',
-        url: '/api/menus',
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+        return apiRequest<Menu>({
+            method: 'POST',
+            url: '/api/menus',
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    }, 'Failed to create menu')
 }
 
 export const updateMenu = async (id: string, data: Partial<MenuFormData>): Promise<ApiResponse<Menu>> => {
-    const formData = new FormData()
+    return withErrorHandling(async () => {
+        const formData = buildFormData({
+            name: data.name,
+            description: data.description,
+            isActive: data.isActive,
+            categories: data.categories,
+            images: data.image
+        })
 
-    if (data.name) formData.append('name', data.name)
-    if (data.description) formData.append('description', data.description)
-    if (data.isActive !== undefined) formData.append('isActive', data.isActive.toString())
-
-    if (data.image) {
-        formData.append('images', data.image)
-    }
-
-    return apiRequest<Menu>({
-        method: 'PUT',
-        url: `/api/menus/${id}`,
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+        return apiRequest<Menu>({
+            method: 'PUT',
+            url: `/api/menus/${id}`,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    }, `Failed to update menu with id: ${id}`)
 }
 
 export const deleteMenu = async (id: string): Promise<ApiResponse<DeleteMenuResponse>> => {
-    return apiRequest<DeleteMenuResponse>({
-        method: 'DELETE',
-        url: `/api/menus/${id}`
-    })
+    return withErrorHandling(async () => {
+        return apiRequest<DeleteMenuResponse>({
+            method: 'DELETE',
+            url: `/api/menus/${id}`
+        })
+    }, `Failed to delete menu with id: ${id}`)
 }
 

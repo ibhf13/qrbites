@@ -9,27 +9,27 @@ export const menuFormSchema = z.object({
         .min(3, 'Menu name must be at least 3 characters')
         .max(50, 'Menu name cannot exceed 50 characters')
         .trim(),
-    
+
     description: z
         .string()
         .max(500, 'Description cannot exceed 500 characters')
         .trim()
         .optional()
         .or(z.literal('')),
-    
+
     restaurantId: z
         .string()
         .min(1, 'Restaurant is required'),
-    
+
     isActive: z
         .boolean()
         .default(true),
-    
+
     categories: z
         .array(z.enum(categoryValues))
         .optional()
         .default([]),
-    
+
     images: z
         .array(z.instanceof(File))
         .optional()
@@ -38,16 +38,17 @@ export const menuFormSchema = z.object({
             `Maximum ${MENU_IMAGE_CONSTRAINTS.maxFiles} images allowed`
         )
         .refine(
-            (files) => 
-                !files || 
+            (files) =>
+                !files ||
                 files.every(file => file.size <= MENU_IMAGE_CONSTRAINTS.maxSize),
             `Each image must be less than ${MENU_IMAGE_CONSTRAINTS.maxSize / (1024 * 1024)}MB`
         )
         .refine(
             (files) =>
                 !files ||
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 files.every(file => MENU_IMAGE_CONSTRAINTS.acceptedTypes.includes(file.type as any)),
-            'Only JPEG, PNG, and WebP images are allowed'
+            'Only JPEG, PNG, and JPG images are allowed'
         )
 })
 

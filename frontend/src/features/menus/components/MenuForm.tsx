@@ -106,11 +106,11 @@ export const MenuForm: React.FC<MenuFormProps> = ({
                         accept={{
                             'image/jpeg': [],
                             'image/png': [],
-                            'image/webp': []
+                            'image/jpg': []
                         }}
                         multiple={false}
                         maxSize={5 * 1024 * 1024}
-                        helpText="Maximum 5MB. Supported formats: JPEG, PNG, WebP"
+                        helpText="Maximum 5MB. Supported formats: JPEG, PNG, JPG"
                         initialPreview={existingImageUrl || undefined}
                         showPreview={true}
                     />

@@ -2,19 +2,14 @@ import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { FlexBox, LoadingSpinner } from '@/components/common'
 import { useAuthContext } from '../contexts/AuthContext'
-import { isUserAuthenticated } from '../utils/authStorage'
 
-export const isAuthenticated = (): boolean => {
-    return isUserAuthenticated()
-}
-
-interface ProtectedRouteProps {
+interface Props {
     children: React.ReactNode
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<Props> = ({ children }) => {
     const location = useLocation()
-    const { isAuthenticated: isAuthFromContext, loading } = useAuthContext()
+    const { isAuthenticated, loading } = useAuthContext()
 
     if (loading) {
         return (
@@ -24,14 +19,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         )
     }
 
-    const hasValidToken = isAuthenticated()
-    const isAuth = isAuthFromContext && hasValidToken
+    if (!isAuthenticated) {
+        const from = location.pathname + location.search
 
-    if (!isAuth) {
-        return <Navigate to="/login" state={{ from: location.pathname }} />
+        return <Navigate to="/login" state={{ from }} replace />
     }
 
     return <>{children}</>
 }
 
-export default ProtectedRoute 
+export default ProtectedRoute
+

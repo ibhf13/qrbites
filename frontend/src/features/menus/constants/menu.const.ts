@@ -46,7 +46,7 @@ export const DEFAULT_MENU_FILTERS = {
 export const MENU_IMAGE_CONSTRAINTS = {
     maxSize: 5 * 1024 * 1024,
     maxFiles: 10,
-    acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    acceptedTypes: ['image/jpeg', 'image/png', 'image/jpg'],
     dimensions: {
         maxWidth: 2048,
         maxHeight: 2048,
