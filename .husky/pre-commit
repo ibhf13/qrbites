@@ -1,1 +1,22 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🐶 Husky: Running pre-commit hook..."
+echo "📁 Working directory: $(pwd)"
+echo "🔍 Git status:"
+git status --short
+
+echo ""
+echo "✨ Running lint-staged..."
 npx lint-staged
+
+LINT_STAGED_EXIT_CODE=$?
+
+if [ $LINT_STAGED_EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "❌ Lint-staged failed with exit code: $LINT_STAGED_EXIT_CODE"
+  exit $LINT_STAGED_EXIT_CODE
+else
+  echo ""
+  echo "✅ All checks passed! Proceeding with commit..."
+fi
