@@ -1,0 +1,3255 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "QrBites API",
+    "version": "1.0.0",
+    "description": "\nQrBites Restaurant Menu Management System API Documentation.\n\n## Features\n- 🍽️ Digital menu management\n- 📱 QR code generation for menus\n- 🔐 JWT-based authentication\n- 👥 Multi-role authorization (Admin, Restaurant Owner, Customer)\n- 🖼️ Image upload with Cloudinary integration\n- 🔍 Advanced menu search and filtering\n\n## Authentication\nMost endpoints require JWT authentication. To authenticate:\n1. Register or login via /api/auth/register or /api/auth/login\n2. Copy the token from the response\n3. Click the \"Authorize\" button (🔒 icon) above\n4. Enter: `Bearer <your-token>`\n5. Click \"Authorize\" and \"Close\"\n\nYour token will be automatically included in subsequent requests.\n      ",
+    "contact": {
+      "name": "QrBites Support",
+      "email": "support@qrbites.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://qrbites-api.vercel.app",
+      "description": "Production (Vercel)"
+    },
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    {
+      "name": "System",
+      "description": "System health and status endpoints"
+    },
+    {
+      "name": "Authentication",
+      "description": "User authentication and authorization endpoints"
+    },
+    {
+      "name": "Users",
+      "description": "User management operations"
+    },
+    {
+      "name": "Restaurants",
+      "description": "Restaurant profile and management"
+    },
+    {
+      "name": "Menus",
+      "description": "Menu management operations"
+    },
+    {
+      "name": "Menu Items",
+      "description": "Menu item CRUD operations"
+    },
+    {
+      "name": "QR Codes",
+      "description": "QR code generation and management"
+    },
+    {
+      "name": "Public",
+      "description": "Public endpoints (no authentication required)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token in the format: Bearer {token}"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Error message describing what went wrong"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "email"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Invalid email format"
+                }
+              }
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "role"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8,
+            "example": "SecurePass123!",
+            "description": "Password is never returned in responses"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "restaurant_owner",
+              "customer"
+            ],
+            "example": "restaurant_owner"
+          },
+          "restaurantId": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011",
+            "description": "Reference to restaurant (for restaurant_owner role)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Restaurant": {
+        "type": "object",
+        "required": [
+          "name",
+          "ownerId"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "example": "La Bella Cucina"
+          },
+          "description": {
+            "type": "string",
+            "example": "Authentic Italian cuisine in the heart of the city"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "example": "123 Main Street"
+              },
+              "city": {
+                "type": "string",
+                "example": "New York"
+              },
+              "state": {
+                "type": "string",
+                "example": "NY"
+              },
+              "zipCode": {
+                "type": "string",
+                "example": "10001"
+              },
+              "country": {
+                "type": "string",
+                "example": "USA"
+              }
+            }
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string",
+                "example": "+1-555-123-4567"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "info@restaurant.com"
+              }
+            }
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "logo": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://res.cloudinary.com/xxx/image/upload/v123/logo.jpg"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Menu": {
+        "type": "object",
+        "required": [
+          "name",
+          "restaurantId"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "example": "Lunch Menu"
+          },
+          "description": {
+            "type": "string",
+            "example": "Daily lunch specials available 11am-3pm"
+          },
+          "restaurantId": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Appetizers",
+              "Main Course",
+              "Desserts",
+              "Beverages"
+            ]
+          },
+          "qrCode": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://res.cloudinary.com/xxx/image/upload/v123/qrcode.png"
+          },
+          "qrCodeId": {
+            "type": "string",
+            "example": "abc123xyz",
+            "description": "Unique identifier for QR code URL"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MenuItem": {
+        "type": "object",
+        "required": [
+          "name",
+          "price",
+          "menuId"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "example": "Margherita Pizza"
+          },
+          "description": {
+            "type": "string",
+            "example": "Classic pizza with fresh mozzarella, tomato sauce, and basil"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 12.99
+          },
+          "currency": {
+            "type": "string",
+            "example": "USD",
+            "default": "USD"
+          },
+          "category": {
+            "type": "string",
+            "example": "Main Course"
+          },
+          "menuId": {
+            "type": "string",
+            "format": "objectId",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://res.cloudinary.com/xxx/image/upload/v123/pizza.jpg"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "example": true
+          },
+          "allergens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "gluten",
+              "dairy"
+            ]
+          },
+          "dietary": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "vegetarian"
+            ]
+          },
+          "spicyLevel": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5,
+            "example": 2
+          },
+          "preparationTime": {
+            "type": "number",
+            "description": "Preparation time in minutes",
+            "example": 15
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecurePass123!"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "role"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "newuser@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8,
+            "example": "SecurePass123!"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "restaurant_owner",
+              "customer"
+            ],
+            "example": "restaurant_owner"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "role": {
+                    "type": "string",
+                    "example": "restaurant_owner"
+                  },
+                  "restaurantId": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 100,
+            "description": "Total number of items"
+          },
+          "page": {
+            "type": "integer",
+            "example": 1,
+            "description": "Current page number"
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10,
+            "description": "Items per page"
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 10,
+            "description": "Total number of pages"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Success": {
+        "description": "Successful operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Created": {
+        "description": "Resource created successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NoContent": {
+        "description": "Resource deleted successfully - no content returned"
+      },
+      "BadRequest": {
+        "description": "Bad request - validation error or invalid input",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication required - missing or invalid token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": "Authentication required"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Insufficient permissions - authenticated but not authorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": "You do not have permission to access this resource"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": "Resource not found"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict - resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": "Resource already exists"
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": "An unexpected error occurred"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "success": false,
+              "error": "Too many requests. Please try again later."
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "IdParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Resource ID (MongoDB ObjectId)",
+        "schema": {
+          "type": "string",
+          "format": "objectId",
+          "example": "507f1f77bcf86cd799439011"
+        }
+      },
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "description": "Page number for pagination (starts at 1)",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "example": 1
+        }
+      },
+      "LimitParam": {
+        "name": "limit",
+        "in": "query",
+        "description": "Number of items per page",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10,
+          "example": 10
+        }
+      },
+      "SortParam": {
+        "name": "sort",
+        "in": "query",
+        "description": "Sort field and order (prefix with - for descending)",
+        "schema": {
+          "type": "string",
+          "example": "-createdAt"
+        }
+      },
+      "SearchParam": {
+        "name": "search",
+        "in": "query",
+        "description": "Search query string",
+        "schema": {
+          "type": "string",
+          "example": "pizza"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Main health check endpoint",
+        "description": "Returns the health status of the API, including database connectivity and uptime.",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "healthy"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 3600,
+                      "description": "Server uptime in seconds"
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "connected"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "unhealthy"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Database connection failed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/detailed": {
+      "get": {
+        "summary": "Detailed health information",
+        "description": "Returns comprehensive health information including memory usage, CPU, and system metrics.",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Detailed health information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "healthy"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 3600
+                    },
+                    "database": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "example": "connected"
+                        },
+                        "responseTime": {
+                          "type": "number",
+                          "example": 5
+                        }
+                      }
+                    },
+                    "memory": {
+                      "type": "object",
+                      "properties": {
+                        "heapUsed": {
+                          "type": "number",
+                          "example": 45678912
+                        },
+                        "heapTotal": {
+                          "type": "number",
+                          "example": 67108864
+                        }
+                      }
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/simple": {
+      "get": {
+        "summary": "Simple health check",
+        "description": "Lightweight health check for load balancers and simple monitoring. Returns 200 OK if service is running.",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is running",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "summary": "Kubernetes readiness probe",
+        "description": "Indicates whether the service is ready to accept traffic. Checks database connectivity.",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ready"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "not ready"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "example": "Database not connected"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "summary": "Kubernetes liveness probe",
+        "description": "Indicates whether the service is alive and should not be restarted.",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "alive"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/system": {
+      "get": {
+        "summary": "System information",
+        "description": "Returns system information including Node.js version, platform, and environment.",
+        "tags": [
+          "System"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "System information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "nodeVersion": {
+                          "type": "string",
+                          "example": "v20.10.0"
+                        },
+                        "platform": {
+                          "type": "string",
+                          "example": "linux"
+                        },
+                        "environment": {
+                          "type": "string",
+                          "example": "production"
+                        },
+                        "cpus": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "totalMemory": {
+                          "type": "number",
+                          "example": 8589934592
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/menu-items": {
+      "get": {
+        "summary": "Get all menu items",
+        "description": "Retrieve a list of menu items with optional filtering. Restaurant owners see only their menu items.",
+        "tags": [
+          "Menu Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          },
+          {
+            "$ref": "#/components/parameters/SortParam"
+          },
+          {
+            "$ref": "#/components/parameters/SearchParam"
+          },
+          {
+            "name": "menuId",
+            "in": "query",
+            "description": "Filter by menu ID",
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by category",
+            "schema": {
+              "type": "string",
+              "example": "Appetizers"
+            }
+          },
+          {
+            "name": "isAvailable",
+            "in": "query",
+            "description": "Filter by availability status",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "description": "Minimum price filter",
+            "schema": {
+              "type": "number",
+              "example": 5
+            }
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "description": "Maximum price filter",
+            "schema": {
+              "type": "number",
+              "example": 20
+            }
+          },
+          {
+            "name": "dietary",
+            "in": "query",
+            "description": "Filter by dietary preference (e.g., vegetarian, vegan)",
+            "schema": {
+              "type": "string",
+              "example": "vegetarian"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved menu items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "menuItems": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/MenuItem"
+                          }
+                        },
+                        "pagination": {
+                          "$ref": "#/components/schemas/Pagination"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new menu item",
+        "description": "Create a new menu item with optional image upload. Restaurant owners can only create items for their own menus.",
+        "tags": [
+          "Menu Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "price",
+                  "menuId"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Margherita Pizza",
+                    "description": "Item name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Classic pizza with fresh mozzarella, tomato sauce, and basil"
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 12.99,
+                    "description": "Item price"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "example": "USD",
+                    "default": "USD"
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Main Course"
+                  },
+                  "menuId": {
+                    "type": "string",
+                    "format": "objectId",
+                    "example": "507f1f77bcf86cd799439011",
+                    "description": "Menu ID (must be owned by user)"
+                  },
+                  "isAvailable": {
+                    "type": "boolean",
+                    "example": true,
+                    "default": true
+                  },
+                  "allergens": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "gluten",
+                      "dairy"
+                    ],
+                    "description": "List of allergens (JSON array as string)"
+                  },
+                  "dietary": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "vegetarian"
+                    ],
+                    "description": "Dietary tags (JSON array as string)"
+                  },
+                  "spicyLevel": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "example": 2
+                  },
+                  "preparationTime": {
+                    "type": "number",
+                    "example": 15,
+                    "description": "Preparation time in minutes"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Menu item image"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Menu item created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MenuItem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/menu-items/{id}": {
+      "get": {
+        "summary": "Get menu item by ID",
+        "description": "Retrieve a specific menu item by its ID. Users can only access items from their own menus.",
+        "tags": [
+          "Menu Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menu item retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MenuItem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a menu item",
+        "description": "Update an existing menu item. Only the owner can update their menu items.",
+        "tags": [
+          "Menu Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Updated Margherita Pizza"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Now with extra basil!"
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 13.99
+                  },
+                  "currency": {
+                    "type": "string",
+                    "example": "USD"
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Main Course"
+                  },
+                  "isAvailable": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "allergens": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "gluten",
+                      "dairy"
+                    ]
+                  },
+                  "dietary": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "vegetarian"
+                    ]
+                  },
+                  "spicyLevel": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "example": 2
+                  },
+                  "preparationTime": {
+                    "type": "number",
+                    "example": 15
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "New menu item image (replaces existing)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Menu item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MenuItem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a menu item",
+        "description": "Delete a menu item permanently. Only the owner can delete their menu items.",
+        "tags": [
+          "Menu Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Menu item deleted successfully (no content)"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/menu-items/{id}/image": {
+      "post": {
+        "summary": "Upload menu item image",
+        "description": "Upload or replace the image for a menu item. The image will be uploaded to Cloudinary.",
+        "tags": [
+          "Menu Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "image"
+                ],
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Menu item image file (JPG, PNG, WEBP)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "imageUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://res.cloudinary.com/xxx/image/upload/v123/menuitem.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/menus": {
+      "get": {
+        "summary": "Get all menus",
+        "description": "Retrieve a list of menus. Restaurant owners see only their menus, admins see all menus.",
+        "tags": [
+          "Menus"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          },
+          {
+            "$ref": "#/components/parameters/SortParam"
+          },
+          {
+            "$ref": "#/components/parameters/SearchParam"
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter by active status",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "restaurantId",
+            "in": "query",
+            "description": "Filter by restaurant ID (admin only)",
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved menus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "menus": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Menu"
+                          }
+                        },
+                        "pagination": {
+                          "$ref": "#/components/schemas/Pagination"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new menu",
+        "description": "Create a new menu for a restaurant. Restaurant owners can only create menus for their restaurant.",
+        "tags": [
+          "Menus"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "restaurantId"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Dinner Menu",
+                    "description": "Menu name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Evening dinner specialties",
+                    "description": "Menu description"
+                  },
+                  "restaurantId": {
+                    "type": "string",
+                    "format": "objectId",
+                    "example": "507f1f77bcf86cd799439011",
+                    "description": "Restaurant ID (must match user's restaurant)"
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "Appetizers",
+                      "Main Course",
+                      "Desserts"
+                    ],
+                    "description": "Menu categories (JSON array as string)"
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "example": true,
+                    "default": true
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Menu images (multiple files supported)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Menu created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Menu"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/menus/{id}": {
+      "get": {
+        "summary": "Get menu by ID",
+        "description": "Retrieve a specific menu by its ID. Users can only access menus they own.",
+        "tags": [
+          "Menus"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menu retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Menu"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a menu",
+        "description": "Update an existing menu. Only the owner can update their menus.",
+        "tags": [
+          "Menus"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Updated Dinner Menu"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Updated evening specialties"
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "Appetizers",
+                      "Entrees",
+                      "Desserts",
+                      "Drinks"
+                    ]
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "New menu images (will be added to existing)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Menu updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Menu"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a menu",
+        "description": "Soft delete a menu by setting isActive to false. Only the owner can delete their menus.",
+        "tags": [
+          "Menus"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Menu deleted successfully (no content)"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/menus/{id}/image": {
+      "post": {
+        "summary": "Upload menu image",
+        "description": "Upload a single image for a menu. The image will be uploaded to Cloudinary.",
+        "tags": [
+          "Menus"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "image"
+                ],
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Menu image file"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "imageUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://res.cloudinary.com/xxx/image/upload/v123/menu.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/menus/{id}/qrcode": {
+      "post": {
+        "summary": "Generate QR code for menu",
+        "description": "Generate a QR code for the menu that links to the public menu view. The QR code is uploaded to Cloudinary.",
+        "tags": [
+          "Menus",
+          "QR Codes"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "number",
+                    "example": 300,
+                    "description": "QR code size in pixels (default 300)"
+                  },
+                  "errorCorrectionLevel": {
+                    "type": "string",
+                    "enum": [
+                      "L",
+                      "M",
+                      "Q",
+                      "H"
+                    ],
+                    "example": "M",
+                    "description": "Error correction level (default M)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QR code generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "qrCode": {
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://res.cloudinary.com/xxx/image/upload/v123/qrcode.png"
+                        },
+                        "qrCodeId": {
+                          "type": "string",
+                          "example": "abc123xyz"
+                        },
+                        "menuUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://qrbites.com/r/abc123xyz"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/restaurants": {
+      "get": {
+        "summary": "Get all restaurants",
+        "description": "Retrieve a list of restaurants. Restaurant owners see only their restaurant, admins see all restaurants.",
+        "tags": [
+          "Restaurants"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          },
+          {
+            "$ref": "#/components/parameters/SortParam"
+          },
+          {
+            "$ref": "#/components/parameters/SearchParam"
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter by active status",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "Filter by city",
+            "schema": {
+              "type": "string",
+              "example": "New York"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved restaurants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "restaurants": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Restaurant"
+                          }
+                        },
+                        "pagination": {
+                          "$ref": "#/components/schemas/Pagination"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new restaurant",
+        "description": "Create a new restaurant profile. Restaurant owners can create one restaurant, admins can create multiple.",
+        "tags": [
+          "Restaurants"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "La Bella Cucina",
+                    "description": "Restaurant name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Authentic Italian cuisine in the heart of the city"
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "address": {
+                        "type": "string",
+                        "example": "123 Main Street"
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "New York"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "NY"
+                      },
+                      "zipCode": {
+                        "type": "string",
+                        "example": 10001
+                      },
+                      "country": {
+                        "type": "string",
+                        "example": "USA"
+                      }
+                    },
+                    "description": "Location details (as JSON string)"
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "phone": {
+                        "type": "string",
+                        "example": "+1-555-123-4567"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "info@restaurant.com"
+                      }
+                    },
+                    "description": "Contact information (as JSON string)"
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "example": true,
+                    "default": true
+                  },
+                  "logo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Restaurant logo image"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Restaurant created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Restaurant"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/restaurants/{id}": {
+      "get": {
+        "summary": "Get restaurant by ID",
+        "description": "Retrieve a specific restaurant by its ID. Users can only access restaurants they own unless they're an admin.",
+        "tags": [
+          "Restaurants"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Restaurant"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a restaurant",
+        "description": "Update an existing restaurant profile. Only the owner or admin can update the restaurant.",
+        "tags": [
+          "Restaurants"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "La Bella Cucina Updated"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Updated description with new specialties"
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "address": {
+                        "type": "string"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "state": {
+                        "type": "string"
+                      },
+                      "zipCode": {
+                        "type": "string"
+                      },
+                      "country": {
+                        "type": "string"
+                      }
+                    },
+                    "description": "Updated location details (as JSON string)"
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "phone": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    },
+                    "description": "Updated contact information (as JSON string)"
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "logo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "New restaurant logo (replaces existing)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Restaurant updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Restaurant"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a restaurant",
+        "description": "Soft delete a restaurant by setting isActive to false. Only the owner or admin can delete the restaurant.",
+        "tags": [
+          "Restaurants"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Restaurant deleted successfully (no content)"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/restaurants/{id}/logo": {
+      "post": {
+        "summary": "Upload restaurant logo",
+        "description": "Upload or replace the logo for a restaurant. The logo will be uploaded to Cloudinary.",
+        "tags": [
+          "Restaurants"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "logo"
+                ],
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Restaurant logo file (JPG, PNG, WEBP)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logo uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "logoUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://res.cloudinary.com/xxx/image/upload/v123/logo.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Create a new user account. Role can be either restaurant_owner or customer. Admin accounts must be created directly in the database.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "examples": {
+                "restaurantOwner": {
+                  "summary": "Restaurant Owner Registration",
+                  "value": {
+                    "email": "owner@restaurant.com",
+                    "password": "SecurePass123!",
+                    "role": "restaurant_owner"
+                  }
+                },
+                "customer": {
+                  "summary": "Customer Registration",
+                  "value": {
+                    "email": "customer@example.com",
+                    "password": "SecurePass123!",
+                    "role": "customer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticate user with email and password to receive a JWT token. Use this token for subsequent authenticated requests.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Login Example",
+                  "value": {
+                    "email": "owner@restaurant.com",
+                    "password": "SecurePass123!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful - returns JWT token and user data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input - email or password missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Please provide email and password"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Invalid credentials"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Get current user profile",
+        "description": "Retrieve the authenticated user's profile information. Requires valid JWT token.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/password": {
+      "put": {
+        "summary": "Change user password",
+        "description": "Change the authenticated user's password. Requires current password for verification.",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ],
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "OldPass123!",
+                    "description": "User's current password"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 8,
+                    "example": "NewSecurePass123!",
+                    "description": "New password (minimum 8 characters)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Password changed successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "description": "Current password is incorrect or user not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Get all users",
+        "description": "Retrieve a list of all users with pagination and filtering. Admin access only.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          },
+          {
+            "$ref": "#/components/parameters/SortParam"
+          },
+          {
+            "$ref": "#/components/parameters/SearchParam"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Filter by user role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "admin",
+                "restaurant_owner",
+                "customer"
+              ],
+              "example": "restaurant_owner"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter by active status",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "users": {
+                          "type": "array",
+                          "items": {
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/User"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "password": {
+                                    "type": "string",
+                                    "description": "Password is excluded from response",
+                                    "readOnly": true
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "pagination": {
+                          "$ref": "#/components/schemas/Pagination"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Access denied. Admin privileges required."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/account": {
+      "delete": {
+        "summary": "Deactivate own account",
+        "description": "Deactivate the currently authenticated user's account. This is a soft delete that sets isActive to false.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deactivated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Account deactivated successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Get user by ID",
+        "description": "Retrieve a user's profile by ID. Users can view their own profile, admins can view any profile.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/User"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "password": {
+                              "type": "string",
+                              "description": "Password is excluded from response",
+                              "readOnly": true
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Can only access own profile unless admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user profile",
+        "description": "Update a user's profile. Users can update their own profile, admins can update any profile.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "newemail@example.com",
+                    "description": "New email address (must be unique)"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "admin",
+                      "restaurant_owner",
+                      "customer"
+                    ],
+                    "example": "restaurant_owner",
+                    "description": "User role (admin only)"
+                  },
+                  "restaurantId": {
+                    "type": "string",
+                    "format": "objectId",
+                    "example": "507f1f77bcf86cd799439011",
+                    "description": "Associated restaurant ID (for restaurant_owner role)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/User"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "password": {
+                              "type": "string",
+                              "description": "Password is excluded from response",
+                              "readOnly": true
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Can only update own profile unless admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Conflict - Email already in use",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Email already in use"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete user account",
+        "description": "Permanently delete a user account. Admin access only. This is a hard delete.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted successfully (no content)"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Access denied. Admin privileges required."
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  }
+}
