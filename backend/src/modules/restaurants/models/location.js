@@ -26,7 +26,6 @@ const locationSchema = new Schema(
       trim: true,
       validate: {
         validator: function (v) {
-          // eslint-disable-next-line sonarjs/concise-regex
           return !v || /^[0-9]{5}$/.test(v)
         },
         message: props => `${props.value} is not a valid postal code! Use 5 digits (e.g., 12345)`,

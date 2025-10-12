@@ -6,6 +6,7 @@ const {
   cleanupOnError,
   uploadToCloudinary,
 } = require('@commonMiddlewares/uploadValidationMiddleware')
+const { addUserRestaurants } = require('@commonMiddlewares/authMiddleware')
 
 const { restaurantSchema, restaurantUpdateSchema } = require('../validations/restaurantValidation')
 const {
@@ -19,7 +20,7 @@ const {
 
 const router = express.Router()
 
-router.use(protect, apiLimiter)
+router.use(protect, addUserRestaurants, apiLimiter)
 
 router.get('/', getRestaurants)
 router.get('/:id', checkRestaurantOwnership('id'), getRestaurantById)

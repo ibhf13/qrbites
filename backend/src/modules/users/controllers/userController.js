@@ -84,10 +84,8 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   // Non-admin users cannot update certain fields
-  if (req.user.role !== 'admin') {
-    if (role !== undefined || isActive !== undefined) {
-      throw forbidden('Not authorized to update role or account status')
-    }
+  if ((role !== undefined || isActive !== undefined) && req.user.role !== 'admin') {
+    throw forbidden('Not authorized to update role or account status')
   }
 
   const user = await User.findById(id)

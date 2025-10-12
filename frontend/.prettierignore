@@ -1,0 +1,56 @@
+# Dependencies and build outputs
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Generated and minified files
+*.min.js
+*.min.css
+*.bundle.js
+*.map
+
+# Package lock files (should not be formatted)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files
+.env*
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.vite/
+
+# Logs
+*.log
+
+# Tool-specific files
+.tern-port
+lighthouse*.json
+lighthouse*.html
+
+# Project-specific ignores
+.cursor/
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts
+vite.config.ts.timestamp-*
+
+# Only ignore specific config files that shouldn't be formatted
+.editorconfig
+

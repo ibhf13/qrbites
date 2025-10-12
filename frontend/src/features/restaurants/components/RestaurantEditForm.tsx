@@ -53,6 +53,7 @@ const RestaurantEditForm: React.FC<RestaurantEditFormProps> = ({ restaurant, onC
                 ...formData,
                 id: restaurant._id,
                 logoUrl: restaurant.logoUrl
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any}
             onSubmit={handleSubmit}
             onCancel={onClose}

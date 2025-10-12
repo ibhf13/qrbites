@@ -51,9 +51,7 @@ const sanitizeSearchInput = (input, options = {}) => {
 
   const dangerousPatterns = [
     /(\*.*\*)|(\+.*\+)/, // Nested quantifiers
-    // eslint-disable-next-line sonarjs/slow-regex
     /\([^)]*\)\*\+|\([^)]*\)\+\*/, // Quantifiers after groups
-    // eslint-disable-next-line sonarjs/slow-regex
     /\([^)]*\|[^)]*\)\*/, // Alternation with quantifiers
     /(.)\1{10,}/, // Too many repetitions
   ]
