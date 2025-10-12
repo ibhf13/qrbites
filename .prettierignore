@@ -1,0 +1,33 @@
+# Dependencies and build outputs
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files
+.env*
+
+# Cache and temporary directories
+.cache/
+.husky/_/
+
+# Logs
+*.log
+
+# Project-specific ignores
+.cursor/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+

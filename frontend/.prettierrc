@@ -1,16 +1,32 @@
 {
   "semi": false,
   "singleQuote": true,
-  "trailingComma": "es5",
   "tabWidth": 2,
+  "trailingComma": "es5",
   "printWidth": 120,
-  "objectWrap": "collapse",
+  "useTabs": false,
+  "endOfLine": "lf",
   "bracketSpacing": true,
-  "arrowParens": "always",
-  "endOfLine": "auto",
-  "jsxSingleQuote": false,
-  "bracketSameLine": false,
+  "bracketSameLine": true,
+  "singleAttributePerLine": false,
+  "arrowParens": "avoid",
+  "proseWrap": "preserve",
   "htmlWhitespaceSensitivity": "css",
   "embeddedLanguageFormatting": "auto",
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "overrides": [
+    {
+      "files": "*.json",
+      "options": {
+        "printWidth": 80,
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "printWidth": 80,
+        "proseWrap": "always"
+      }
+    }
+  ]
 }
