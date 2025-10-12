@@ -3,6 +3,8 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const compression = require('compression')
 const mongoSanitize = require('express-mongo-sanitize')
+const swaggerUi = require('swagger-ui-express')
+const swaggerSpec = require('@config/swagger')
 const logger = require('@commonUtils/logger')
 const loggerMiddleware = require('@commonMiddlewares/loggerMiddleware')
 const { notFoundMiddleware, errorHandlerMiddleware } = require('@commonMiddlewares/errorMiddleware')
@@ -46,8 +48,9 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:', 'https://res.cloudinary.com'],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for Swagger UI
         styleSrc: ["'self'", "'unsafe-inline'"],
+        fontSrc: ["'self'", 'data:'], // For Swagger UI fonts
       },
     },
     hsts: {
@@ -102,6 +105,45 @@ app.use(
 app.use(ddosProtection)
 app.use(ipBlacklist.middleware())
 
+// ============================================================
+// API DOCUMENTATION (Swagger/OpenAPI)
+// ============================================================
+const swaggerUiOptions = {
+  customCss: `
+    .swagger-ui .topbar { display: none }
+    .swagger-ui .info { margin: 20px 0 }
+    .swagger-ui .scheme-container { padding: 20px 0 }
+  `,
+  customSiteTitle: 'QrBites API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true, // Keep auth token between page refreshes
+    displayRequestDuration: true, // Show request duration
+    filter: true, // Enable search/filter
+    tryItOutEnabled: true, // Enable "Try it out" by default
+    syntaxHighlight: {
+      activate: true,
+      theme: 'monokai',
+    },
+    defaultModelsExpandDepth: 1,
+    defaultModelExpandDepth: 1,
+    docExpansion: 'list', // 'list', 'full', or 'none'
+  },
+}
+
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions))
+
+// Serve Swagger JSON spec
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  res.send(swaggerSpec)
+})
+
+// Log documentation URL on startup
+if (process.env.NODE_ENV !== 'test') {
+  const port = process.env.PORT || 5000
+  logger.info(`📚 API Documentation available at: http://localhost:${port}/api-docs`)
+}
 
 // 9. Routes (with proper rate limiting scoping)
 

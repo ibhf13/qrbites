@@ -15,9 +15,10 @@ const requiredEnvVars = [
   'CLOUDINARY_API_SECRET',
 ]
 
-// Validate required environment variables
+// Validate required environment variables (skip in test environment)
+// Test environment variables are set in jest.setup.js before any imports
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
-if (missingVars.length > 0) {
+if (missingVars.length > 0 && process.env.NODE_ENV !== 'test') {
   console.error('❌ Missing required environment variables:', missingVars.join(', '))
   console.error('Please check your .env file and ensure all required variables are set.')
   console.error('\nRequired variables:')
@@ -118,13 +119,15 @@ if (config.IS_PRODUCTION) {
   }
 }
 
-// Log configuration summary (without sensitive data)
-console.log('🔧 Configuration loaded:')
-console.log(`   Environment: ${config.NODE_ENV}`)
-console.log(`   Port: ${config.PORT}`)
-console.log(`   Database: ${config.MONGODB_URI.replace(/\/\/.*@/, '//***:***@')}`)
-console.log(`   Cloudinary: ${config.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`)
-console.log(`   CORS Origins: ${config.ALLOWED_ORIGINS.length} configured`)
-console.log(`   Log Level: ${config.LOG_LEVEL}`)
+// Log configuration summary (without sensitive data) - skip in test mode
+if (config.NODE_ENV !== 'test') {
+  console.log('🔧 Configuration loaded:')
+  console.log(`   Environment: ${config.NODE_ENV}`)
+  console.log(`   Port: ${config.PORT}`)
+  console.log(`   Database: ${config.MONGODB_URI.replace(/\/\/.*@/, '//***:***@')}`)
+  console.log(`   Cloudinary: ${config.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`)
+  console.log(`   CORS Origins: ${config.ALLOWED_ORIGINS.length} configured`)
+  console.log(`   Log Level: ${config.LOG_LEVEL}`)
+}
 
 module.exports = config

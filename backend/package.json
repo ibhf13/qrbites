@@ -40,7 +40,10 @@
     "test:watch:unit": "jest --watch --testPathIgnorePatterns='integration'",
     "test:models": "jest --testPathPattern='models/__tests__'",
     "test:controllers": "jest --testPathPattern='controllers/__tests__'",
-    "test:middlewares": "jest --testPathPattern='middlewares/__tests__'"
+    "test:middlewares": "jest --testPathPattern='middlewares/__tests__'",
+    "docs": "node scripts/validateSwagger.js",
+    "docs:validate": "node scripts/validateSwagger.js",
+    "docs:serve": "npm run dev"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -62,6 +65,8 @@
     "node-cache": "^5.1.2",
     "qrcode": "^1.5.4",
     "rate-limit-redis": "^4.2.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^8.3.2",
     "winston": "^3.17.0",
     "write-file-atomic": "^6.0.0"
