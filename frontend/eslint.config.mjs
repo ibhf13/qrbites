@@ -16,6 +16,8 @@ export default [
             'dist/*',
             'build/*',
             'node_modules/*',
+            'public/*',
+            '**/*.md',
         ],
     },
     // Configuration for app source files with strict TypeScript checking
