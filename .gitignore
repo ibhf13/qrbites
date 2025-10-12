@@ -5,6 +5,9 @@ package-lock.json
 # IDE
 .vscode/
 
+# husky
+.husky/
+--help
 
 # Environment variables
 .env
