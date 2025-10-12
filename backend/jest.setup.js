@@ -1,19 +1,13 @@
+/**
+ * Jest Setup File
+ * Runs after test framework is installed but before tests
+ * Environment variables are set in jest.env.js (loaded via setupFiles)
+ */
 
 const { MongoMemoryServer } = require('mongodb-memory-server')
 const mongoose = require('mongoose')
 
 let mongoServer
-
-// Set test environment variables
-process.env.NODE_ENV = 'test'
-process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-purposes-only'
-process.env.JWT_EXPIRES_IN = '1h'
-process.env.BCRYPT_ROUNDS = '4' // Lower rounds for faster tests
-process.env.CLOUDINARY_CLOUD_NAME = 'test-cloud'
-process.env.CLOUDINARY_API_KEY = 'test-api-key'
-process.env.CLOUDINARY_API_SECRET = 'test-api-secret'
-process.env.API_URL = 'http://localhost:5000'
-process.env.FRONTEND_URL = 'http://localhost:3000'
 
 // Mock uuid
 jest.mock('uuid', () => ({

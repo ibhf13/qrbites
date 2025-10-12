@@ -7,6 +7,7 @@ module.exports = {
   resetMocks: true,
   restoreMocks: true,
   testTimeout: 10000, // Reduce timeout to 10 seconds
+  setupFiles: ['<rootDir>/jest.env.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
