@@ -16,18 +16,20 @@ const requiredEnvVars = [
 ]
 
 // Validate required environment variables (skip in test environment)
-// Test environment variables are set in jest.setup.js before any imports
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
-if (missingVars.length > 0 && process.env.NODE_ENV !== 'test') {
-  console.error('❌ Missing required environment variables:', missingVars.join(', '))
-  console.error('Please check your .env file and ensure all required variables are set.')
-  console.error('\nRequired variables:')
-  console.error('  - JWT_SECRET: Your JWT secret key')
-  console.error('  - MONGODB_URI: MongoDB connection string')
-  console.error('  - CLOUDINARY_CLOUD_NAME: Your Cloudinary cloud name')
-  console.error('  - CLOUDINARY_API_KEY: Your Cloudinary API key')
-  console.error('  - CLOUDINARY_API_SECRET: Your Cloudinary API secret')
-  process.exit(1)
+// Test environment variables are set in jest.env.js before any imports
+if (process.env.NODE_ENV !== 'test') {
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
+  if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:', missingVars.join(', '))
+    console.error('Please check your .env file and ensure all required variables are set.')
+    console.error('\nRequired variables:')
+    console.error('  - JWT_SECRET: Your JWT secret key')
+    console.error('  - MONGODB_URI: MongoDB connection string')
+    console.error('  - CLOUDINARY_CLOUD_NAME: Your Cloudinary cloud name')
+    console.error('  - CLOUDINARY_API_KEY: Your Cloudinary API key')
+    console.error('  - CLOUDINARY_API_SECRET: Your Cloudinary API secret')
+    process.exit(1)
+  }
 }
 
 const config = {
@@ -120,7 +122,7 @@ if (config.IS_PRODUCTION) {
 }
 
 // Log configuration summary (without sensitive data) - skip in test mode
-if (config.NODE_ENV !== 'test') {
+if (config.NODE_ENV !== 'test' && config.MONGODB_URI) {
   console.log('🔧 Configuration loaded:')
   console.log(`   Environment: ${config.NODE_ENV}`)
   console.log(`   Port: ${config.PORT}`)
