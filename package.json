@@ -1,15 +1,15 @@
 {
-    "name": "qrbites-monorepo",
+    "name": "qrbites",
     "version": "1.0.0",
     "private": true,
     "description": "QRBites - Restaurant Menu Digitization Platform",
     "scripts": {
         "prepare": "husky",
-        "lint:backend": "cd backend && npm run lint",
-        "lint:frontend": "cd frontend && npm run lint",
-        "format:backend": "cd backend && npm run format",
-        "format:frontend": "cd frontend && npm run format",
-        "pre": "npm run lint:backend && npm run lint:frontend"
+        "lint:backend": "echo '🔍 Linting backend...' && cd backend && npm run lint",
+        "lint:frontend": "echo '🔍 Linting frontend...' && cd frontend && npm run lint",
+        "format:backend": "echo '✨ Formatting backend...' && cd backend && npm run format",
+        "format:frontend": "echo '✨ Formatting frontend...' && cd frontend && npm run format",
+        "pre": "echo '🚀 Running pre-commit checks...' && npm run lint:backend && npm run lint:frontend && echo '✅ All pre-commit checks passed!'"
     },
     "devDependencies": {
         "husky": "^9.1.7",
