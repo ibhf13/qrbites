@@ -12,6 +12,7 @@ export const isValidationError = (response: any): boolean => {
     // Handle axios-wrapped error response
     if (response?.response?.data && isApiErrorResponse(response.response.data)) {
         const apiError = response.response.data
+
         return apiError.error === 'Validation error' && !!apiError.details
     }
 

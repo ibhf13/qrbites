@@ -10,6 +10,7 @@ const {
   cleanupOnError,
   uploadToCloudinary,
 } = require('@commonMiddlewares/uploadValidationMiddleware')
+const { addUserRestaurants } = require('@commonMiddlewares/authMiddleware')
 
 const { menuSchema, menuUpdateSchema } = require('../validations/menuValidation')
 const {
@@ -22,9 +23,10 @@ const {
   generateQRCode,
 } = require('../controllers/menuController')
 
+
 const router = express.Router()
 
-router.use(protect, apiLimiter)
+router.use(protect, addUserRestaurants, apiLimiter)
 
 router.get('/', getMenus)
 router.get('/:id', checkMenuOwnership(), getMenuById)

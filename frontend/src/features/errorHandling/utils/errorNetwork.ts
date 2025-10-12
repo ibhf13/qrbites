@@ -25,6 +25,7 @@ export const isNetworkError = (error: any): boolean => {
  */
 export const isServerError = (error: any): boolean => {
     const status = error?.response?.status || error?.status
+
     return status >= 500 && status < 600
 }
 
@@ -36,6 +37,7 @@ export const getNetworkErrorMessage = (error: any): string => {
         if (error?.message?.includes('timeout')) {
             return NETWORK_ERROR_MESSAGES.REQUEST_TIMEOUT
         }
+
         return NETWORK_ERROR_MESSAGES.CONNECTION_LOST
     }
 

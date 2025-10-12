@@ -58,8 +58,10 @@ export const useRestaurantForm = (
 
                 if (!hoursValid) {
                     const hoursErrors = methods.formState.errors.hours
+
                     if (hoursErrors) {
                         setFormError('Please fix the business hours validation errors before proceeding.')
+
                         return false
                     }
                 }
@@ -70,6 +72,7 @@ export const useRestaurantForm = (
 
                 if (!hasOpenDays) {
                     setFormError('Your restaurant must be open at least one day of the week.')
+
                     return false
                 }
 

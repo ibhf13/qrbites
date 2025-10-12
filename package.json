@@ -8,7 +8,8 @@
         "lint:backend": "cd backend && npm run lint",
         "lint:frontend": "cd frontend && npm run lint",
         "format:backend": "cd backend && npm run format",
-        "format:frontend": "cd frontend && npm run format"
+        "format:frontend": "cd frontend && npm run format",
+        "pre": "npm run lint:backend && npm run lint:frontend"
     },
     "devDependencies": {
         "husky": "^9.1.7",

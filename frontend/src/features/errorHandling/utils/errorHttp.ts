@@ -59,9 +59,11 @@ export const getHttpStatusMessage = (status: number): string => {
             if (status >= 400 && status < 500) {
                 return 'Client error. Please check your request and try again.'
             }
+
             if (status >= 500) {
                 return 'Server error. Please try again later.'
             }
+
             return 'An unexpected error occurred.'
     }
 }
@@ -87,5 +89,6 @@ export const getHttpErrorSeverity = (status: number): 'low' | 'medium' | 'high' 
     if (status === 401 || status === 403) return 'critical'
     if (status >= 500) return 'high'
     if (status >= 400 && status < 500) return 'medium'
+
     return 'low'
 }

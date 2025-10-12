@@ -5,6 +5,12 @@ const logger = require('@commonUtils/logger')
  * Initialize Cloudinary configuration
  */
 const initializeCloudinary = () => {
+    // Skip initialization in test environment as it's mocked
+    if (process.env.NODE_ENV === 'test') {
+        logger.debug('Skipping Cloudinary initialization in test environment')
+        return
+    }
+
     try {
         const config = {
             cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
