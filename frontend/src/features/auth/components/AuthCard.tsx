@@ -1,4 +1,4 @@
-import { Card, Typography, Box } from '@/components/common'
+import { Card, Typography, Box, Divider } from '@/components/common'
 import { ErrorDisplay } from '@/features/errorHandling/components'
 import React from 'react'
 
@@ -6,6 +6,7 @@ interface AuthCardProps {
     children: React.ReactNode
     title: string
     error?: string | null
+    oauthContent?: React.ReactNode
     footerContent?: React.ReactNode
     className?: string
 }
@@ -14,6 +15,7 @@ const AuthCard: React.FC<AuthCardProps> = ({
     children,
     title,
     error,
+    oauthContent,
     footerContent,
     className = ""
 }) => {
@@ -44,6 +46,15 @@ const AuthCard: React.FC<AuthCardProps> = ({
             )}
 
             {children}
+
+            {oauthContent && (
+                <>
+                    <Divider text="OR" className="my-6" />
+                    <Box>
+                        {oauthContent}
+                    </Box>
+                </>
+            )}
 
             {footerContent && (
                 <Box mt="xl" className="text-center">

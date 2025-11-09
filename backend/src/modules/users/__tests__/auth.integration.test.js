@@ -146,10 +146,7 @@ describe('Auth Integration Tests', () => {
         .expect(200)
 
       // Old token should still work (tokens are not invalidated)
-      await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200)
+      await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`).expect(200)
     })
 
     it('should reject token after user deactivation', async () => {
@@ -159,10 +156,7 @@ describe('Auth Integration Tests', () => {
       await User.findByIdAndUpdate(user._id, { isActive: false })
 
       // Token should be rejected
-      await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(401)
+      await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`).expect(401)
     })
 
     it('should reject token after user deletion', async () => {
@@ -172,10 +166,7 @@ describe('Auth Integration Tests', () => {
       await User.findByIdAndDelete(user._id)
 
       // Token should be rejected
-      await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(401)
+      await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`).expect(401)
     })
   })
 
@@ -250,12 +241,10 @@ describe('Auth Integration Tests', () => {
       const { user } = await createTestUser({ password })
 
       const loginPromises = Array.from({ length: 5 }, () =>
-        request(app)
-          .post('/api/auth/login')
-          .send({
-            email: user.email,
-            password,
-          })
+        request(app).post('/api/auth/login').send({
+          email: user.email,
+          password,
+        })
       )
 
       const responses = await Promise.all(loginPromises)
@@ -461,16 +450,10 @@ describe('Auth Integration Tests', () => {
       const { user, token } = await createTestUser({ password })
 
       // This should work
-      await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200)
+      await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`).expect(200)
 
       // Subsequent requests should still work
-      await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200)
+      await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`).expect(200)
     })
 
     it('should handle rapid successive logins', async () => {
@@ -479,12 +462,10 @@ describe('Auth Integration Tests', () => {
 
       // Rapid successive logins
       for (let i = 0; i < 3; i++) {
-        const response = await request(app)
-          .post('/api/auth/login')
-          .send({
-            email: user.email,
-            password,
-          })
+        const response = await request(app).post('/api/auth/login').send({
+          email: user.email,
+          password,
+        })
 
         expect(response.status).toBe(200)
         expect(response.body.data.token).toBeDefined()
@@ -519,4 +500,3 @@ describe('Auth Integration Tests', () => {
     })
   })
 })
-

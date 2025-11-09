@@ -1,6 +1,7 @@
 const authController = require('./authController')
 const userController = require('./userController')
 const publicController = require('./publicController')
+const oauthController = require('./oauthController')
 
 module.exports = {
   // Auth controller exports
@@ -8,6 +9,9 @@ module.exports = {
   login: authController.login,
   getMe: authController.getMe,
   changePassword: authController.changePassword,
+
+  // OAuth controller exports
+  googleCallback: oauthController.googleCallback,
 
   // User controller exports
   getUsers: userController.getUsers,

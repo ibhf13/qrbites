@@ -19,13 +19,13 @@ describe('User Model', () => {
 
     it('should require email field', async () => {
       const userData = userFactory.build({ email: undefined })
-      
+
       await expect(User.create(userData)).rejects.toThrow()
     })
 
     it('should require password field', async () => {
       const userData = userFactory.build({ password: undefined })
-      
+
       await expect(User.create(userData)).rejects.toThrow()
     })
 
@@ -45,21 +45,21 @@ describe('User Model', () => {
 
     it('should enforce minimum password length of 6 characters', async () => {
       const userData = userFactory.build({ password: '12345' })
-      
+
       await expect(User.create(userData)).rejects.toThrow()
     })
 
     it('should enforce minimum name length of 2 characters', async () => {
       const userData = userFactory.build({ name: 'A' })
-      
+
       await expect(User.create(userData)).rejects.toThrow()
     })
 
     it('should enforce maximum name length of 50 characters', async () => {
-      const userData = userFactory.build({ 
-        name: 'A'.repeat(51) 
+      const userData = userFactory.build({
+        name: 'A'.repeat(51),
       })
-      
+
       await expect(User.create(userData)).rejects.toThrow()
     })
 
@@ -86,7 +86,7 @@ describe('User Model', () => {
 
     it('should only accept valid role values', async () => {
       const userData = userFactory.build({ role: 'superuser' })
-      
+
       await expect(User.create(userData)).rejects.toThrow()
     })
 
@@ -223,9 +223,7 @@ describe('User Model', () => {
 
     it('should have compound index on role and isActive', async () => {
       const indexes = User.schema.indexes()
-      const compoundIndex = indexes.find(
-        index => index[0].role === 1 && index[0].isActive === 1
-      )
+      const compoundIndex = indexes.find(index => index[0].role === 1 && index[0].isActive === 1)
 
       expect(compoundIndex).toBeDefined()
     })
@@ -292,8 +290,8 @@ describe('User Model', () => {
     })
 
     it('should handle special characters in name', async () => {
-      const userData = userFactory.build({ 
-        name: "O'Brien-Smith" 
+      const userData = userFactory.build({
+        name: "O'Brien-Smith",
       })
       const user = await User.create(userData)
 
@@ -301,8 +299,8 @@ describe('User Model', () => {
     })
 
     it('should trim whitespace from name', async () => {
-      const userData = userFactory.build({ 
-        name: '  John Doe  ' 
+      const userData = userFactory.build({
+        name: '  John Doe  ',
       })
       const user = await User.create(userData)
 
@@ -310,4 +308,3 @@ describe('User Model', () => {
     })
   })
 })
-

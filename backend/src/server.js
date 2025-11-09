@@ -25,7 +25,7 @@ const startServer = async () => {
     })
 
     // Graceful shutdown
-    const shutdown = async (signal) => {
+    const shutdown = async signal => {
       logger.info(`📡 ${signal} received. Shutting down...`)
       server.close(() => {
         logger.success('✅ Server closed')

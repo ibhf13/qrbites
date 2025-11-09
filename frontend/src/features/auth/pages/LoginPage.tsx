@@ -8,6 +8,7 @@ import { LoginFormData } from '../types/auth.types'
 import { loginSchema } from '../validations/login.validation'
 import AuthCard from '../components/AuthCard'
 import AuthLayout from '../components/AuthLayout'
+import OAuthButton from '../components/OAuthButton'
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate()
@@ -55,6 +56,10 @@ const LoginPage: React.FC = () => {
         onSubmit(demoCredentials)
     }
 
+    const oauthContent = (
+        <OAuthButton provider="google" disabled={isSubmitting || isLoading} />
+    )
+
     const footerContent = (
         <FlexBox direction="col" gap="sm">
             <Typography variant="body" color="muted" align="center">
@@ -79,7 +84,7 @@ const LoginPage: React.FC = () => {
 
     return (
         <AuthLayout>
-            <AuthCard title="Log In" error={error} footerContent={footerContent}>
+            <AuthCard title="Log In" error={error} oauthContent={oauthContent} footerContent={footerContent}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <FormInput
                         label="Email Address"

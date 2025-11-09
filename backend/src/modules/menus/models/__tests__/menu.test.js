@@ -404,7 +404,7 @@ describe('Menu Model', () => {
 
     it('should handle multiple image URLs', async () => {
       const imageUrls = Array.from({ length: 10 }, (_, i) => `https://example.com/image${i}.jpg`)
-      
+
       const menuData = {
         name: 'Test Menu',
         restaurantId: testRestaurant._id,
@@ -416,4 +416,3 @@ describe('Menu Model', () => {
     })
   })
 })
-

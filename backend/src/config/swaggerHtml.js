@@ -1,10 +1,9 @@
-
 /**
  * Generates HTML page for Swagger UI with CDN-hosted assets
  * @param {string} specUrl - URL to the OpenAPI specification JSON
  * @returns {string} HTML string
  */
-const generateSwaggerHtml = (specUrl) => `
+const generateSwaggerHtml = specUrl => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,4 +54,3 @@ const generateSwaggerHtml = (specUrl) => `
 `
 
 module.exports = { generateSwaggerHtml }
-

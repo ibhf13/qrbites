@@ -16,7 +16,7 @@ const Menu = require('../models/menu')
 // Cache keys for clearing public routes
 const CACHE_KEYS = {
   PUBLIC_MENUS: '/api/public/menus/',
-  PUBLIC_RESTAURANTS: '/api/public/restaurants/'
+  PUBLIC_RESTAURANTS: '/api/public/restaurants/',
 }
 
 /**

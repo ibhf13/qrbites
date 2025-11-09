@@ -91,13 +91,13 @@ describe('File Upload Utils', () => {
         body: {},
       }
 
-      // Accessing cloudinaryUrl or path will return undefined, 
+      // Accessing cloudinaryUrl or path will return undefined,
       // and trying to use it will fail (simulating an error condition)
       Object.defineProperty(req.body, 'imageUrl', {
         set: () => {
           throw new Error('File URL generation failed')
         },
-        configurable: true
+        configurable: true,
       })
 
       const result = attachFileUrl(req, 'menu', 'imageUrl')
@@ -128,7 +128,7 @@ describe('File Upload Utils', () => {
       const req = {
         files: [
           { filename: 'image1.jpg', cloudinaryUrl: '/uploads/menus/image1.jpg' },
-          { filename: 'image2.jpg', cloudinaryUrl: '/uploads/menus/image2.jpg' }
+          { filename: 'image2.jpg', cloudinaryUrl: '/uploads/menus/image2.jpg' },
         ],
         body: {},
       }
@@ -143,8 +143,16 @@ describe('File Upload Utils', () => {
     it('should attach multiple file URLs with relativePath', () => {
       const req = {
         files: [
-          { filename: 'image1.jpg', relativePath: '2025/01/15', cloudinaryUrl: '/uploads/menus/2025/01/15/image1.jpg' },
-          { filename: 'image2.jpg', relativePath: '2025/01/15', cloudinaryUrl: '/uploads/menus/2025/01/15/image2.jpg' },
+          {
+            filename: 'image1.jpg',
+            relativePath: '2025/01/15',
+            cloudinaryUrl: '/uploads/menus/2025/01/15/image1.jpg',
+          },
+          {
+            filename: 'image2.jpg',
+            relativePath: '2025/01/15',
+            cloudinaryUrl: '/uploads/menus/2025/01/15/image2.jpg',
+          },
         ],
         body: {},
       }
@@ -162,7 +170,7 @@ describe('File Upload Utils', () => {
       const req = {
         files: [
           { filename: 'image1.jpg', cloudinaryUrl: '/uploads/menus/image1.jpg' },
-          { filename: 'image2.jpg', cloudinaryUrl: '/uploads/menus/image2.jpg' }
+          { filename: 'image2.jpg', cloudinaryUrl: '/uploads/menus/image2.jpg' },
         ],
         body: {},
       }
@@ -185,7 +193,7 @@ describe('File Upload Utils', () => {
         set: () => {
           throw new Error('File URL generation failed')
         },
-        configurable: true
+        configurable: true,
       })
 
       const result = attachFileUrls(req, 'menu', 'imageUrls')
@@ -210,7 +218,7 @@ describe('File Upload Utils', () => {
 
       // Test that badRequest is called
       await updateDocumentWithFileUrl(mockModel, 'documentId', req, 'menu', 'imageUrl').catch(
-        () => { }
+        () => {}
       )
       expect(badRequest).toHaveBeenCalledWith('No file uploaded')
     })
@@ -288,7 +296,7 @@ describe('File Upload Utils', () => {
 
       // Test that badRequest is called
       await updateDocumentWithFileUrl(mockModel, 'invalidId', req, 'menu', 'imageUrl').catch(
-        () => { }
+        () => {}
       )
       expect(badRequest).toHaveBeenCalledWith('Invalid Document ID format')
     })

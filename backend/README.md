@@ -1,6 +1,7 @@
 # 🍽️ QRBites Backend
 
-The backend API for QRBites - a comprehensive restaurant menu digitization platform built with Node.js, Express, and MongoDB.
+The backend API for QRBites - a comprehensive restaurant menu digitization
+platform built with Node.js, Express, and MongoDB.
 
 ## 📋 Table of Contents
 
@@ -18,12 +19,17 @@ The backend API for QRBites - a comprehensive restaurant menu digitization platf
 
 ## 🎯 Overview
 
-The QRBites backend provides a RESTful API for managing restaurants, menus, menu items, and user authentication. It features JWT-based authentication, role-based authorization, image upload with Cloudinary, Redis caching, and comprehensive API documentation with Swagger.
+The QRBites backend provides a RESTful API for managing restaurants, menus, menu
+items, and user authentication. It features JWT-based authentication, role-based
+authorization, image upload with Cloudinary, Redis caching, and comprehensive
+API documentation with Swagger.
 
 ### 🌐 Production URL
 
-- **API Base URL**: [https://qrbites-api.vercel.app](https://qrbites-api.vercel.app)
-- **Swagger Documentation**: [https://qrbites-api.vercel.app/api-docs](https://qrbites-api.vercel.app/api-docs)
+- **API Base URL**:
+  [https://qrbites-api.vercel.app](https://qrbites-api.vercel.app)
+- **Swagger Documentation**:
+  [https://qrbites-api.vercel.app/api-docs](https://qrbites-api.vercel.app/api-docs)
 
 ### Key Features
 
@@ -83,21 +89,25 @@ The QRBites backend provides a RESTful API for managing restaurants, menus, menu
 ### Installation
 
 1. **Navigate to backend directory**
+
    ```bash
    cd backend
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Create environment file**
+
    ```bash
    cp .env.example .env
    ```
 
-4. **Configure environment variables** (see [Environment Variables](#environment-variables))
+4. **Configure environment variables** (see
+   [Environment Variables](#environment-variables))
 
 5. **Start development server**
    ```bash
@@ -262,18 +272,21 @@ backend/
 
 Interactive API documentation is available at:
 
-- **Production**: [https://qrbites-api.vercel.app/api-docs](https://qrbites-api.vercel.app/api-docs)
+- **Production**:
+  [https://qrbites-api.vercel.app/api-docs](https://qrbites-api.vercel.app/api-docs)
 - **Local**: `http://localhost:5000/api-docs`
 
 ### API Endpoints
 
 #### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - User login
 - `POST /api/auth/refresh` - Refresh JWT token
 - `POST /api/auth/logout` - User logout
 
 #### Users
+
 - `GET /api/users` - Get all users (Admin only)
 - `GET /api/users/:id` - Get user by ID
 - `PUT /api/users/:id` - Update user
@@ -282,6 +295,7 @@ Interactive API documentation is available at:
 - `PUT /api/users/profile` - Update profile
 
 #### Restaurants
+
 - `GET /api/restaurants` - Get all restaurants
 - `POST /api/restaurants` - Create restaurant
 - `GET /api/restaurants/:id` - Get restaurant by ID
@@ -290,6 +304,7 @@ Interactive API documentation is available at:
 - `POST /api/restaurants/:id/logo` - Upload restaurant logo
 
 #### Menus
+
 - `GET /api/menus` - Get all menus
 - `POST /api/menus` - Create menu
 - `GET /api/menus/:id` - Get menu by ID
@@ -299,6 +314,7 @@ Interactive API documentation is available at:
 - `GET /api/menus/restaurant/:restaurantId` - Get menus by restaurant
 
 #### Menu Items
+
 - `GET /api/menu-items` - Get all menu items
 - `POST /api/menu-items` - Create menu item
 - `GET /api/menu-items/:id` - Get menu item by ID
@@ -307,12 +323,14 @@ Interactive API documentation is available at:
 - `POST /api/menu-items/:id/image` - Upload item image
 
 #### Health
+
 - `GET /api/health` - Health check
 - `GET /api/health/db` - Database health check
 
 ### Authentication
 
-Most endpoints require JWT authentication. Include the token in the Authorization header:
+Most endpoints require JWT authentication. Include the token in the
+Authorization header:
 
 ```
 Authorization: Bearer <your-jwt-token>
@@ -374,6 +392,7 @@ FRONTEND_URL=http://localhost:5173
 ### Required Variables
 
 These variables are **required** for the application to run:
+
 - `JWT_SECRET`
 - `MONGODB_URI`
 - `CLOUDINARY_CLOUD_NAME`
@@ -485,7 +504,12 @@ These variables are **required** for the application to run:
 router.get('/profile', authMiddleware, getProfile)
 
 // Protect route with authentication and authorization
-router.post('/restaurants', authMiddleware, authorize(['admin', 'restaurantOwner']), createRestaurant)
+router.post(
+  '/restaurants',
+  authMiddleware,
+  authorize(['admin', 'restaurantOwner']),
+  createRestaurant
+)
 ```
 
 ## 🧪 Testing
@@ -560,11 +584,13 @@ describe('User API', () => {
 ### Test Coverage
 
 The project aims for high test coverage:
+
 - Unit tests for models, services, utilities
 - Integration tests for API endpoints
 - Middleware tests for authentication and validation
 
 View coverage report:
+
 ```bash
 npm run test:coverage
 open coverage/lcov-report/index.html
@@ -608,11 +634,13 @@ docker-compose logs -f api
 The backend is configured for serverless deployment on Vercel.
 
 1. **Install Vercel CLI**
+
    ```bash
    npm i -g vercel
    ```
 
 2. **Deploy**
+
    ```bash
    vercel deploy
    ```
@@ -643,6 +671,7 @@ Before deploying to production:
 ### Logging
 
 Winston logger with multiple transports:
+
 - Console (development)
 - File (production)
 - Log levels: error, warn, info, debug
@@ -657,6 +686,7 @@ logger.error('Database connection failed', { error: err.message })
 ### Error Tracking
 
 Custom error classes for consistent error handling:
+
 - `ApiError` - Base API error
 - `ValidationError` - Request validation errors
 - `UnauthorizedError` - Authentication errors
@@ -668,6 +698,7 @@ Custom error classes for consistent error handling:
 ### Common Issues
 
 **MongoDB Connection Failed**
+
 ```bash
 # Check MongoDB is running
 mongod --version
@@ -675,6 +706,7 @@ mongod --version
 ```
 
 **Cloudinary Upload Failed**
+
 ```bash
 # Verify Cloudinary credentials in .env
 CLOUDINARY_CLOUD_NAME=your-cloud-name
@@ -683,12 +715,14 @@ CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 **JWT Verification Failed**
+
 ```bash
 # Ensure JWT_SECRET is set and matches
 # Check token expiration time
 ```
 
 **Port Already in Use**
+
 ```bash
 # Change PORT in .env or kill process
 lsof -ti:5000 | xargs kill -9

@@ -149,9 +149,7 @@ const deleteRestaurant = asyncHandler(async (req, res) => {
   // Delete the restaurant
   await Restaurant.deleteOne({ _id: id })
 
-  logger.warn(
-    `Restaurant deleted: all it related menus and menu items by user ${req.user._id}`
-  )
+  logger.warn(`Restaurant deleted: all it related menus and menu items by user ${req.user._id}`)
 
   // Clear cache for public restaurant routes
   clearCache('/api/public/restaurants/')

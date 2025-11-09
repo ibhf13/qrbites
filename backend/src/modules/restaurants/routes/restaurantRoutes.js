@@ -373,6 +373,11 @@ router.delete('/:id', checkRestaurantOwnership('id'), deleteRestaurant)
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/:id/logo', checkRestaurantOwnership('id'), uploadToCloudinary('restaurant', 'logo'), uploadLogo)
+router.post(
+  '/:id/logo',
+  checkRestaurantOwnership('id'),
+  uploadToCloudinary('restaurant', 'logo'),
+  uploadLogo
+)
 
 module.exports = router

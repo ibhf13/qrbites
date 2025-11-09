@@ -1,5 +1,7 @@
-const user = require('./user')
+const User = require('./user')
+const FederatedCredential = require('./FederatedCredential')
 
 module.exports = {
-  User: user,
+  User,
+  FederatedCredential,
 }

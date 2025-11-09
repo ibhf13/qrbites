@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+const passport = require('passport')
 const { helmetConfig, makeQueryWritable } = require('@config/security')
 const {
   getJsonParser,
@@ -14,6 +15,7 @@ const { notFoundMiddleware, errorHandlerMiddleware } = require('@commonMiddlewar
 const { ddosProtection, ipBlacklist } = require('@commonMiddlewares/rateLimitMiddleware')
 const { corsMiddleware } = require('@commonMiddlewares/corsMiddleware')
 const { multerErrorHandler } = require('@commonServices/upload')
+const configurePassport = require('@config/passport')
 
 const app = express()
 
@@ -45,6 +47,10 @@ app.use(getMongoSanitize())
 // 8. DDoS Protection and IP Blacklist
 app.use(ddosProtection)
 app.use(ipBlacklist.middleware())
+
+// 9. Initialize Passport and configure OAuth strategies
+configurePassport()
+app.use(passport.initialize())
 
 // API DOCUMENTATION
 mountDocumentationRoutes(app)
