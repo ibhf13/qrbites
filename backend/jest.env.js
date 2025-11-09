@@ -16,3 +16,6 @@ process.env.CLOUDINARY_API_SECRET = 'test-api-secret'
 process.env.API_URL = 'http://localhost:5000'
 process.env.FRONTEND_URL = 'http://localhost:3000'
 process.env.MONGODB_URI = 'mongodb://localhost:27017/test-placeholder' // Temporary, will be replaced by MongoMemoryServer
+process.env.GOOGLE_CLIENT_ID = 'test-google-client-id'
+process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret'
+process.env.GOOGLE_CALLBACK_URL = 'http://localhost:5000/api/auth/google/callback'
