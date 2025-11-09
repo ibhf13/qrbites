@@ -14,10 +14,7 @@ describe('Auth Controller', () => {
         name: 'New User',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201)
 
       expect(response.body.success).toBe(true)
       expect(response.body.data).toHaveProperty('_id')
@@ -39,10 +36,7 @@ describe('Auth Controller', () => {
         name: 'Test User',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201)
 
       expect(response.body.data.email).toBe('uppercase@example.com')
     })
@@ -55,10 +49,7 @@ describe('Auth Controller', () => {
       }
 
       // Create first user
-      await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      await request(app).post('/api/auth/register').send(userData).expect(201)
 
       // Try to register with same email
       const response = await request(app)
@@ -79,10 +70,7 @@ describe('Auth Controller', () => {
         name: 'Test User',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(422)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(422)
 
       expect(response.body.success).toBe(false)
     })
@@ -93,10 +81,7 @@ describe('Auth Controller', () => {
         name: 'Test User',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(422)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(422)
 
       expect(response.body.success).toBe(false)
     })
@@ -108,10 +93,7 @@ describe('Auth Controller', () => {
         name: 'Test User',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(422)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(422)
 
       expect(response.body.success).toBe(false)
     })
@@ -122,10 +104,7 @@ describe('Auth Controller', () => {
         password: 'ValidPassword123!',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201)
 
       expect(response.body.data.email).toBe(userData.email)
       expect(response.body.data.displayName).toBe('Anonymous User')
@@ -138,10 +117,7 @@ describe('Auth Controller', () => {
         name: 'Test User',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201)
 
       expect(response.body.data.role).toBe('user')
     })
@@ -154,10 +130,7 @@ describe('Auth Controller', () => {
         role: 'admin',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201)
 
       // Should ignore the role field and default to 'user'
       expect(response.body.data.role).toBe('user')
@@ -192,7 +165,7 @@ describe('Auth Controller', () => {
       const password = 'ValidPassword123!'
       const { user } = await createTestUser({
         email: 'lowercase@example.com',
-        password
+        password,
       })
 
       const response = await request(app)
@@ -253,7 +226,7 @@ describe('Auth Controller', () => {
       const password = 'ValidPassword123!'
       const { user } = await createTestUser({
         password,
-        isActive: false
+        isActive: false,
       })
 
       const response = await request(app)
@@ -294,7 +267,7 @@ describe('Auth Controller', () => {
       const password = 'ValidPassword123!'
       const { user } = await createTestUser({
         name: 'John Doe',
-        password
+        password,
       })
 
       const response = await request(app)
@@ -326,9 +299,7 @@ describe('Auth Controller', () => {
     })
 
     it('should reject request without token', async () => {
-      const response = await request(app)
-        .get('/api/auth/me')
-        .expect(401)
+      const response = await request(app).get('/api/auth/me').expect(401)
 
       expect(response.body.success).toBe(false)
       expect(response.body.error).toContain('no token')
@@ -347,11 +318,7 @@ describe('Auth Controller', () => {
       const { user } = await createTestUser()
 
       // Create an expired token
-      const expiredToken = jwt.sign(
-        { id: user._id },
-        process.env.JWT_SECRET,
-        { expiresIn: '0s' }
-      )
+      const expiredToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '0s' })
 
       await new Promise(resolve => setTimeout(resolve, 100))
 
@@ -530,10 +497,7 @@ describe('Auth Controller', () => {
         name: 'Token Test',
       }
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201)
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201)
 
       const token = response.body.data.token
       expect(token).toBeDefined()
@@ -563,4 +527,3 @@ describe('Auth Controller', () => {
     })
   })
 })
-

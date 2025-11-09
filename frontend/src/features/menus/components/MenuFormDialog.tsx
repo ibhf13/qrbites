@@ -36,6 +36,7 @@ const MenuFormDialog: React.FC<MenuFormDialogProps> = ({
                             name: menuData.name,
                             description: menuData.description || '',
                             isActive: menuData.isActive,
+                            categories: menuData.categories || [],
                         }
                         : undefined
                 }

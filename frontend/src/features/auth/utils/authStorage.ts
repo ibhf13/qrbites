@@ -2,6 +2,7 @@ import { AuthUser, StorageType, StoredAuthData, JWTPayload } from "../types/auth
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const USER_DATA_KEY = 'user'
+const OAUTH_PENDING_TOKEN_KEY = 'oauth_pending_token'
 
 export const storeAuthData = (token: string, user: AuthUser, storageType: StorageType): void => {
     const storage = storageType === 'localStorage' ? localStorage : sessionStorage
@@ -64,7 +65,17 @@ export const getAuthData = (): StoredAuthData | null => {
 }
 
 export const getAuthToken = (): string | null => {
-    return localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY)
+    // Check regular storage first
+    const storedToken = localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY)
+
+    // Fallback to pending OAuth token if no stored token
+    if (!storedToken) {
+        const pendingToken = localStorage.getItem(OAUTH_PENDING_TOKEN_KEY)
+
+        return pendingToken
+    }
+
+    return storedToken
 }
 
 export const getUserData = (): AuthUser | null => {
@@ -86,6 +97,7 @@ export const getUserData = (): AuthUser | null => {
 export const clearAuthData = (): void => {
     localStorage.removeItem(AUTH_TOKEN_KEY)
     localStorage.removeItem(USER_DATA_KEY)
+    localStorage.removeItem(OAUTH_PENDING_TOKEN_KEY)
     sessionStorage.removeItem(AUTH_TOKEN_KEY)
     sessionStorage.removeItem(USER_DATA_KEY)
 
@@ -145,5 +157,42 @@ export const isValidTokenFormat = (token: string): boolean => {
         return !!(payload.exp && payload.id)
     } catch {
         return false
+    }
+}
+
+/**
+ * Store OAuth token temporarily before user data is fetched
+ * @param token - JWT token from OAuth provider
+ */
+export const storeOAuthPendingToken = (token: string): void => {
+    localStorage.setItem(OAUTH_PENDING_TOKEN_KEY, token)
+
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔐 OAuth pending token stored')
+    }
+}
+
+/**
+ * Get OAuth pending token without removing it
+ * @returns OAuth token or null
+ */
+export const getOAuthPendingToken = (): string | null => {
+    const token = localStorage.getItem(OAUTH_PENDING_TOKEN_KEY)
+
+    if (token && process.env.NODE_ENV === 'development') {
+        console.log('🔐 OAuth pending token retrieved')
+    }
+
+    return token
+}
+
+/**
+ * Remove OAuth pending token from storage
+ */
+export const removeOAuthPendingToken = (): void => {
+    localStorage.removeItem(OAUTH_PENDING_TOKEN_KEY)
+
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔐 OAuth pending token removed')
     }
 }

@@ -124,4 +124,3 @@ afterAll(async () => {
 
 // Set test timeout
 jest.setTimeout(10000)
-

@@ -7,6 +7,7 @@ import { RegisterFormData } from '../types/auth.types'
 import { registerSchema } from '../validations/register.validation'
 import AuthCard from '../components/AuthCard'
 import AuthLayout from '../components/AuthLayout'
+import OAuthButton from '../components/OAuthButton'
 
 const RegisterPage: React.FC = () => {
     const navigate = useNavigate()
@@ -36,6 +37,10 @@ const RegisterPage: React.FC = () => {
         }
     }
 
+    const oauthContent = (
+        <OAuthButton provider="google" disabled={isSubmitting || isLoading} />
+    )
+
     const footerContent = (
         <Typography variant="body" color="muted" align="center">
             Already have an account?{' '}
@@ -50,7 +55,7 @@ const RegisterPage: React.FC = () => {
 
     return (
         <AuthLayout>
-            <AuthCard title="Create an Account" error={error} footerContent={footerContent}>
+            <AuthCard title="Create an Account" error={error} oauthContent={oauthContent} footerContent={footerContent}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <FormInput
                         label="Full Name"

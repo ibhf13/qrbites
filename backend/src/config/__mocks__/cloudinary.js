@@ -15,10 +15,11 @@ const cloudinary = {
   v2: {
     config: () => {},
     uploader: {
-      upload: () => Promise.resolve({
-        secure_url: 'https://test.cloudinary.com/test-image.jpg',
-        public_id: 'test-public-id',
-      }),
+      upload: () =>
+        Promise.resolve({
+          secure_url: 'https://test.cloudinary.com/test-image.jpg',
+          public_id: 'test-public-id',
+        }),
       upload_stream: (options, callback) => {
         const stream = {
           end: () => {
@@ -58,4 +59,3 @@ module.exports = {
   getPublicIdFromUrl,
   isCloudinaryConfigured,
 }
-

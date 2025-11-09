@@ -53,7 +53,10 @@ const generateQRCode = async (url, options = {}) => {
  */
 const getQRCodeUrl = urlOrFilename => {
   // If it's already a full URL (from Cloudinary), return as-is
-  if (urlOrFilename && (urlOrFilename.startsWith('http://') || urlOrFilename.startsWith('https://'))) {
+  if (
+    urlOrFilename &&
+    (urlOrFilename.startsWith('http://') || urlOrFilename.startsWith('https://'))
+  ) {
     return urlOrFilename
   }
 

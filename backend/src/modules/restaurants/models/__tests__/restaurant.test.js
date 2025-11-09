@@ -44,7 +44,13 @@ describe('Restaurant Model', () => {
       const restaurantData = {
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -54,7 +60,13 @@ describe('Restaurant Model', () => {
       const restaurantData = {
         name: 'Test Restaurant',
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -64,7 +76,13 @@ describe('Restaurant Model', () => {
       const restaurantData = {
         name: 'Test Restaurant',
         userId: testUser._id,
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -85,7 +103,13 @@ describe('Restaurant Model', () => {
         name: 'AB',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -96,7 +120,13 @@ describe('Restaurant Model', () => {
         name: 'A'.repeat(51),
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -108,7 +138,13 @@ describe('Restaurant Model', () => {
         userId: testUser._id,
         description: 'A'.repeat(501),
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -119,7 +155,13 @@ describe('Restaurant Model', () => {
         name: '  Test Restaurant  ',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -131,7 +173,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -144,7 +192,13 @@ describe('Restaurant Model', () => {
         userId: testUser._id,
         isActive: false,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -156,7 +210,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -169,7 +229,13 @@ describe('Restaurant Model', () => {
         userId: testUser._id,
         logoUrl: 'https://example.com/logo.png',
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -185,7 +251,13 @@ describe('Restaurant Model', () => {
         contact: {
           phone: 'invalid-phone',
         },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -199,7 +271,13 @@ describe('Restaurant Model', () => {
           name: `Restaurant ${phone}`,
           userId: testUser._id,
           contact: { phone },
-          location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+          location: {
+            address: '123 Main St',
+            city: 'City',
+            state: 'ST',
+            zipCode: '12345',
+            country: 'Country',
+          },
         }
 
         const restaurant = await Restaurant.create(restaurantData)
@@ -215,7 +293,13 @@ describe('Restaurant Model', () => {
           phone: '+12345678901',
           email: 'invalid-email',
         },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -229,7 +313,13 @@ describe('Restaurant Model', () => {
           phone: '+12345678901',
           email: 'valid@example.com',
         },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -244,7 +334,13 @@ describe('Restaurant Model', () => {
           phone: '+12345678901',
           website: 'https://restaurant.com',
         },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -258,7 +354,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
         hours: [
           { day: 0, open: '09:00', close: '17:00', closed: false },
           { day: 1, open: '09:00', close: '17:00', closed: false },
@@ -275,7 +377,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
         hours: [{ open: '09:00', close: '17:00' }],
       }
 
@@ -290,7 +398,13 @@ describe('Restaurant Model', () => {
           name: `Restaurant ${day}`,
           userId: testUser._id,
           contact: { phone: '+12345678901' },
-          location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+          location: {
+            address: '123 Main St',
+            city: 'City',
+            state: 'ST',
+            zipCode: '12345',
+            country: 'Country',
+          },
           hours: [{ day, open: '09:00', close: '17:00' }],
         }
 
@@ -306,7 +420,13 @@ describe('Restaurant Model', () => {
           name: `Restaurant ${time}`,
           userId: testUser._id,
           contact: { phone: '+12345678901' },
-          location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+          location: {
+            address: '123 Main St',
+            city: 'City',
+            state: 'ST',
+            zipCode: '12345',
+            country: 'Country',
+          },
           hours: [{ day: 0, open: time, close: '17:00' }],
         }
 
@@ -319,7 +439,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
         hours: [{ day: 0, open: '09:00', close: '17:00' }],
       }
 
@@ -332,7 +458,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
         hours: [{ day: 0, closed: true }],
       }
 
@@ -345,7 +477,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -371,7 +509,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -387,7 +531,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -402,7 +552,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: 'invalid-id',
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       await expect(Restaurant.create(restaurantData)).rejects.toThrow()
@@ -415,7 +571,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -428,7 +590,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -441,7 +609,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -462,7 +636,13 @@ describe('Restaurant Model', () => {
         name: "O'Brien's Restaurant & Bar",
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -475,7 +655,13 @@ describe('Restaurant Model', () => {
         userId: testUser._id,
         description: 'Serving delicious 🍕 pizza and 🍝 pasta',
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
       }
 
       const restaurant = await Restaurant.create(restaurantData)
@@ -487,7 +673,13 @@ describe('Restaurant Model', () => {
         name: 'Test Restaurant',
         userId: testUser._id,
         contact: { phone: '+12345678901' },
-        location: { address: '123 Main St', city: 'City', state: 'ST', zipCode: '12345', country: 'Country' },
+        location: {
+          address: '123 Main St',
+          city: 'City',
+          state: 'ST',
+          zipCode: '12345',
+          country: 'Country',
+        },
         hours: [
           { day: 0, open: '09:00', close: '12:00' },
           { day: 0, open: '17:00', close: '22:00' },
@@ -500,4 +692,3 @@ describe('Restaurant Model', () => {
     })
   })
 })
-

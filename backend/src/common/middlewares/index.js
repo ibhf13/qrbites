@@ -1,8 +1,5 @@
 const authMiddleware = require('./authMiddleware')
-const {
-  corsMiddleware,
-  imageFileCorsMiddleware,
-} = require('./corsMiddleware')
+const { corsMiddleware, imageFileCorsMiddleware } = require('./corsMiddleware')
 const { notFoundMiddleware, errorHandlerMiddleware } = require('./errorMiddleware')
 const loggerMiddleware = require('./loggerMiddleware')
 const {

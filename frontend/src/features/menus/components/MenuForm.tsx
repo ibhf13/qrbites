@@ -4,6 +4,7 @@ import { Typography, Box, FlexBox } from '@/components/common'
 import Checkbox from '@/components/common/forms/Checkbox'
 import FileDropzone from '@/components/common/forms/FileDropzone'
 import Input from '@/components/common/forms/Input'
+import TagInput from '@/components/common/forms/TagInput'
 import TextArea from '@/components/common/forms/TextArea'
 import { useMenuForm } from '../hooks/useMenuForm'
 import { MenuFormData } from '../types/menu.types'
@@ -32,7 +33,8 @@ export const MenuForm: React.FC<MenuFormProps> = ({
         isSubmitting,
         handleSubmit,
         handleInputChange,
-        handleFileChange
+        handleFileChange,
+        handleCategoriesChange
     } = useMenuForm({
         restaurantId,
         initialData,
@@ -82,6 +84,15 @@ export const MenuForm: React.FC<MenuFormProps> = ({
                     error={errors.description}
                     placeholder="Enter menu description (optional)"
                     rows={3}
+                />
+
+                <TagInput
+                    label="Categories"
+                    value={formData.categories || []}
+                    onChange={handleCategoriesChange}
+                    placeholder="Type category and press Enter"
+                    helpText="Press Enter or comma to add multiple categories"
+                    error={errors.categories}
                 />
 
                 {mode === 'create' && (

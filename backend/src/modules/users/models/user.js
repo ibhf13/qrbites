@@ -14,7 +14,10 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: function () {
+        // Password is required only for local authentication
+        return this.authProvider === 'local'
+      },
       minlength: [6, 'Password must be at least 6 characters long'],
     },
     name: {
@@ -22,6 +25,11 @@ const userSchema = new Schema(
       trim: true,
       minlength: [2, 'Name must be at least 2 characters long'],
       maxlength: [50, 'Name cannot be longer than 50 characters'],
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
     },
     role: {
       type: String,
@@ -46,8 +54,7 @@ userSchema.index({ role: 1, isActive: 1 })
 // Hash password before saving
 userSchema.pre('save', async function (next) {
   try {
-    // Only hash the password if it's new or modified
-    if (!this.isModified('password')) return next()
+    if (!this.isModified('password') || !this.password) return next()
 
     // Generate salt and hash password
     const rounds = parseInt(process.env.BCRYPT_ROUNDS, 10) || 12
@@ -65,6 +72,10 @@ userSchema.pre('save', async function (next) {
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
+    // OAuth users might not have a password
+    if (!this.password) {
+      return false
+    }
     return await bcrypt.compare(candidatePassword, this.password)
   } catch (error) {
     logger.error('Error comparing passwords', error)

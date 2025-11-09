@@ -33,69 +33,58 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const config = {
-  // Server configuration
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT, 10) || 5000,
   HOST: process.env.HOST || 'localhost',
 
-  // Database configuration
   MONGODB_URI: process.env.MONGODB_URI,
-  MONGODB_OPTIONS: {
-    // Connection options are now handled by mongoose defaults
-    // Keeping this for backward compatibility
-  },
 
-  // JWT configuration
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
 
-  // Cloudinary configuration (NEW)
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 
-  // CORS configuration
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
     : ['http://localhost:3000', 'http://localhost:5173'],
 
-  // File upload configuration
-  MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE, 10) || 5 * 1024 * 1024, // 5MB
-  UPLOAD_DIR: process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'), // For backward compatibility
+  MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE, 10) || 5 * 1024 * 1024,
+  UPLOAD_DIR: process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
 
-  // API configuration
   API_URL: process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`,
   BASE_URL:
     process.env.BASE_URL || process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`,
 
-  // Frontend URL (for redirects)
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
 
-  // Rate limiting configuration
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  GOOGLE_CALLBACK_URL:
+    process.env.GOOGLE_CALLBACK_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://your-domain.com/api/auth/google/callback'
+      : `http://localhost:${process.env.PORT || 5000}/api/auth/google/callback`),
+
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
   AUTH_RATE_LIMIT_MAX: parseInt(process.env.AUTH_RATE_LIMIT_MAX, 10) || 5,
   CREATE_USER_RATE_LIMIT_MAX: parseInt(process.env.CREATE_USER_RATE_LIMIT_MAX, 10) || 3,
 
-  // Cache configuration
-  CACHE_TTL: parseInt(process.env.CACHE_TTL, 10) || 600, // 10 minutes
+  CACHE_TTL: parseInt(process.env.CACHE_TTL, 10) || 600,
 
-  // Logging configuration
   LOG_LEVEL: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
   LOG_FILE: process.env.LOG_FILE || path.join(__dirname, '../../logs/app.log'),
 
-  // Security configuration
   BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS, 10) || 12,
-  SESSION_SECRET: process.env.SESSION_SECRET || process.env.JWT_SECRET,
 
-  // Development/Testing flags
   IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
   IS_TESTING: process.env.NODE_ENV === 'test',
 }
 
-// Validate configuration in production
 if (config.IS_PRODUCTION) {
   const productionWarnings = []
 
@@ -111,8 +100,16 @@ if (config.IS_PRODUCTION) {
     productionWarnings.push('API_URL should not use localhost in production')
   }
 
-  if (!config.CLOUDINARY_CLOUD_NAME || !config.CLOUDINARY_API_KEY || !config.CLOUDINARY_API_SECRET) {
+  if (
+    !config.CLOUDINARY_CLOUD_NAME ||
+    !config.CLOUDINARY_API_KEY ||
+    !config.CLOUDINARY_API_SECRET
+  ) {
     productionWarnings.push('Cloudinary credentials must be set in production')
+  }
+
+  if (!config.GOOGLE_CLIENT_ID || !config.GOOGLE_CLIENT_SECRET) {
+    productionWarnings.push('Google OAuth credentials should be set in production for OAuth login')
   }
 
   if (productionWarnings.length > 0) {
@@ -121,13 +118,15 @@ if (config.IS_PRODUCTION) {
   }
 }
 
-// Log configuration summary (without sensitive data) - skip in test mode
 if (config.NODE_ENV !== 'test' && config.MONGODB_URI) {
   console.log('🔧 Configuration loaded:')
   console.log(`   Environment: ${config.NODE_ENV}`)
   console.log(`   Port: ${config.PORT}`)
   console.log(`   Database: ${config.MONGODB_URI.replace(/\/\/.*@/, '//***:***@')}`)
-  console.log(`   Cloudinary: ${config.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`)
+  console.log(
+    `   Cloudinary: ${config.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`
+  )
+  console.log(`   Google OAuth: ${config.GOOGLE_CLIENT_ID ? '✅ Configured' : '❌ Not configured'}`)
   console.log(`   CORS Origins: ${config.ALLOWED_ORIGINS.length} configured`)
   console.log(`   Log Level: ${config.LOG_LEVEL}`)
 }

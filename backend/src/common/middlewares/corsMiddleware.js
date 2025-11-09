@@ -63,7 +63,7 @@ const corsMiddleware = cors({
     'X-QR-Scan',
     'X-User-Agent',
     'X-Referrer',
-    'X-Timestamp'
+    'X-Timestamp',
   ],
   exposedHeaders: ['Content-Length', 'X-Requested-With', 'Content-Type', 'Accept'],
 })
@@ -96,7 +96,6 @@ const setStaticFileCorsHeaders = (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
   res.setHeader('Access-Control-Allow-Credentials', 'true')
 }
-
 
 /**
  * Middleware to add CORS headers to image file responses

@@ -115,11 +115,7 @@
       },
       "User": {
         "type": "object",
-        "required": [
-          "email",
-          "password",
-          "role"
-        ],
+        "required": ["email", "password", "role"],
         "properties": {
           "_id": {
             "type": "string",
@@ -140,11 +136,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "admin",
-              "restaurant_owner",
-              "customer"
-            ],
+            "enum": ["admin", "restaurant_owner", "customer"],
             "example": "restaurant_owner"
           },
           "restaurantId": {
@@ -165,10 +157,7 @@
       },
       "Restaurant": {
         "type": "object",
-        "required": [
-          "name",
-          "ownerId"
-        ],
+        "required": ["name", "ownerId"],
         "properties": {
           "_id": {
             "type": "string",
@@ -248,10 +237,7 @@
       },
       "Menu": {
         "type": "object",
-        "required": [
-          "name",
-          "restaurantId"
-        ],
+        "required": ["name", "restaurantId"],
         "properties": {
           "_id": {
             "type": "string",
@@ -280,12 +266,7 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "Appetizers",
-              "Main Course",
-              "Desserts",
-              "Beverages"
-            ]
+            "example": ["Appetizers", "Main Course", "Desserts", "Beverages"]
           },
           "qrCode": {
             "type": "string",
@@ -309,11 +290,7 @@
       },
       "MenuItem": {
         "type": "object",
-        "required": [
-          "name",
-          "price",
-          "menuId"
-        ],
+        "required": ["name", "price", "menuId"],
         "properties": {
           "_id": {
             "type": "string",
@@ -361,19 +338,14 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "gluten",
-              "dairy"
-            ]
+            "example": ["gluten", "dairy"]
           },
           "dietary": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "example": [
-              "vegetarian"
-            ]
+            "example": ["vegetarian"]
           },
           "spicyLevel": {
             "type": "number",
@@ -398,10 +370,7 @@
       },
       "LoginRequest": {
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "properties": {
           "email": {
             "type": "string",
@@ -417,11 +386,7 @@
       },
       "RegisterRequest": {
         "type": "object",
-        "required": [
-          "email",
-          "password",
-          "role"
-        ],
+        "required": ["email", "password", "role"],
         "properties": {
           "email": {
             "type": "string",
@@ -436,10 +401,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "restaurant_owner",
-              "customer"
-            ],
+            "enum": ["restaurant_owner", "customer"],
             "example": "restaurant_owner"
           }
         }
@@ -711,9 +673,7 @@
       "get": {
         "summary": "Main health check endpoint",
         "description": "Returns the health status of the API, including database connectivity and uptime.",
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [],
         "responses": {
           "200": {
@@ -781,9 +741,7 @@
       "get": {
         "summary": "Detailed health information",
         "description": "Returns comprehensive health information including memory usage, CPU, and system metrics.",
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [],
         "responses": {
           "200": {
@@ -851,9 +809,7 @@
       "get": {
         "summary": "Simple health check",
         "description": "Lightweight health check for load balancers and simple monitoring. Returns 200 OK if service is running.",
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [],
         "responses": {
           "200": {
@@ -874,9 +830,7 @@
       "get": {
         "summary": "Kubernetes readiness probe",
         "description": "Indicates whether the service is ready to accept traffic. Checks database connectivity.",
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [],
         "responses": {
           "200": {
@@ -922,9 +876,7 @@
       "get": {
         "summary": "Kubernetes liveness probe",
         "description": "Indicates whether the service is alive and should not be restarted.",
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [],
         "responses": {
           "200": {
@@ -950,9 +902,7 @@
       "get": {
         "summary": "System information",
         "description": "Returns system information including Node.js version, platform, and environment.",
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "security": [],
         "responses": {
           "200": {
@@ -1003,9 +953,7 @@
       "get": {
         "summary": "Get all menu items",
         "description": "Retrieve a list of menu items with optional filtering. Restaurant owners see only their menu items.",
-        "tags": [
-          "Menu Items"
-        ],
+        "tags": ["Menu Items"],
         "security": [
           {
             "bearerAuth": []
@@ -1124,9 +1072,7 @@
       "post": {
         "summary": "Create a new menu item",
         "description": "Create a new menu item with optional image upload. Restaurant owners can only create items for their own menus.",
-        "tags": [
-          "Menu Items"
-        ],
+        "tags": ["Menu Items"],
         "security": [
           {
             "bearerAuth": []
@@ -1138,11 +1084,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "price",
-                  "menuId"
-                ],
+                "required": ["name", "price", "menuId"],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -1184,10 +1126,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "example": [
-                      "gluten",
-                      "dairy"
-                    ],
+                    "example": ["gluten", "dairy"],
                     "description": "List of allergens (JSON array as string)"
                   },
                   "dietary": {
@@ -1195,9 +1134,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "example": [
-                      "vegetarian"
-                    ],
+                    "example": ["vegetarian"],
                     "description": "Dietary tags (JSON array as string)"
                   },
                   "spicyLevel": {
@@ -1260,9 +1197,7 @@
       "get": {
         "summary": "Get menu item by ID",
         "description": "Retrieve a specific menu item by its ID. Users can only access items from their own menus.",
-        "tags": [
-          "Menu Items"
-        ],
+        "tags": ["Menu Items"],
         "security": [
           {
             "bearerAuth": []
@@ -1310,9 +1245,7 @@
       "put": {
         "summary": "Update a menu item",
         "description": "Update an existing menu item. Only the owner can update their menu items.",
-        "tags": [
-          "Menu Items"
-        ],
+        "tags": ["Menu Items"],
         "security": [
           {
             "bearerAuth": []
@@ -1360,19 +1293,14 @@
                     "items": {
                       "type": "string"
                     },
-                    "example": [
-                      "gluten",
-                      "dairy"
-                    ]
+                    "example": ["gluten", "dairy"]
                   },
                   "dietary": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "example": [
-                      "vegetarian"
-                    ]
+                    "example": ["vegetarian"]
                   },
                   "spicyLevel": {
                     "type": "number",
@@ -1434,9 +1362,7 @@
       "delete": {
         "summary": "Delete a menu item",
         "description": "Delete a menu item permanently. Only the owner can delete their menu items.",
-        "tags": [
-          "Menu Items"
-        ],
+        "tags": ["Menu Items"],
         "security": [
           {
             "bearerAuth": []
@@ -1470,9 +1396,7 @@
       "post": {
         "summary": "Upload menu item image",
         "description": "Upload or replace the image for a menu item. The image will be uploaded to Cloudinary.",
-        "tags": [
-          "Menu Items"
-        ],
+        "tags": ["Menu Items"],
         "security": [
           {
             "bearerAuth": []
@@ -1489,9 +1413,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "image"
-                ],
+                "required": ["image"],
                 "properties": {
                   "image": {
                     "type": "string",
@@ -1552,9 +1474,7 @@
       "get": {
         "summary": "Get all menus",
         "description": "Retrieve a list of menus. Restaurant owners see only their menus, admins see all menus.",
-        "tags": [
-          "Menus"
-        ],
+        "tags": ["Menus"],
         "security": [
           {
             "bearerAuth": []
@@ -1637,9 +1557,7 @@
       "post": {
         "summary": "Create a new menu",
         "description": "Create a new menu for a restaurant. Restaurant owners can only create menus for their restaurant.",
-        "tags": [
-          "Menus"
-        ],
+        "tags": ["Menus"],
         "security": [
           {
             "bearerAuth": []
@@ -1651,10 +1569,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "restaurantId"
-                ],
+                "required": ["name", "restaurantId"],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -1677,11 +1592,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "example": [
-                      "Appetizers",
-                      "Main Course",
-                      "Desserts"
-                    ],
+                    "example": ["Appetizers", "Main Course", "Desserts"],
                     "description": "Menu categories (JSON array as string)"
                   },
                   "isActive": {
@@ -1741,9 +1652,7 @@
       "get": {
         "summary": "Get menu by ID",
         "description": "Retrieve a specific menu by its ID. Users can only access menus they own.",
-        "tags": [
-          "Menus"
-        ],
+        "tags": ["Menus"],
         "security": [
           {
             "bearerAuth": []
@@ -1791,9 +1700,7 @@
       "put": {
         "summary": "Update a menu",
         "description": "Update an existing menu. Only the owner can update their menus.",
-        "tags": [
-          "Menus"
-        ],
+        "tags": ["Menus"],
         "security": [
           {
             "bearerAuth": []
@@ -1824,12 +1731,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "example": [
-                      "Appetizers",
-                      "Entrees",
-                      "Desserts",
-                      "Drinks"
-                    ]
+                    "example": ["Appetizers", "Entrees", "Desserts", "Drinks"]
                   },
                   "isActive": {
                     "type": "boolean",
@@ -1888,9 +1790,7 @@
       "delete": {
         "summary": "Delete a menu",
         "description": "Soft delete a menu by setting isActive to false. Only the owner can delete their menus.",
-        "tags": [
-          "Menus"
-        ],
+        "tags": ["Menus"],
         "security": [
           {
             "bearerAuth": []
@@ -1924,9 +1824,7 @@
       "post": {
         "summary": "Upload menu image",
         "description": "Upload a single image for a menu. The image will be uploaded to Cloudinary.",
-        "tags": [
-          "Menus"
-        ],
+        "tags": ["Menus"],
         "security": [
           {
             "bearerAuth": []
@@ -1943,9 +1841,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "image"
-                ],
+                "required": ["image"],
                 "properties": {
                   "image": {
                     "type": "string",
@@ -2006,10 +1902,7 @@
       "post": {
         "summary": "Generate QR code for menu",
         "description": "Generate a QR code for the menu that links to the public menu view. The QR code is uploaded to Cloudinary.",
-        "tags": [
-          "Menus",
-          "QR Codes"
-        ],
+        "tags": ["Menus", "QR Codes"],
         "security": [
           {
             "bearerAuth": []
@@ -2034,12 +1927,7 @@
                   },
                   "errorCorrectionLevel": {
                     "type": "string",
-                    "enum": [
-                      "L",
-                      "M",
-                      "Q",
-                      "H"
-                    ],
+                    "enum": ["L", "M", "Q", "H"],
                     "example": "M",
                     "description": "Error correction level (default M)"
                   }
@@ -2103,9 +1991,7 @@
       "get": {
         "summary": "Get all restaurants",
         "description": "Retrieve a list of restaurants. Restaurant owners see only their restaurant, admins see all restaurants.",
-        "tags": [
-          "Restaurants"
-        ],
+        "tags": ["Restaurants"],
         "security": [
           {
             "bearerAuth": []
@@ -2188,9 +2074,7 @@
       "post": {
         "summary": "Create a new restaurant",
         "description": "Create a new restaurant profile. Restaurant owners can create one restaurant, admins can create multiple.",
-        "tags": [
-          "Restaurants"
-        ],
+        "tags": ["Restaurants"],
         "security": [
           {
             "bearerAuth": []
@@ -2202,9 +2086,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -2310,9 +2192,7 @@
       "get": {
         "summary": "Get restaurant by ID",
         "description": "Retrieve a specific restaurant by its ID. Users can only access restaurants they own unless they're an admin.",
-        "tags": [
-          "Restaurants"
-        ],
+        "tags": ["Restaurants"],
         "security": [
           {
             "bearerAuth": []
@@ -2360,9 +2240,7 @@
       "put": {
         "summary": "Update a restaurant",
         "description": "Update an existing restaurant profile. Only the owner or admin can update the restaurant.",
-        "tags": [
-          "Restaurants"
-        ],
+        "tags": ["Restaurants"],
         "security": [
           {
             "bearerAuth": []
@@ -2476,9 +2354,7 @@
       "delete": {
         "summary": "Delete a restaurant",
         "description": "Soft delete a restaurant by setting isActive to false. Only the owner or admin can delete the restaurant.",
-        "tags": [
-          "Restaurants"
-        ],
+        "tags": ["Restaurants"],
         "security": [
           {
             "bearerAuth": []
@@ -2512,9 +2388,7 @@
       "post": {
         "summary": "Upload restaurant logo",
         "description": "Upload or replace the logo for a restaurant. The logo will be uploaded to Cloudinary.",
-        "tags": [
-          "Restaurants"
-        ],
+        "tags": ["Restaurants"],
         "security": [
           {
             "bearerAuth": []
@@ -2531,9 +2405,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "logo"
-                ],
+                "required": ["logo"],
                 "properties": {
                   "logo": {
                     "type": "string",
@@ -2594,9 +2466,7 @@
       "post": {
         "summary": "Register a new user",
         "description": "Create a new user account. Role can be either restaurant_owner or customer. Admin accounts must be created directly in the database.",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [],
         "requestBody": {
           "required": true,
@@ -2656,9 +2526,7 @@
       "post": {
         "summary": "User login",
         "description": "Authenticate user with email and password to receive a JWT token. Use this token for subsequent authenticated requests.",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [],
         "requestBody": {
           "required": true,
@@ -2731,9 +2599,7 @@
       "get": {
         "summary": "Get current user profile",
         "description": "Retrieve the authenticated user's profile information. Requires valid JWT token.",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [
           {
             "bearerAuth": []
@@ -2772,9 +2638,7 @@
       "put": {
         "summary": "Change user password",
         "description": "Change the authenticated user's password. Requires current password for verification.",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [
           {
             "bearerAuth": []
@@ -2786,10 +2650,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "currentPassword",
-                  "newPassword"
-                ],
+                "required": ["currentPassword", "newPassword"],
                 "properties": {
                   "currentPassword": {
                     "type": "string",
@@ -2853,9 +2714,7 @@
       "get": {
         "summary": "Get all users",
         "description": "Retrieve a list of all users with pagination and filtering. Admin access only.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "security": [
           {
             "bearerAuth": []
@@ -2880,11 +2739,7 @@
             "description": "Filter by user role",
             "schema": {
               "type": "string",
-              "enum": [
-                "admin",
-                "restaurant_owner",
-                "customer"
-              ],
+              "enum": ["admin", "restaurant_owner", "customer"],
               "example": "restaurant_owner"
             }
           },
@@ -2973,9 +2828,7 @@
       "delete": {
         "summary": "Deactivate own account",
         "description": "Deactivate the currently authenticated user's account. This is a soft delete that sets isActive to false.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "security": [
           {
             "bearerAuth": []
@@ -3015,9 +2868,7 @@
       "get": {
         "summary": "Get user by ID",
         "description": "Retrieve a user's profile by ID. Users can view their own profile, admins can view any profile.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "security": [
           {
             "bearerAuth": []
@@ -3086,9 +2937,7 @@
       "put": {
         "summary": "Update user profile",
         "description": "Update a user's profile. Users can update their own profile, admins can update any profile.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "security": [
           {
             "bearerAuth": []
@@ -3114,11 +2963,7 @@
                   },
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "admin",
-                      "restaurant_owner",
-                      "customer"
-                    ],
+                    "enum": ["admin", "restaurant_owner", "customer"],
                     "example": "restaurant_owner",
                     "description": "User role (admin only)"
                   },
@@ -3208,9 +3053,7 @@
       "delete": {
         "summary": "Delete user account",
         "description": "Permanently delete a user account. Admin access only. This is a hard delete.",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "security": [
           {
             "bearerAuth": []

@@ -34,9 +34,9 @@ const processMenuForPublic = menu => {
     qrCodeUrl: menu.qrCodeUrl,
     restaurant: menu.restaurantId
       ? {
-        id: menu.restaurantId.id || menu.restaurantId._id || menu.restaurantId,
-        name: menu.restaurantId.name || null,
-      }
+          id: menu.restaurantId.id || menu.restaurantId._id || menu.restaurantId,
+          name: menu.restaurantId.name || null,
+        }
       : null,
     categories: menu.categories || [],
     isActive: menu.isActive,

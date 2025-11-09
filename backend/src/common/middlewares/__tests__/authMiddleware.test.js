@@ -563,4 +563,3 @@ describe('Auth Middleware', () => {
     })
   })
 })
-

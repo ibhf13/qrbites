@@ -45,8 +45,11 @@ apiClient.interceptors.request.use(
         if (process.env.NODE_ENV === 'development' && config.url?.includes('/api/auth/')) {
             console.log('🔐 Auth request:', {
                 url: config.url,
+                method: config.method,
                 hasToken: !!token,
-                tokenLength: token?.length || 0
+                tokenLength: token?.length || 0,
+                data: config.data,
+                headers: config.headers
             })
         }
 

@@ -1,18 +1,8 @@
-const jwt = require('jsonwebtoken')
 const User = require('@modules/users/models/user')
 const { asyncHandler, badRequest, unauthorized, notFound, errorMessages } = require('@errors')
+const { generateToken } = require('@commonUtils/tokenUtils')
+const { AUTH_PROVIDERS } = require('@common/constants/oauthConstants')
 const logger = require('@commonUtils/logger')
-
-/**
- * Generate JWT token
- * @param {String} id - User ID
- * @returns {String} JWT token
- */
-const generateToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  })
-}
 
 /**
  * Register a new user
@@ -63,6 +53,13 @@ const login = asyncHandler(async (req, res) => {
 
   if (!user) {
     throw unauthorized('Invalid credentials')
+  }
+
+  // Check if user is OAuth-only
+  if (!user.password && user.authProvider !== AUTH_PROVIDERS.LOCAL) {
+    throw badRequest(
+      `This account uses ${user.authProvider} authentication. Please use the "Sign in with ${user.authProvider}" button.`
+    )
   }
 
   const isMatch = await user.comparePassword(password)
@@ -118,6 +115,13 @@ const changePassword = asyncHandler(async (req, res) => {
 
   if (!user) {
     throw notFound(errorMessages.notFound('User'))
+  }
+
+  // Check if user has a password (OAuth users might not)
+  if (!user.password || user.authProvider !== AUTH_PROVIDERS.LOCAL) {
+    throw badRequest(
+      `Cannot change password for ${user.authProvider} accounts. Please use ${user.authProvider} to manage your password.`
+    )
   }
 
   const isMatch = await user.comparePassword(currentPassword)

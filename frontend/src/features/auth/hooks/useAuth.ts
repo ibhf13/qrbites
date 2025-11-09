@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { getAuthData, storeAuthData, clearAuthData, isTokenExpired } from '../utils/authStorage'
+import { getAuthData, storeAuthData, clearAuthData, isTokenExpired, getOAuthPendingToken, removeOAuthPendingToken } from '../utils/authStorage'
+import { processOAuthToken } from '../utils/oauthUtils'
 import { authApi } from '../api/auth.api'
 import { AuthUser, LoginRequest, RegisterRequest, ChangePasswordRequest, AuthOperationResult } from '../types/auth.types'
 import {
@@ -62,6 +63,42 @@ export const useAuth = () => {
         const initializeAuth = async () => {
             try {
                 setLoading(true)
+
+                // Handle OAuth token from URL if present
+                processOAuthToken() // This stores token temporarily
+
+                // Check for pending OAuth token
+                const pendingToken = getOAuthPendingToken()
+
+                if (pendingToken) {
+                    // Fetch user data with the OAuth token
+                    const response = await authApi.getCurrentUser()
+
+                    if (response.success && response.data) {
+                        const user: AuthUser = {
+                            _id: response.data._id,
+                            email: response.data.email,
+                            name: response.data.name,
+                            role: response.data.role,
+                            displayName: response.data.displayName || response.data.name,
+                        }
+
+                        // Store complete auth data
+                        storeAuthData(pendingToken, user, 'localStorage')
+                        // Remove pending token after successful storage
+                        removeOAuthPendingToken()
+                        setIsAuthenticated(true)
+                        setUser(user)
+                        setLoading(false)
+
+                        return
+                    } else {
+                        // Failed to fetch user data
+                        clearAuthData()
+                        removeOAuthPendingToken()
+                    }
+                }
+
                 const storedData = getAuthData()
 
                 if (storedData?.token && storedData?.user) {

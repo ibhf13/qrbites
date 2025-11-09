@@ -417,6 +417,11 @@ router.delete('/:id', checkMenuItemOwnership(), deleteMenuItem)
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/:id/image', checkMenuItemOwnership(), uploadToCloudinary('menuItem', 'image'), uploadImage)
+router.post(
+  '/:id/image',
+  checkMenuItemOwnership(),
+  uploadToCloudinary('menuItem', 'image'),
+  uploadImage
+)
 
 module.exports = router

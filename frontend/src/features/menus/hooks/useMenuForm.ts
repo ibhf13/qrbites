@@ -32,6 +32,7 @@ export const useMenuForm = ({
         description: initialData?.description || '',
         restaurantId: initialData?.restaurantId || restaurantId || '',
         isActive: initialData?.isActive ?? true,
+        categories: initialData?.categories || [],
         image: undefined
     })
     const [errors, setErrors] = useState<FormErrors>({})
@@ -66,6 +67,7 @@ export const useMenuForm = ({
             description: initialData?.description || '',
             restaurantId: initialData?.restaurantId || restaurantId || '',
             isActive: initialData?.isActive ?? true,
+            categories: initialData?.categories || [],
             image: undefined
         })
         setErrors({})
@@ -108,6 +110,13 @@ export const useMenuForm = ({
         setFormData(prev => ({
             ...prev,
             image: files[0] || undefined
+        }))
+    }
+
+    const handleCategoriesChange = (categories: string[]) => {
+        setFormData(prev => ({
+            ...prev,
+            categories
         }))
     }
 
@@ -179,6 +188,7 @@ export const useMenuForm = ({
         handleSubmit,
         handleInputChange,
         handleFileChange,
+        handleCategoriesChange,
         updateFormData,
         resetForm,
         validateForm

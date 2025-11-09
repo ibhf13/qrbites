@@ -16,4 +16,3 @@ process.env.CLOUDINARY_API_SECRET = 'test-api-secret'
 process.env.API_URL = 'http://localhost:5000'
 process.env.FRONTEND_URL = 'http://localhost:3000'
 process.env.MONGODB_URI = 'mongodb://localhost:27017/test-placeholder' // Temporary, will be replaced by MongoMemoryServer
-

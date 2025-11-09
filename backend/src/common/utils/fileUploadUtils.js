@@ -96,7 +96,7 @@ const updateDocumentWithFileUrl = async (Model, id, req, uploadType, fieldName) 
     logDatabaseError(error, 'UPDATE', {
       collection: Model.modelName,
       id,
-      field: fieldName
+      field: fieldName,
     })
     throw error
   }

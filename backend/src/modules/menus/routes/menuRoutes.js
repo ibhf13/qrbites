@@ -28,7 +28,6 @@ const {
   generateQRCode,
 } = require('../controllers/menuController')
 
-
 const router = express.Router()
 
 router.use(protect, addUserRestaurants, apiLimiter)
