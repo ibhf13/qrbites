@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useNotificationContext } from '@/features/notifications/contexts/NotificationContext'
 import { useDeleteMenu } from '../hooks'
 import { useGenerateQRCode } from '@/features/qr'
@@ -30,6 +31,7 @@ export const useMenuActions = ({
     menus,
     refreshList
 }: UseMenuActionsProps): UseMenuActionsResult => {
+    const navigate = useNavigate()
     const { showSuccess, showError } = useNotificationContext()
 
     const [qrViewerOpen, setQrViewerOpen] = useState(false)
@@ -107,9 +109,7 @@ export const useMenuActions = ({
     }
 
     const handleView = (menuId: string) => {
-        const targetUrl = `/view/menu/${menuId}`
-
-        window.open(targetUrl, '_blank')
+        navigate(`/view/menu/${menuId}`)
     }
 
     const closeQRViewer = () => {

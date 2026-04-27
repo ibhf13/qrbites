@@ -61,7 +61,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
     }
 
     const handleViewMenu = () => {
-        if (!loading && onView) {
+        if (!loading && isActive && onView) {
             onView(_id)
         }
     }
@@ -69,8 +69,8 @@ export const MenuCard: React.FC<MenuCardProps> = ({
     return (
         <Card
             variant="default"
-            hoverEffect="lift"
-            interactive
+            hoverEffect={isActive ? 'lift' : 'none'}
+            interactive={isActive}
             loading={loading}
             onClick={handleViewMenu}
             image={{
